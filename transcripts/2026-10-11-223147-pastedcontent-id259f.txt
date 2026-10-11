@@ -1,0 +1,618 @@
+ ▐▛███▛█   Claude Code v2.1.296
+▝▜██████▀  Sonnet 5.5 · Claude Pro
+ ▝▝   ▝▝   ~/PycharmProjects/deep-learning-assignment2
+
+
+❯ In this chat, we will work on a small piece of a university deep learning     
+  assignment. It's a Kaggle competition with cat and dog's pictures. Please     
+  create a notebook at notebooks/01_eda.ipynb. It will run from the notebooks   
+  folder. So in the first cell of the notebook, please set root to the root of  
+  the repo we are working in right now. In the further cells, please use that   
+  to build the paths. In the next cell, I want to create a function that will   
+  take as an input the CSV path and an image folder path and will output a dict 
+  with five counts. The first is how many rows the CSV has, the second is how   
+  many unique image ID values there are, the third one is how many files are in 
+  the folder, the fourth one is how many IDs in the CSV don't have a file, the  
+  fifth one is how many files don't have an ID in the CSV. Please come up with  
+  the name for the function by yourself. In the next cell, please run this      
+  function on data train. And data test. Then in the next cell, please load the 
+  train CSV file. I want to see in the result how many rows there are for each  
+  combination of the label columns. Under label columns, I mean all the         
+  columns except the image ID. The comments needs to be only in the places      
+  where it is not obvious what happens and they must be very short. Also, I     
+  like the clean code, like one function do one job, that follows solid, dry,   
+  kiss, principles. But please do not do over-engineering or patterns just for  
+  the sake of it. I mean, keep Yagni.                                           
+
+  Listed 1 directory (ctrl+o to expand)
+
+⏺ Skill(python-code-standards)
+  ⎿  Successfully loaded skill
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ I mistyped the path (underscore vs hyphen). Retry with the correct one.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Python 3.11 has jupyter. Use it.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The notebook is at notebooks/01_eda.ipynb. I ran it with nbconvert, and all
+  four cells work. I did not save the outputs in the file.
+
+  The cells do this:
+
+  1. Cell 1: Sets ROOT = Path.cwd().parent and DATA = ROOT / "data".
+  2. Cell 2: Defines count_csv_vs_image_files(csv_path, image_dir). It returns a
+     dict with five keys: csv_rows, unique_csv_ids, files_in_folder,
+     csv_ids_without_file, and files_without_csv_id. The function matches an
+     image ID to a file by the file name without its extension.
+  3. Cell 3: Runs the function on train and on test.
+  4. Cell 4: Loads train.csv and treats every column except image_id as a label
+     column. It shows the row count for each combination of labels.
+
+  The notebook has no comments. The code is plain enough that I saw nothing to
+  explain.
+
+  The run printed these counts:
+
+  - Train: 12260 rows, 12260 unique IDs, 12260 files. No ID is missing a file,
+    and no file is missing an ID.
+  - Test: 18673 rows, 18673 unique IDs, 18673 files. No ID is missing a file,
+    and no file is missing an ID.
+
+  I did not read the label combination table. Run cell 4 to see it.
+
+  The Python at /Library/Frameworks/Python.framework/Versions/3.11/bin/python3
+  has jupyter. The default python3 does not have nbformat. Pick a kernel with
+  pandas when you open the notebook.
+
+✻ Cooked for 30s · done 8:17 PM
+
+❯ Can you please run that for me with preserving the outputs?                   
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I ran the notebook, and the outputs are now saved in notebooks/01_eda.ipynb.
+
+  The label table has 8 combinations:
+
+  ┌─────┬─────┬───────┬───────┬─────────┬──────┐
+  │ Cat │ Dog │ Moris │ Motya │ Biatrix │ rows │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 0   │ 0   │ 0     │ 0     │ 0       │ 2162 │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 0   │ 1   │ 0     │ 0     │ 0       │ 4984 │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 0   │ 1   │ 0     │ 0     │ 1       │ 37   │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 1   │ 0   │ 0     │ 0     │ 0       │ 4989 │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 1   │ 0   │ 0     │ 1     │ 0       │ 32   │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 1   │ 0   │ 1     │ 0     │ 0       │ 42   │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 1   │ 0   │ 1     │ 1     │ 0       │ 10   │
+  ├─────┼─────┼───────┼───────┼─────────┼──────┤
+  │ 1   │ 1   │ 1     │ 0     │ 1       │ 4    │
+  └─────┴─────┴───────┴───────┴─────────┴──────┘
+
+  The table holds three points to check:
+
+  - No animal: 2162 rows have all labels at 0.
+  - Cat and Dog together: 4 rows have both labels at 1.
+  - Named pets: Some rows have a named pet label (Moris, Motya, or Biatrix) with
+    the Cat or Dog label that fits the pet. Moris and Motya always appear with
+    Cat. Biatrix always appears with Dog, except in the 4-row case.
+
+  The counts check from the earlier run did not change.
+
+✻ Baked for 11s · done 8:20 PM
+
+❯ Never mind, I did not like the result of your run, so I have reran the        
+  notebook in the PyCharm.                                                      
+  Also, I have a question. Did you drop null and not a number values from the   
+  dataset? during the output and analyze. If no, please Please do not drop      
+  them. I would like to see the whole result. Also, can you please sort the     
+  table in the last cell by the number of rows descending.                      
+  Also, I see in the second cell, you are using the path.stem. I do not         
+  understand what it means. Can you please explain?                             
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Update(notebooks/01_eda.ipynb)
+  ⎿  Error editing file
+
+  Read 1 file (ctrl+o to expand)
+  ⎿  Updated cell 644ac871:
+        1 train = pd.read_csv(DATA / "train.csv")
+        2 label_columns = [column for column in train.columns if column !
+          = "image_id"]
+        3 # dropna=False keeps rows that have NaN in a label column
+        4 train.groupby(label_columns, dropna=False).size().rename("rows"
+          ).reset_index().sort_values("rows", ascending=False)
+
+
+⏺ I am checking that the edited cell runs. I will do this in a scratch copy, so
+  your PyCharm outputs stay as they are.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ I changed the last cell, and it runs. I tested it in a scratch copy, so the
+  notebook file has no new outputs. Run the cell in PyCharm to see the new
+  table.
+
+  Null and NaN values
+
+  - Before: The old code used groupby, which drops rows with NaN in a grouping
+    column by default. It would have hidden such rows without any message.
+  - Train data: train.csv has no NaN in any column. The eight row counts add up
+    to 12260, which is every row. The old table was therefore complete.
+  - Now: The cell uses dropna=False. A NaN in a label column will show as its
+    own row in the table.
+  - Other cells: The count function in cell 2 does not drop anything. It also
+    gives the same result when it reads test.csv.
+
+  Sort order
+
+  The table now sorts by rows, largest first. The top row is Cat only (4989
+  rows). The last row is Cat, Dog, Moris, and Biatrix (4 rows).
+
+  What path.stem means
+
+  path.stem is the file name without its extension. For example, the file name
+  000d336b….jpg gives the stem 000d336b…. The CSV holds IDs without .jpg. So the
+  code removes the extension from each file name before it compares the file
+  names with the IDs. If the code did not do this, every ID would look like it
+  has no file.
+
+  I also added one short comment above the groupby line. It explains why
+  dropna=False is there.
+
+✻ Sautéed for 25s · done 8:46 PM
+
+❯ Can you please add a cell that will show one sample of each of the groups     
+  that are not standard, like the one with all the zeros. The one where both    
+  Mot- Morris and Motya are present, and the one where both Morris and Beatrix  
+  are present. I want them to be displayed as the images in the next cell.      
+
+⏺ Edit Notebook(notebooks/01_eda.ipynb@644ac871)
+  ⎿  Updated cell 56f29652:
+         1 import matplotlib.pyplot as plt
+         2 
+         3 odd_groups = {
+         4     "No labels": (train[label_columns] == 0).all(axis=1),
+         5     "Moris + Motya": (train["Moris"] == 1) & (train["Motya"] =
+           = 1),
+         6     "Moris + Biatrix": (train["Moris"] == 1) & (train["Biatrix
+           "] == 1),
+         7 }
+         8 
+         9 fig, axes = plt.subplots(1, len(odd_groups), figsize=(5 * len(
+           odd_groups), 5))
+        10 for ax, (title, mask) in zip(axes, odd_groups.items()):
+        11     image_id = train.loc[mask, "image_id"].sample(1, random_st
+           ate=0).iloc[0]
+        12     ax.imshow(plt.imread(DATA / "train" / f"{image_id}.jpg"))
+        13     ax.set_title(title)
+        14     ax.axis("off")
+        15 plt.show()
+
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I added a new cell at the end of notebooks/01_eda.ipynb. It ran in a scratch
+  copy with no errors. I did not look at the images. Run the cell in PyCharm to
+  see them.
+
+  The cell shows one image from each of three groups, side by side:
+
+  1. No labels: All five label columns are 0. This group has 2162 rows.
+  2. Moris + Motya: Both labels are 1. This group has 10 rows.
+  3. Moris + Biatrix: Both labels are 1. This group has 4 rows.
+
+  The code picks the image with sample(1, random_state=0). The fixed seed gives
+  you the same image each time you run the cell. To see a different image,
+  change the 0 to another number.
+
+  I read "Beatrix" as the Biatrix column. The Moris + Biatrix group is the same
+  group where Cat and Dog are both 1.
+
+  I did not add the group with Dog and Biatrix (37 rows). It has Biatrix without
+  Moris, so it does not match your request. I can add it if you want it.
+
+✻ Baked for 16s · done 8:52 PM
+
+❯ Oh, actually, can you please set somewhere in the first cell the random state 
+  to be 42? I want it to be reused everywhere where we want a random state.       ⎿  Updated cell 1270747e:
+        1 from pathlib import Pa
+          th
+        2 
+        3 ROOT = Path.cwd().pare
+          nt
+        4 DATA = ROOT / "data"
+        5 RANDOM_STATE = 42
+  ⎿  Updated cell 56f29652:
+         1 import matplotlib.pyplot as plt
+         2 
+         3 odd_groups = {
+         4     "No labels": (train[label_columns] == 0).all(axis=1),
+         5     "Moris + Motya": (train["Moris"] == 1) & (train["Motya"] =
+           = 1),
+         6     "Moris + Biatrix": (train["Moris"] == 1) & (train["Biatrix
+           "] == 1),
+         7 }
+         8 
+         9 fig, axes = plt.subplots(1, len(odd_groups), figsize=(5 * len(
+           odd_groups), 5))
+        10 for ax, (title, mask) in zip(axes, odd_groups.items()):
+        11     image_id = train.loc[mask, "image_id"].sample(1, random_st
+           ate=RANDOM_STATE).iloc[0]
+        12     ax.imshow(plt.imread(DATA / "train" / f"{image_id}.jpg"))
+        13     ax.set_title(title)
+        14     ax.axis("off")
+        15 plt.show()
+
+
+
+⏺ I added RANDOM_STATE = 42 to the first cell. The image cell now uses it in
+  place of the fixed 0.
+
+  I did not run the notebook after this change. The edit is small, but the
+  images you see will probably differ from the earlier run, because the seed is
+  now 42. Run the notebook in PyCharm to see them.
+
+  Use RANDOM_STATE in every later cell that needs a random state.
+
+✻ Cogitated for 8s · done 8:53 PM
+
+❯ Actually, let's please rewrite the last cell. We have eight classes. So I     
+  want the plot to contain the 8x8 figure, where each row will represent one of 
+  our classes. And in the columns, there will be random samples of the images   
+  from this category. For the last category, we have only four images, so for   
+  last spaces needs to be empty.                                                
+  ⎿  Updated cell 56f29652:
+         1 import matplotlib.pyplot as plt
+         2 
+         3 IMAGES_PER_CLASS = 8
+         4 
+         5 classes = sorted(train.groupby(label_columns, dropna=False), k
+           ey=lambda item: len(item[1]), reverse=True)
+         6 
+         7 fig, axes = plt.subplots(len(classes), IMAGES_PER_CLASS, figsi
+           ze=(2 * IMAGES_PER_CLASS, 2 * len(classes)))
+         8 for ax in axes.flat:
+         9     ax.axis("off")
+        10 
+        11 for row, (labels, rows) in enumerate(classes):
+        12     class_name = " + ".join(c for c, value in zip(label_column
+           s, labels) if value == 1) or "No labels"
+        13     axes[row, 0].text(-0.05, 0.5, f"{class_name}\n(n={len(rows
+           )})", transform=axes[row, 0].transAxes, ha="right", va="center
+           ")
+        14     sample_ids = rows["image_id"].sample(min(len(rows), IMAGES
+           _PER_CLASS), random_state=RANDOM_STATE)
+        15     for ax, image_id in zip(axes[row], sample_ids):
+        16         ax.imshow(plt.imread(DATA / "train" / f"{image_id}.jpg
+           "))
+        17 
+        18 fig.subplots_adjust(left=0.15)
+        19 plt.show()
+
+⏺ I will run the notebook in a scratch copy. Then I will check the figure.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ I rewrote the last cell of notebooks/01_eda.ipynb. I ran it in a scratch copy
+  and looked at the figure. The layout is correct. I did not save outputs in
+  your notebook file. Run the cell in PyCharm to see the figure.
+
+  The figure has 8 rows and 8 columns:
+
+  - Rows: Each row is one class. The rows are in the same order as your table,
+    largest class first.
+  - Row labels: Each label shows the active labels of the class and the row
+    count. For example, Cat + Moris (n=42). The class with all zeros has the
+    label No labels.
+  - Columns: Each row shows 8 random images of its class. The code uses
+    RANDOM_STATE for the sample.
+  - Last row: The class Cat + Dog + Moris + Biatrix has 4 images. The 4 spaces
+    on the right are empty.
+
+  The no-label row shows other animals, for example a turkey, horses, and a
+  lobster. These images are not cats or dogs.
+
+  I added one constant to the cell, IMAGES_PER_CLASS = 8. It sets the number of
+  columns.
+
+✻ Baked for 24s · done 9:46 PM
+
+❯ Now I want to add the conclusion cell. Please consciously state my next       
+  thoughts. First of all, I want to mention that the data is clean and that it  
+  maps perfectly between the CSV file and the actual images to be trained on.   
+  also the IDs are only 0s and 1s, the mores and motia are always cats, and the 
+  Beatrix is always a dog. The thing to mention is also that the classes are    
+  very imbalanced. The raw cat and dog classes are big and are about 40% each.  
+  The no label class is about 1/6. And there are very little Morris, Motia, and 
+  Beatrix images. But the final metric to be used on Kaggle is macro F1 score.  
+  So these three minority groups give us the 60% of the result. Like 3 times    
+  20%. So we definitely need a stratification. Also the thing to mention that   
+  there are eight label combinations. And cat and dog are together only in four 
+  photos and only of Morris and Beatrix together. Also, we can clearly see      
+  that the raw cat and dog photos are of a different species. They are probably 
+  taken somewhere from web. And the animals are big and are placed in the       
+  center. Whereas Morris, Motia and Beatrix are the phone photos, probably.     
+  From one home. And from their walks. So we need to be careful because model   
+  can learn the background not the actual pets. Also the Morris, Motia and      
+  Beatrix contain the near duplicates photos. So we must try to stay these      
+  photos in the same fold so we do not have a leakage in the validations tab.   
+  Also the photos of the pets with names are pretty small, so we need to be     
+  careful with cropping of the images during the augmentation, because we can   
+  delete the animal from the photo completely. please design this flow of       
+  thoughts in something structural but pretty short so we do not overload the   
+  reader.                                                                       
+
+⏺ Edit Notebook(notebooks/01_eda.ipynb@56f29652)
+  ⎿  Updated cell 4ff46477:
+         1 ## Conclusions
+         2 
+         3 **Data quality**
+         4 - The CSV and the image folders match exactly: no missing file
+           s, no extra files, no duplicate IDs.
+         5 - Labels are only 0 and 1, with no NaN.
+         6 - Moris and Motya are always cats. Biatrix is always a dog.
+         7 - There are 8 label combinations. Cat and Dog appear together 
+           in only 4 photos (Moris + Biatrix).
+         8 
+         9 **Class imbalance**
+        10 - Cat and Dog are about 40% each. No label is about 1/6. Moris
+           , Motya and Biatrix are very small.
+        11 - The Kaggle metric is macro F1, so each of the 5 labels weigh
+           s 20%. The 3 named pets together give 60% of the score.
+        12 - Use stratified splits.
+        13 
+        14 **Domain shift**
+        15 - Generic cat and dog photos look like web images: many breeds
+           , large animal, centered.
+        16 - Moris, Motya and Biatrix look like phone photos from one hom
+           e and from walks.
+        17 - Risk: the model learns the background, not the pet.
+        18 
+        19 **Validation and augmentation**
+        20 - The named-pet classes contain near-duplicate photos. Keep ne
+           ar-duplicates in the same fold to avoid leakage.
+        21 - The named pets are small in the frame. Use gentle cropping, 
+           so the animal is not cut out of the image.
+
+⏺ I added a markdown cell with the conclusions at the end of
+  notebooks/01_eda.ipynb. It has four short groups:
+
+  1. Data quality: The CSV and the images match. Labels are only 0 and 1. Moris
+     and Motya are always cats, and Biatrix is always a dog. There are 8 label
+     combinations, and Cat with Dog appears in only 4 photos.
+  2. Class imbalance: Cat and Dog are about 40% each. No label is about 1/6. The
+     three named pets are very small. Macro F1 gives them 60% of the score, so
+     the cell says to use stratified splits.
+  3. Domain shift: The generic photos look like web images. The named-pet photos
+     look like phone photos from one home. The model can learn the background
+     instead of the pet.
+  4. Validation and augmentation: Keep near-duplicates in the same fold. Use
+     gentle cropping, because the named pets are small in the frame.
+
+  The cell has two claims that I checked against the data:
+
+  - Cat and Dog share: Cat is 5077 rows (41%) and Dog is 5025 rows (41%). Both
+    match "about 40%".
+  - No label share: The no-label class is 2162 rows (18%). This is close to your
+    1/6.
+
+  The cell has two claims that come from your own look at the photos, so I did
+  not check them: the near-duplicates and the phone photos from one home.
+
+  I did not run the notebook. A markdown cell has no output.
+
+✻ Baked for 13s · done 10:11 PM
+
+❯ Let's make several changes to this cell. First of all, maybe let's not name   
+  it conclusions because we will not finish with this on the analysis. It must  
+  signalize that it's something in the mid work. Also, I now understand that    
+  naming the very small for Morris, Moti and Beatrix is too generic. Can you    
+  please calculate the percentage and attach the exact numbers there? I think   
+  it would be something like under 0.5% for each, because we have 12,000 and    
+  0.5% of it is 60. And each of them is under 60. Can you please also rename    
+  the domain shift? Because from my understanding, domain shift is used in the  
+  test, train, split difference. And we did not want to use this term there. I  
+  also want to add a section regarding the no labels class, because there we    
+  need to be really careful. The reason for that we because we have both hard   
+  negatives and and easy negatives. Like, for example, we easily differentiate  
+  a lobster from the cat and the dog, but there is a wombat that also has a     
+  fur, legs, and etc. And we may result in false positives.                     
+  ⎿  Updated cell 4ff46477:
+         1 ## Notes so far (work in progress)
+         2 
+         3 **Data quality**
+         4 - The CSV and the image folders match exactly: no missing file
+           s, no extra files, no duplicate IDs.
+         5 - Labels are only 0 and 1, with no NaN.
+         6 - Moris and Motya are always cats. Biatrix is always a dog.
+         7 - There are 8 label combinations. Cat and Dog appear together 
+           in only 4 photos (Moris + Biatrix).
+         8 
+         9 **Class imbalance** (12260 train images)
+        10 - Cat: 5077 (41.4%). Dog: 5025 (41.0%). No label: 2162 (17.6%)
+           .
+        11 - Moris: 56 (0.46%). Motya: 42 (0.34%). Biatrix: 41 (0.33%).
+        12 - The Kaggle metric is macro F1, so each of the 5 labels weigh
+           s 20%. The 3 named pets together give 60% of the score.
+        13 - Use stratified splits.
+        14 
+        15 **No-label class**
+        16 - It holds easy negatives (lobster, turkey, horses) and hard n
+           egatives (wombat, other furry animals).
+        17 - Hard negatives can cause false Cat or Dog predictions. Check
+            errors on this class separately.
+        18 
+        19 **Photo source and background bias**
+        20 - Generic cat and dog photos look like web images: many breeds
+           , large animal, centered.
+        21 - Moris, Motya and Biatrix look like phone photos from one hom
+           e and from walks.
+        22 - Risk: the model learns the background, not the pet.
+        23 
+        24 **Validation and augmentation**
+        25 - The named-pet classes contain near-duplicate photos. Keep ne
+           ar-duplicates in the same fold to avoid leakage.
+        26 - The named pets are small in the frame. Use gentle cropping, 
+           so the animal is not cut out of the image.
+
+⏺ I changed the markdown cell in notebooks/01_eda.ipynb. I made these five
+  changes:
+
+  1. Title: The title is now "Notes so far (work in progress)".
+  2. Exact numbers: I computed the counts from your label table. Each named pet
+     is under 0.5% of the 12260 train images, as you expected:
+     - Moris: 56 images (0.46%). These are the groups Cat + Moris, Cat + Moris +
+       Motya, and Cat + Dog + Moris + Biatrix.
+     - Motya: 42 images (0.34%).
+     - Biatrix: 41 images (0.33%).
+     - The same section now gives Cat (5077, 41.4%), Dog (5025, 41.0%), and No
+       label (2162, 17.6%).
+  3. Domain shift: I renamed that section "Photo source and background bias". It
+     does not use the term "domain shift".
+  4. No-label section: The new section names easy negatives (lobster, turkey,
+     horses) and hard negatives (wombat, other furry animals). It says hard
+     negatives can cause false Cat or Dog predictions. It also says to check
+     errors on this class separately.
+  5. Other sections: I did not change the sections on data quality, validation,
+     and augmentation.
+
+  I took the examples of animals from the figure and from your words. The wombat
+  is in your message, and I did not find it in the figure as a labeled example.
+  I did not run the notebook. A markdown cell has no output.
+
+✻ Cogitated for 12s · done 10:22 PM
+
+❯ I also noticed that for the code cell, we use the class name where it's       
+  actually a label combination. Maybe it would be not set accurate to use a     
+  class there because there are only five classes in the result. Like cat, dog, 
+  Beatrix, Morris, and Mocha. So please rename that.                            
+  ⎿  Updated cell 56f29652:
+         1 import matplotlib.pyplot as plt
+         2 
+         3 IMAGES_PER_COMBINATION = 8
+         4 
+         5 label_combinations = sorted(train.groupby(label_columns, dropn
+           a=False), key=lambda item: len(item[1]), reverse=True)
+         6 
+         7 fig, axes = plt.subplots(len(label_combinations), IMAGES_PER_C
+           OMBINATION, figsize=(2 * IMAGES_PER_COMBINATION, 2 * len(label
+           _combinations)))
+         8 for ax in axes.flat:
+         9     ax.axis("off")
+        10 
+        11 for row, (labels, rows) in enumerate(label_combinations):
+        12     combination_name = " + ".join(c for c, value in zip(label_
+           columns, labels) if value == 1) or "No labels"
+        13     axes[row, 0].text(-0.05, 0.5, f"{combination_name}\n(n={le
+           n(rows)})", transform=axes[row, 0].transAxes, ha="right", va="
+           center")
+        14     sample_ids = rows["image_id"].sample(min(len(rows), IMAGES
+           _PER_COMBINATION), random_state=RANDOM_STATE)
+        15     for ax, image_id in zip(axes[row], sample_ids):
+        16         ax.imshow(plt.imread(DATA / "train" / f"{image_id}.jpg
+           "))
+        17 
+        18 fig.subplots_adjust(left=0.15)
+        19 plt.show()
+  ⎿  Updated cell 4ff46477:
+         1 ## Notes so far (work in progress)
+         2 
+         3 **Data quality**
+         4 - The CSV and the image folders match exactly: no missing file
+           s, no extra files, no duplicate IDs.
+         5 - Labels are only 0 and 1, with no NaN.
+         6 - Moris and Motya are always cats. Biatrix is always a dog.
+         7 - There are 8 label combinations. Cat and Dog appear together 
+           in only 4 photos (Moris + Biatrix).
+         8 
+         9 **Class imbalance** (12260 train images)
+        10 - Cat: 5077 (41.4%). Dog: 5025 (41.0%). No label: 2162 (17.6%)
+           .
+        11 - Moris: 56 (0.46%). Motya: 42 (0.34%). Biatrix: 41 (0.33%).
+        12 - The Kaggle metric is macro F1, so each of the 5 labels weigh
+           s 20%. The 3 named pets together give 60% of the score.
+        13 - Use stratified splits.
+        14 
+        15 **No-label combination**
+        16 - It holds easy negatives (lobster, turkey, horses) and hard n
+           egatives (wombat, other furry animals).
+        17 - Hard negatives can cause false Cat or Dog predictions. Check
+            errors on this combination separately.
+        18 
+        19 **Photo source and background bias**
+        20 - Generic cat and dog photos look like web images: many breeds
+           , large animal, centered.
+        21 - Moris, Motya and Biatrix look like phone photos from one hom
+           e and from walks.
+        22 - Risk: the model learns the background, not the pet.
+        23 
+        24 **Validation and augmentation**
+        25 - The photos of the named pets contain near-duplicates. Keep n
+           ear-duplicates in the same fold to avoid leakage.
+        26 - The named pets are small in the frame. Use gentle cropping, 
+           so the animal is not cut out of the image.
+
+⏺ I renamed "class" to "label combination" in the code cell and in the notes
+  cell. I did not run the notebook, because the change only renames things.
+
+  Code cell
+  - IMAGES_PER_CLASS is now IMAGES_PER_COMBINATION.
+  - classes is now label_combinations.
+  - class_name is now combination_name.
+
+  Notes cell
+  - The section "No-label class" is now "No-label combination". Its last line
+    now says "this combination".
+  - The line about near-duplicates now says "the photos of the named pets". It
+    no longer says "named-pet classes".
+
+  I kept "Class imbalance" as the heading of that section. The numbers in it are
+  counts for the five real classes (Cat, Dog, Moris, Motya, Biatrix), plus the
+  no-label group. If you want that heading to change too, tell me.
+
+✻ Sautéed for 13s · done 10:24 PM
+
+❯ Nice, let's please commit this one. Please use a very short message for a     
+  commit. No need to describe the deep things there. Just say something that    
+  signalizes that it's a part of EDA.                                           
+
+  Committed f1e5181, ran 1 shell command (ctrl+o to expand)
+  ⎿  PostToolUse:Bash says: Tip: Run /ultrareview before you push to catch bugs 
+     with a cloud-based multi-agent review — 3 free reviews left.
+
+⏺ I committed the notebook as f1e5181 with the message "Add EDA notebook". The
+  commit has only notebooks/01_eda.ipynb.
+
+  The .gitignore file has changes that were already staged before this session.
+  I left it out of the commit. It is still staged.
+
+  The commit is on main. I did not push it.
+
+✻ Cooked for 8s · done 10:26 PM
+❯ I wanted to include the gitignore in that commit. You can either amend the    
+  old one on creating a new one,                                                
+
+⏺ Amend is safe: the commit is local and not pushed.
+
+  Amended commit e04a64b (ctrl+o to expand)
+
+⏺ I amended the commit. It is now e04a64b with the same message, "Add EDA
+  notebook". It has two files: .gitignore and notebooks/01_eda.ipynb. The
+  working tree is clean. I did not push the commit.
+
+✻ Churned for 5s · done 10:27 PM
+
+❯ /rename coder-agent-1 
+  ⎿  Session renamed to: coder-agent-1
