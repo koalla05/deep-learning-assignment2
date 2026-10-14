@@ -1,0 +1,511 @@
+ ▐▛███▛█   Claude Code v2.1.299
+▝▜██████▀  Sonnet 5.5 · Claude Pro
+ ▝▝   ▝▝   ~/PycharmProjects/deep-learning-assignment2
+
+
+❯ /rename coder-agent-8 
+  ⎿  Session renamed to: coder-agent-8
+
+❯ In this chat, we will work on a small piece of a university deep learning     
+  assignment. It's a Kaggle competition with cat and dog's pictures. Please     
+  read the existing notebooks located in notebooks/. When you will write code,  
+  you must follow the existing patterns from the existing notebooks, including  
+  the path, random state, and so on. Your new code will land into the metrics   
+  notebook. Now I want to see how much one photo can change the macro F1 for    
+  each label. The named pets have very little photos. So I expect one photo to  
+  matter much for the, them than for cat or dog. In this chat, we will work on  
+  a small piece of a university deep learning assignment. It's a Kaggle         
+  competition with cat and dog's pictures. Please read the existing notebooks   
+  located in notebooks/. When you will write code, you must follow the existing 
+  patterns from the existing notebooks, including the path, random state, and   
+  so on. Your new code will land into the metrics notebook. Now I want to see   
+  how much one photo can change the macro F1 for each label. The named pets     
+  have very little photos. So I expect one photo to matter much for the, them   
+  than for cat or dog.                                                          
+
+  Read 1 file, ran 2 shell commands (ctrl+o to expand)
+
+⏺ Edit Notebook(notebooks/02_metric.ipynb@603c8135)
+  ⎿  Updated cell 44b8a654:
+         1 def compute_one_photo_effect(y_true: pd.DataFrame, y_pred: pd.
+           DataFrame) -> pd.DataFrame:
+         2     """Return, per label, the F1 change if one more photo is m
+           issed or one more false alarm is raised, and the macro F1 chan
+           ge."""
+         3     true_positive = ((y_true == 1) & (y_pred == 1)).sum()
+         4     false_positive = ((y_true == 0) & (y_pred == 1)).sum()
+         5     false_negative = ((y_true == 1) & (y_pred == 0)).sum()
+         6 
+         7     def f1(tp, fp, fn):
+         8         return 2 * tp / (2 * tp + fp + fn)
+         9 
+        10     base_f1 = f1(true_positive, false_positive, false_negative
+           )
+        11     one_more_miss = f1(true_positive - 1, false_positive, fals
+           e_negative + 1) - base_f1
+        12     one_more_false_alarm = f1(true_positive, false_positive + 
+           1, false_negative) - base_f1
+        13     return pd.DataFrame({
+        14         "f1": base_f1,
+        15         "one more miss": one_more_miss,
+        16         "one more false alarm": one_more_false_alarm,
+        17         "one more miss, macro F1": one_more_miss / len(y_true.
+           columns),
+        18     }).T
+
+⏺ Edit Notebook(notebooks/02_metric.ipynb@603c8135)
+  ⎿  Updated cell c9038cfd:
+        1 FINAL_THRESHOLD = 0.25
+        2 
+        3 final_predictions = (logreg_probabilities > FINAL
+          _THRESHOLD).astype(int)
+        4 compute_one_photo_effect(y_true, final_prediction
+          s)
+
+⏺ I inserted two cells. They may be in the wrong order, so I check the order and
+  run the code.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The order is wrong. I swap the two cells in the file, then run the code.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The swap worked, and the diff is small. The notebook runner is not available.
+  I run the cells as a script in the scratchpad instead.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ My script dropped the cell that defines final_predictions. This is a script
+  error, not a notebook error. I fix the script.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I added two cells to notebooks/02_metric.ipynb, before Conclusions. They show
+  that one photo moves the named pets' F1 much more than Cat or Dog. I ran the
+  code as a script on the notebook cells, because jupyter nbconvert did not run
+  here. I did not run it in Jupyter, so the new cells have no saved output yet.
+
+  - Function cell: compute_one_photo_effect takes the true labels and the 0/1
+    predictions. For each label, it gives the F1 change if one more photo is
+    missed. It also gives the change for one more false alarm, and the macro F1
+    change for one more miss.
+  - Call cell: it uses FINAL_THRESHOLD = 0.25, the threshold from the Decision
+    section. It applies that threshold to logreg_probabilities.
+
+  Result at threshold 0.25:
+
+  ┌────────────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
+  │                        │   Cat   │   Dog   │  Moris  │  Motya  │ Biatrix │
+  ├────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ F1                     │ 0.9972  │ 0.9959  │ 0.9174  │ 0.9136  │ 0.9762  │
+  ├────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ one more miss          │ -0.0001 │ -0.0001 │ -0.0100 │ -0.0136 │ -0.0123 │
+  ├────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ one more false alarm   │ -0.0001 │ -0.0001 │ -0.0083 │ -0.0111 │ -0.0115 │
+  ├────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ one more miss, macro   │ -0.0000 │ -0.0000 │ -0.0020 │ -0.0027 │ -0.0025 │
+  │ F1                     │         │         │         │         │         │
+  └────────────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
+
+  - Your expectation holds. One photo costs a named pet about 0.010 to 0.014 F1.
+    It costs Cat or Dog about 0.0001.
+  - The ratio is about 100 to 1. The cause is the label counts: about 5000
+    photos for Cat and Dog, and 41 to 56 for the named pets.
+  - Macro F1 effect: one miss on a named pet moves macro F1 by about 0.002 to
+    0.003. The nested-versus-fixed gain of 0.014 equals about 5 to 7 such
+    photos.
+
+  Two notes:
+  - Both cells were inserted after the same cell, so they landed in reverse
+    order. I swapped them in the file with a script. The diff is 17 added lines
+    and 1 changed line.
+  - I did not change the Conclusions cell. I can add a short bullet on this
+    result if you want one.
+
+✻ Brewed for 52s · done 9:03 AM
+
+❯ Okay, so we see that on average, the named pad give us the 0.0024 of F1       
+  decrease per image. Let's set the limit when we consider the two results      
+  similar of, for example, two photos. So it's 0.005. Add that to the           
+  conclusion.                                                                   
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The diff is larger than I expect. I check the cause.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The extra lines are cell outputs. You ran the cells in PyCharm since my last
+  step, so the notebook now holds the saved output. The edit itself is small.
+
+  I added a section called Effect of one photo to the Conclusions cell in
+  notebooks/02_metric.ipynb. It sits before Decision. It has four bullets:
+
+  - At threshold 0.25, one missed photo lowers the F1 of Cat or Dog by about
+    0.0001. It lowers the F1 of a named pet by 0.010 to 0.014.
+  - For macro F1, one missed named-pet photo costs 0.0020 (Moris), 0.0027
+    (Motya) and 0.0025 (Biatrix). The mean is 0.0024.
+  - Two macro F1 results are similar if they differ by less than 0.005. This is
+    about 2 named-pet photos.
+  - A gain smaller than 0.005 is not a real gain, because 2 photos can cause it.
+
+  Your mean of 0.0024 matches my calculation from the saved output. The
+  threshold 0.005 is your rule. I did not change the numbers in the earlier
+  Conclusions sections.
+
+✻ Brewed for 16s · done 9:14 AM
+
+❯ Okay, now we would like to use this, let's say, limit of 0.005. Um, we have   
+  five predictors for each of our labels, for cat, dog, Morris, Motia and       
+  Beatrice. So for each of them, we set either 0 or 1, and it can happen that   
+  as a result, for example, we get a Morris as 1, but the cat is still 0. And   
+  there could be two outcomes. The Morris is correct, but the cat was missed.   
+  In such a case, we... are gaining the missed case. In the other one, the      
+  Morris was incorrectly missed, not missed, but marked as found, and there was 
+  no actually a cat there. And we set still the cat to one. But we have         
+  already seen that the cat weighs almost nothing in the fail. Like, not almost 
+  nothing, but very little. So, we can try to operate on that. Maybe we will    
+  gain something from that. And... And we will look whether the gain is more    
+  than our limit. If it's not, then we would prefer the simpler solution over   
+  the one that may be just luck.                                                
+
+⏺ I add a rule: if Moris or Motya is 1, set Cat to 1. If Biatrix is 1, set Dog
+  to 1. Then I compare macro F1 with the limit.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ My script replace also hit the assignment line. This is a script error. I fix
+  the replace.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The script bug is in my test copy only, not in the notebook cells. The first
+  table printed before the error, and it shows the result.
+
+  I added two cells to notebooks/02_metric.ipynb, after the FINAL_THRESHOLD
+  cell:
+
+  - set_parent_label_for_named_pets: if Moris or Motya is 1, it sets Cat to 1.
+    If Biatrix is 1, it sets Dog to 1. PARENT_LABELS holds this map.
+  - Comparison cell: it scores the predictions before and after the rule. It
+    adds a gain row, and it prints whether the macro F1 gain is above
+    MACRO_F1_LIMIT = 0.005.
+
+  Result at threshold 0.25 (from my script run; the new cells have no saved
+  output until you run them):
+
+  ┌─────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
+  │             │   Cat   │   Dog   │  Moris  │  Motya  │ Biatrix │ macro   │
+  │             │         │         │         │         │         │   F1    │
+  ├─────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ as          │ 0.99724 │ 0.99593 │ 0.91743 │ 0.91358 │ 0.97619 │ 0.96007 │
+  │ predicted   │         │         │         │         │         │         │
+  ├─────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+  │ named pet   │         │         │         │         │         │         │
+  │ sets        │ 0.99724 │ 0.99603 │ 0.91743 │ 0.91358 │ 0.97619 │ 0.96009 │
+  │ Cat/Dog     │         │         │         │         │         │         │
+  └─────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
+
+  - The gain is 0.00002. It is about 250 times below the limit 0.005, so the
+    check prints False.
+  - Only Dog changed, by +0.0001. Cat did not change. The two models for Cat and
+    Dog already predict 1 wherever a named pet is predicted.
+  - Your rule says to keep the simpler solution. We do not add this
+    post-processing.
+  - The rule has no tuned value, so this out-of-fold result is a fair check.
+
+  I did not add this to Conclusions yet. Should I add a short section with this
+  result?
+
+✻ Baked for 35s · done 9:22 AM
+
+❯ Maybe let's also output the count of the images affected.                     
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The bare rule_scores line would not show, because a cell shows only its last
+  expression. I move the count table into its own cell. Then I run it.
+
+  Ran 1 shell command (ctrl+o to expand)
+⏺ I added a new cell after the comparison cell in notebooks/02_metric.ipynb. It
+  shows, for each label, how many photos the rule changed. It splits them into
+  "now correct" (true label 1) and "now wrong" (true label 0).
+
+  Result at threshold 0.25 (from my script run):
+
+  ┌────────────────┬─────┬─────┬───────┬───────┬─────────┐
+  │                │ Cat │ Dog │ Moris │ Motya │ Biatrix │
+  ├────────────────┼─────┼─────┼───────┼───────┼─────────┤
+  │ photos changed │ 2   │ 1   │ 0     │ 0     │ 0       │
+  ├────────────────┼─────┼─────┼───────┼───────┼─────────┤
+  │ now correct    │ 1   │ 1   │ 0     │ 0     │ 0       │
+  ├────────────────┼─────┼─────┼───────┼───────┼─────────┤
+  │ now wrong      │ 1   │ 0   │ 0     │ 0     │ 0       │
+  └────────────────┴─────┴─────┴───────┴───────┴─────────┘
+
+  - The rule changes only 3 photos of 12260.
+  - Cat: one photo becomes correct, and one becomes wrong. The two effects
+    cancel, so Cat F1 does not change.
+  - Dog: one photo becomes correct. This is the +0.0001 Dog F1 gain.
+  - Named pets: no change, because the rule only sets Cat or Dog.
+  - The result stays the same: the gain is far below 0.005, so we keep the
+    simpler solution.
+
+  The rule helps in the two cases you described: a correct Moris with a missed
+  Cat (+1), and a wrong Moris with a Cat set to 1 (+1 wrong). The data show both
+  cases happen once for Cat. The new cell has no saved output until you run it.
+
+✻ Cooked for 22s · done 9:28 AM
+
+❯ Okay, so let's write in the conclusion that this method doesn't bring us      
+  anything. because with this we introduce one error and gain two positive      
+  results. So after canceling out, we are one positive result in gain, and      
+  that's too little for complicating the model. Also, maybe we would try to do  
+  it vice versa, like when the cat or dog is zero, then the appropriate named   
+  pet is also needed to be zero. But it seems that it would also be cancelled   
+  out.                                                                          
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I added a section called Rule: a named pet sets Cat or Dog to the Conclusions
+  cell in notebooks/02_metric.ipynb. It sits before Decision.
+
+  - Why we tried it: Moris and Motya are always cats, and Biatrix is always a
+    dog.
+  - What it changes: 3 photos of 12260. Two become correct (1 for Cat, 1 for
+    Dog). One becomes wrong (Cat).
+  - Net gain: 1 correct photo. The macro F1 gain is 0.00002, far below the limit
+    0.005.
+  - Decision: the rule adds complexity and no real gain, so we keep the simpler
+    solution.
+  - Reverse rule: the section says it is not tested, and we expect the same
+    result.
+
+  I did not test the reverse rule, because you wrote "maybe". I can add a cell
+  for it, as a mirror of set_parent_label_for_named_pets. It would set a named
+  pet to 0 when Cat or Dog is 0. It would use the same 0.005 limit.
+
+✻ Sautéed for 11s · done 9:31 AM
+
+❯ Also, let's please add the like mini drawback of the F1 metric. Um, this      
+  whole section happened because our five models are separate, like the ones    
+  which um, predict the labels like cat, dog, or Beatrix. And that's why they   
+  can give us the combinations that are impossible at all. Like, for example,   
+  the Beatrix 1 but dog 0. And macro F1 scores each column separately, so it    
+  doesn't see these rows. Also, I want to strengthen the reverse rule not       
+  testing. In our test of the direct rule, we have seen that two gained and one 
+  got into loss. So logically, in the reverse order, it would be vice versa,    
+  but with uh, more loss because the weights are bigger, like not the weights,  
+  but the influence on the result with F1 metric.                               
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I edited the Conclusions cell in notebooks/02_metric.ipynb.
+
+  New section: Drawback of macro F1. It sits before the rule section and has two
+  bullets:
+  - The 5 models are separate, so they can give an impossible combination, such
+    as Biatrix = 1 and Dog = 0.
+  - Macro F1 scores each label column alone, so it does not see these
+    combinations.
+
+  Stronger reverse-rule text. The old bullet "we expect the same result" is now
+  four bullets:
+  - The reverse rule is not tested.
+  - It acts on the same 3 photos and gives the opposite result: 1 photo gained
+    and 2 photos lost.
+  - The 2 lost photos belong to a named pet. One named-pet photo costs about 100
+    times more than one Cat or Dog photo.
+  - So the reverse rule is likely worse than the direct rule. The text says this
+    is a forecast, not a measurement.
+
+  Correction to your reasoning, which changes the text. You wrote that the
+  reverse rule would have "more loss" than gain. This is correct. But the
+  reverse rule does not simply mirror the direct rule with the same counts. It
+  has 1 gain and 2 losses. My text says this.
+
+  The forecast is my inference from the 3 changed photos. I assume the reverse
+  rule acts on the same photos, which I did not check in the data. I can run the
+  reverse rule and replace the forecast with a measurement.
+
+✻ Cogitated for 15s · done 9:59 AM
+
+❯ Okay, we need to discover some other metric. Uh, I can see one drawback of    
+  macro F1. It depends on the threshold. Now I want metrics that use            
+  probabilities directly with no threshold. For that, let's choose the PR hook  
+  and ROC hook for each label. And then a macro value, like a macro F1, but for 
+  hoax. Then please show one table with labels as columns and three rows. Uh,   
+  F1 at 0.25, the PR AUK and ROC AUK.                                           
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ My script had a syntax error, so it did not run and the notebook is unchanged.
+  I redo it without the extra line.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ I added two cells to notebooks/02_metric.ipynb, after the changed-photos cell.
+  They build one table with labels as columns, a macro column, and three rows.
+  I ran the code as a script. The new cells have no saved output until you run
+  them.
+
+  - compute_threshold_free_scores: it returns the PR AUC and ROC AUC for each
+    label from logreg_probabilities. It also returns their mean as macro.
+  - Table cell: it puts the F1 at FINAL_THRESHOLD (0.25) on top, with the macro
+    F1 in the macro column.
+
+  For PR AUC, I used average_precision_score. It is the usual summary of the PR
+  curve. It is not the trapezoid area, so the value differs a little.
+
+  ┌────────────┬────────┬────────┬────────┬────────┬─────────┬────────┐
+  │            │  Cat   │  Dog   │ Moris  │ Motya  │ Biatrix │ macro  │
+  ├────────────┼────────┼────────┼────────┼────────┼─────────┼────────┤
+  │ F1 at 0.25 │ 0.9972 │ 0.9959 │ 0.9174 │ 0.9136 │ 0.9762  │ 0.9601 │
+  ├────────────┼────────┼────────┼────────┼────────┼─────────┼────────┤
+  │ PR AUC     │ 0.9999 │ 0.9997 │ 0.9805 │ 0.9766 │ 1.0000  │ 0.9913 │
+  ├────────────┼────────┼────────┼────────┼────────┼─────────┼────────┤
+  │ ROC AUC    │ 0.9999 │ 0.9997 │ 0.9999 │ 0.9999 │ 1.0000  │ 0.9999 │
+  └────────────┴────────┴────────┴────────┴────────┴─────────┴────────┘
+
+  - ROC AUC does not separate the labels. It is 0.9999 or higher for all 5
+    labels. The reason is the huge number of negatives: a few false alarms
+    barely move the false positive rate.
+  - PR AUC is the useful one. It shows the same weakness as F1. Moris (0.981)
+    and Motya (0.977) are below Cat, Dog and Biatrix.
+  - The macro PR AUC (0.991) is close to 1. It is far less sensitive than macro
+    F1, so it is a ranking check, not a replacement for macro F1.
+  - The threshold is not the cause of the weakness. PR AUC is 0.98 for the named
+    pets with no threshold, and F1 at 0.25 is 0.91. The gap between them is the
+    cost of the threshold choice.
+
+  I did not add this to Conclusions yet. Should I add a short section with these
+  results?
+
+✻ Worked for 31s · done 10:19 AM
+
+❯ Okay, so let's go to the conclusions. The raw Haiku is very high, almost one  
+  for every label. And it even gives Morris a higher score than dog. But Morris 
+  is much harder according to F1 metric. That's uh, because raw Haiku divides   
+  the false alarms by all negatives. And all negatives are about 12k photos for 
+  each named pet. So a few false alarms cost almost nothing. We should not      
+  report a rockayuk. PRAUK uses precision, which counts only the photos above   
+  the threshold. So 12k easy negatives do not change it. PRAUK is also lower    
+  for Morris and Motya than for a cat and dog, because some other photos Get a  
+  higher probability than some true Morris and Mota photos. Also, all scores    
+  are very high because the model we used for the embeddings is already very    
+  complex and it's based on ImageNet. So our task is just a toy for it.         
+  Finally, we use PR-AUK because it is the only one of the two that shows uh,   
+  which labels are hard. Like ROC-AUK is triple nine or more for every label.   
+  Because the many is the negatives hide the few false alarms. So it shows no   
+  difference between the labels. Basically, what is the domination of PR-AUK    
+  over F1 is uh, first comparing the models without the threshold lock. Like,   
+  for example, for the F1, the threshold alone moved macro F1 by 0.014 and the  
+  model didn't change itself. And when we compare two models by F1 only, a      
+  better threshold can look like a better model. And PR-AUK doesn't change with 
+  the threshold, so it compares only the models. The second reason is that it   
+  uh, finds the cause of a loss. Because, for example, Beatrix has the PR-AUK   
+  of 1. 1. But the F1 is 0.976. That means that the sort of the probabilities   
+  is perfect by our model, but the threshold causes the loss and better         
+  threshold can fix it. And for Morris, PR-AUK is 0.981. So some wrong photos   
+  are above some true Morris photos. So no threshold can fix all errors, only a 
+  better model can. All errors. Please try to compact all my thoughts into a    
+  clear, short conclusion.                                                      
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I added two sections to the Conclusions cell in notebooks/02_metric.ipynb.
+  Both sit before Decision.
+
+  Metrics without a threshold: PR AUC and ROC AUC (7 bullets)
+  - All scores are very high, because the pretrained embedding model finds our
+    task easy.
+  - ROC AUC is 0.9999 or higher for every label. Moris scores higher than Dog,
+    but Moris is harder by F1.
+  - The cause is the false positive rate: it divides by about 12000 negatives
+    per named pet, so a few false alarms cost almost nothing. So we do not
+    report ROC AUC.
+  - PR AUC uses precision, which counts only the photos above the threshold, so
+    the easy negatives do not change it.
+  - PR AUC is lower for Moris (0.981) and Motya (0.977), because some other
+    photos rank above some true photos of these pets. It is the only one of the
+    two metrics that shows which labels are hard.
+
+  Why PR AUC next to F1 (3 bullets)
+  - It compares models without a threshold. The threshold alone moved macro F1
+    by 0.014 with the same model.
+  - It finds the cause of a loss. Biatrix has PR AUC 1.0 and F1 0.976, so only
+    the threshold causes the loss.
+  - Moris has PR AUC 0.981, so no threshold can fix all errors. Only a better
+    model can.
+
+  I changed two things in your text:
+  - Spelling: I wrote "PR AUC" and "ROC AUC" for what you dictated as "PR-AUK",
+    "raw Haiku" and similar.
+  - Length: I split the text into two sections because it was long, even after
+    compaction.
+
+  I did not change Decision, which still says only "We use the threshold 0.25".
+  Should I add a line that says we report PR AUC next to F1?
+
+✻ Sautéed for 15s · done 10:42 AM
+
+❯ please add the thing that we will use the PR awk next to macro F1.            
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I added a bullet to Decision in notebooks/02_metric.ipynb: "We report the
+  macro PR AUC next to the macro F1." The old bullet "We use the threshold
+  0.25." stays above it.
+
+✻ Cooked for 6s · done 10:44 AM
+
+❯ Okay, so our final conclusion is that we propose macro PRAUG as the           
+  alternative target metric because it keeps the 20% per label, which allows us 
+  to not uh, omit the minor classes. It has no threshold and it ignores easy    
+  negatives. the edge case of F1 is 0 divided by 0. In our setup, sklearn       
+  returns 0 with warning, so a perfect answer loses 0.2 of micro F1. But in our 
+  folds, this cannot happen because we have 8 to 12 photos of each named pet    
+  per fold. In batch of, let's say, 32, it happens very often. So we compute F1 
+  only on the full validation set.                                              
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ I edited the end of the Conclusions cell in notebooks/02_metric.ipynb.
+
+  New section: Edge case of F1 (4 bullets)
+  - F1 is 0 divided by 0 when a label has no true photos and no predicted
+    photos. In our setup, sklearn returns 0 with a warning.
+  - A perfect answer then loses 0.2 of macro F1.
+  - In our folds this cannot happen, because each fold has 8 to 12 photos of
+    each named pet.
+  - In a batch of 32 photos it happens often, so we compute F1 only on the full
+    validation set.
+
+  Decision (3 bullets)
+  - We use the threshold 0.25.
+  - We propose the macro PR AUC as the alternative target metric. It keeps 20%
+    for each label, it needs no threshold, and easy negatives do not change it.
+  - We report the macro PR AUC next to the macro F1.
+
+  I wrote "macro F1", not "micro F1", where you said "micro F1". Micro F1 pools
+  all photos, so a missing label cannot cost 0.2. One label of 5 costs 0.2 only
+  in the macro average.
+
+  I checked the fold counts. Moris has 56 photos, Motya 42 and Biatrix 41. This
+  gives about 8 to 11 per fold, so "8 to 12" holds.
+
+✻ Brewed for 13s · done 12:27 PM
+
+❯ Please commit                                                                 
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ I committed notebooks/02_metric.ipynb as 5502391: "Add one-photo effect,
+  parent-label rule check and PR AUC to metric notebook". I did not push.
+
+  The commit has no other files. The new code cells have no saved output, except
+  the first ones that you ran in PyCharm. Run the notebook again if you want
+  all outputs saved.
+
+✻ Cooked for 8s · done 12:54 PM
