@@ -33,6 +33,62 @@ kernels and move it to `.venv.manual-backup` before syncing. Keep the backup
 until any tools or credentials in it have been recovered; both directories
 are ignored by Git.
 
+## Colab CLI quick reference
+
+Use the standalone `colab` CLI from a terminal. The session name below is the
+one used for our current fold-0 work; replace it if Colab assigns a new VM.
+Drive mounting is interactive, so run that command yourself and approve the
+Google prompt. A new runtime may need a fresh mount. If `colab` is not on your
+PATH, use the full path to its executable (on Herman's Mac,
+`/Users/hermanhavva/.local/bin/colab`).
+
+```sh
+colab sessions
+colab status -s ai301-head-fold0
+colab url -s ai301-head-fold0
+colab drivemount -s ai301-head-fold0
+colab ls -s ai301-head-fold0 /content/drive/MyDrive
+colab log -s ai301-head-fold0 -n 20
+```
+
+From the repository root, `colab exec -s ai301-head-fold0 -f
+notebooks/06_convnext_standard.ipynb --timeout 21600 --env
+STAGE2_ROOT=/content/ai301 ...` executes the local notebook on the VM and
+writes a separate `_output.ipynb` beside the source notebook. Use the run
+flags described in that notebook; for a protected Colab training run include
+`--env STAGE2_BACKUP_TO_DRIVE=1` and a fresh `STAGE2_RUN_ID`. Do not launch a
+full run until its epoch count and time budget are agreed. The CLI needs a
+connection to return the executed notebook. If that connection drops, do not
+assume training continued; inspect the session and Drive backups before
+restarting anything.
+
+Before execution, upload the matching helper and source notebook so the VM's
+run record hashes the code that actually ran. The notebook reloads the helper
+module because CLI calls can reuse a Python kernel:
+
+```sh
+colab upload -s ai301-head-fold0 stage2/finetune.py /content/ai301/stage2/finetune.py
+colab upload -s ai301-head-fold0 stage2/run_records.py /content/ai301/stage2/run_records.py
+colab upload -s ai301-head-fold0 notebooks/06_convnext_standard.ipynb /content/ai301/notebooks/06_convnext_standard.ipynb
+```
+
+Inspect or retrieve individual VM files with these commands (replace
+`<run-id>` with the actual name, without angle brackets):
+
+```sh
+colab ls -s ai301-head-fold0 /content/ai301/artifacts
+colab ls -s ai301-head-fold0 /content/drive/MyDrive/AI301-stage2/01_convnext_standard
+colab download -s ai301-head-fold0 /content/ai301/artifacts/<run-id>/timing_gate.json ./timing_gate.json
+colab log -s ai301-head-fold0 -o ./colab_session_log.ipynb
+```
+
+The output notebook is produced by `colab exec`; the session log is a
+fallback, not a substitute for that notebook. Copy and verify the output
+notebook and small results under the experiment's `results/` folder before
+sharing. Never use `colab stop` until the needed VM files have been checked
+locally or on Drive. We check long-running sessions no more frequently than
+once every ten minutes unless a teammate asks for an immediate status check.
+
 Put the competition's `train.csv`, `test.csv`, `train/`, and `test/` under the
 ignored `data/` directory. Keep `folds.csv` at the repository root. Do not
 commit competition data or credentials.
@@ -58,6 +114,10 @@ These owners are a starting point, not a restriction on where a run happens.
    Secret with that name and grant the notebook access. The key never belongs
    in a notebook, run record, shell command history, or Git. CSV curves are
    also saved locally; W&B does not upload checkpoints or training photos.
+   Colab Secrets are not available to CLI-driven execution. For a CLI run,
+   upload a temporary, W&B-only `.env` to the runtime and set
+   `STAGE2_REMOVE_RUNTIME_ENV_AFTER_LOAD=1` so the notebook removes that file
+   as soon as it loads the key. Never pass the key's value in a CLI argument.
 2. Smoke-test full fine-tuning with real images, then use its first complete
    epoch to measure training and validation time, memory, and checkpoint cost.
    On a 16 GB Mac, try a smaller physical batch and accumulate gradients if
@@ -96,8 +156,28 @@ runs. Save validation probabilities in `<run_id>_val.csv` with columns
 IDs for that fold, and record the Git commit in the JSON. Small JSON and CSV
 files go through Git.
 
+Preserve an output-bearing notebook for every substantive Colab run. Executing
+an `.ipynb` with the Colab CLI saves a separate `_output.ipynb`; move that
+copy to the experiment's `results/` with a run-specific name so it can be
+reviewed and committed alongside the run record. Keep the source notebook
+clean. Before sharing the executed copy, check for error outputs,
+excessive progress logs, and credentials. If Colab has no Recent copy, the
+CLI session history may still hold outputs that can be matched to source cells.
+
 Keep data, credentials, caches, and temporary or per-epoch checkpoints out of
-Git. A Colab resume checkpoint needs durable storage such as Drive. Put only
+Git. With `STAGE2_BACKUP_TO_DRIVE=1`, the standard ConvNeXt notebook saves a
+full resume checkpoint after every completed epoch and a copy of each newly
+selected best model under `MyDrive/<folder-name>/01_convnext_standard/<run-id>/`.
+Set `STAGE2_DRIVE_FOLDER_NAME` to choose that folder name (default
+`AI301-stage2`); it must be a single folder directly under MyDrive.
+It also copies curves, timing records, fold predictions, and the final run
+record as they become available. Each copy is checksum-verified before it
+receives its final filename; an incomplete `.partial` file needs manual
+inspection before retrying. Ensure Drive has room for several full training
+checkpoints. The saved full state contains optimizer and scheduler data, but
+restoring it into a fresh VM and continuing the notebook is not automated yet.
+The CLI's output-bearing notebook still needs to be preserved
+separately after execution. Put only
 selected model checkpoints in `<experiment>/checkpoints/`, where Git LFS
 applies. Install LFS before pulling one:
 

@@ -25,3 +25,6 @@ The first Colab T4 run is recorded in
 Ten epochs took 92 minutes, and the best checkpoint scored 0.93577 macro F1
 on fold 0 at threshold 0.25. This is a screening result, not five-fold CV.
 The held-out probabilities and small trained head are beside the record.
+Its [output-bearing notebook](results/convnext_head_fold0_seed42_colab_executed.ipynb)
+was restored from the local Colab CLI history; execution counts were not
+recorded there, but the last run's cell outputs are present.

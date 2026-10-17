@@ -20,4 +20,4 @@ Multi-label recognition of cats, dogs, and three named pets in competition image
 
 **Run**: One execution of an experiment with a fixed fold, seed, configuration, and code revision. A screening run on one fold is distinct from a five-fold evaluation.
 
-**Head-only checkpoint**: The trained five-output classifier parameters produced while the pretrained ConvNeXt backbone remains frozen. It is the common starting point for matched standard and custom ConvNeXt runs.
+**Head-only checkpoint**: The trained five-output classifier parameters produced while the pretrained ConvNeXt backbone remains frozen. The current checkpoint was trained on folds 1–4 and selected on fold 0, making it a shared starting point for matched fold-0 screening runs, not for other held-out folds.
