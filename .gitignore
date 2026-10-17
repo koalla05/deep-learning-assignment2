@@ -2,6 +2,7 @@
 # Competition data
 /data/
 /.venv/
+/.venv.manual-backup/
 /kaggle.json
 /artifacts/
 *.ckpt
