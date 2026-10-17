@@ -4,6 +4,9 @@
 /.venv/
 /.venv.manual-backup/
 /kaggle.json
+.env
+.env.*
+!.env.example
 /artifacts/
 *.ckpt
 *.pth
