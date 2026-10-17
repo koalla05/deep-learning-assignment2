@@ -1,9 +1,37 @@
 # Stage 2 experiments
 
+This is the CNN part of the Cats and Dogs++ assignment. Each image has five
+binary labels: `Cat`, `Dog`, `Moris`, `Motya`, and `Biatrix`. The competition
+scores macro F1, so the three rare named-pet labels matter as much as the two
+common labels. Our previous frozen ConvNeXt embeddings plus logistic
+regression scored 0.957 in the fair local CV check and **0.92922** on the
+public leaderboard. The saved split is in [`folds.csv`](../folds.csv); the
+full experiment rationale is in the [Stage 2 plan](../docs/stage-2-plan.md).
+
 We have about 20 hours to get useful results. That is elapsed time, not a
 shared compute quota: the three of us can run work in parallel on Macs or
 Colab. We will decide how many trials and folds fit after timing a short run
 with real images and pretrained weights.
+
+## Setup
+
+From the repository root, use `uv` for Python and project dependencies:
+
+```sh
+uv sync --locked
+uv run --locked python -c "import torch, timm; print(torch.__version__, timm.__version__)"
+```
+
+`uv` creates `.venv`; do not make another environment or install project
+packages into it by hand. Select the uv-created interpreter as the notebook
+kernel. If an older manually created `.venv` is already present, stop its
+kernels and move it to `.venv.manual-backup` before syncing. Keep the backup
+until any tools or credentials in it have been recovered; both directories
+are ignored by Git.
+
+Put the competition's `train.csv`, `test.csv`, `train/`, and `test/` under the
+ignored `data/` directory. Keep `folds.csv` at the repository root. Do not
+commit competition data or credentials.
 
 | Folder | Starting owner | Run |
 | --- | --- | --- |
@@ -16,9 +44,10 @@ These owners are a starting point, not a restriction on where a run happens.
 
 ## Run order
 
-1. Follow the [uv setup](../README.md) and put competition files in `data/`.
-   The shared training code is still to be written; only the timing profiler
-   runs today. Build the common data loading, metrics, and result saving first.
+1. The shared training code is still to be written; only the
+   [timing profiler](../notebooks/04_convnext_profile.ipynb) runs today. Build
+   the common data loading, metrics, and result saving first. That profiler
+   uses random weights and is not a trained model.
 2. Time a short training and validation pass on the device you will use.
    Include image loading and checkpoint saving. On a 16 GB Mac, try a smaller
    microbatch and accumulate gradients if needed.
