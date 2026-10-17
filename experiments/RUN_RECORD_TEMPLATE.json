@@ -41,6 +41,13 @@
     "training_seconds": null,
     "validation_seconds": null
   },
+  "telemetry": {
+    "wandb_enabled": false,
+    "wandb_mode": null,
+    "wandb_project": null,
+    "wandb_run_id": null,
+    "model_upload": false
+  },
   "artifacts": {
     "validation_probabilities_csv": null,
     "checkpoint_reference": null
