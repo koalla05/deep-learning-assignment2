@@ -1,0 +1,4 @@
+experiments/*/checkpoints/*.pt filter=lfs diff=lfs merge=lfs -text
+experiments/*/checkpoints/*.pth filter=lfs diff=lfs merge=lfs -text
+experiments/*/checkpoints/*.ckpt filter=lfs diff=lfs merge=lfs -text
+experiments/*/checkpoints/*.safetensors filter=lfs diff=lfs merge=lfs -text

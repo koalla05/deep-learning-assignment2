@@ -1,3 +1,16 @@
 /.idea/
 # Competition data
 /data/
+/.venv/
+/kaggle.json
+/artifacts/
+*.ckpt
+*.pth
+*.pt
+*.safetensors
+!/experiments/*/checkpoints/*.ckpt
+!/experiments/*/checkpoints/*.pth
+!/experiments/*/checkpoints/*.pt
+!/experiments/*/checkpoints/*.safetensors
+__pycache__/
+.ipynb_checkpoints/
