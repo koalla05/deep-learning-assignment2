@@ -136,6 +136,14 @@ If most of these were false alarms, the LB score would be much lower than 0.92, 
 
 ---
 
+## 4. CNN experiments
+
+Our first Stage 2 experiment kept the pretrained ConvNeXt-base backbone frozen and trained a new five-output linear head. We used the saved folds: 9,808 images from folds 1–4 for training and 2,452 images from fold 0 for validation. On a Colab T4, ten epochs took 92 minutes. The best checkpoint reached **0.93577 macro F1** at threshold 0.25 and **0.96683 macro average precision** on fold 0. The named pets remained the hardest labels, especially Moris and Motya. We saved the trained head and fold-0 probabilities so the next ConvNeXt runs can start from the same weights and be compared on the same images. This is a single-fold screening result, not five-fold CV or a new public leaderboard score; it should not be compared directly with the earlier 0.957 CV result or 0.92922 leaderboard result. The [run record](experiments/00_shared_head/results/convnext_head_fold0_seed42_colab.json) has the full settings and per-label scores.
+
+Next we will fine-tune the unchanged ConvNeXt, first timing a real training epoch before deciding how many runs fit. That model will be the control for the custom-block experiment. The [Stage 2 plan](docs/stage-2-plan.md) records the comparison rules and remaining work.
+
+---
+
 ## AI tools
 
 Claude Code was used to help with structuring and organizing the report. The conversation transcripts are in [transcripts/](transcripts/).

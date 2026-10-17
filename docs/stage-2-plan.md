@@ -1,6 +1,6 @@
 # Stage 2 CNN plan
 
-Status: implementation started. MPS and a Colab T4 completed compute probes; training schedules remain provisional until a real-data learning-curve probe.
+Status: the shared helpers and first head-only notebook are implemented. The pretrained, head-only ConvNeXt benchmark completed on fold 0 in Colab. Standard fine-tuning, the custom block, DenseNet, and cross-fold evaluation remain to be run.
 
 ## Confirmed scope
 
@@ -42,6 +42,17 @@ Model-specific code must not enter result or CSV cells. Prediction records carry
 
 The custom block is a hypothesis about useful spatial adaptation for small named pets, not an assumed improvement. Report additional parameters, runtime, overfitting, and GradCAM evidence. Its location cannot recover spatial detail already lost by the backbone.
 
+## Experiment 2: unchanged ConvNeXt fine-tuning
+
+The immediate goal is a measured fold-0 control, not a five-fold score. Keep the same pinned ConvNeXt-base backbone, five-logit classifier, 384-pixel mean-colour letterbox, normalization, horizontal-flip-only training augmentation, label order, and saved fold assignment as Experiment 1. Load its trained head together with the exact pretrained backbone. That head was trained on folds 1–4 and selected using fold 0, so it is suitable for a fold-0 screening run but not as the starting point for a run that holds out another fold.
+
+1. **Check the setup.** Reconstruct the model, load the head with strict key/shape checks, and confirm a forward pass returns five finite logits. Use seed 42 and the fixed fold-0 split. Run a few real training and validation batches in float32 on the chosen device; check memory, backward pass, optimizer step, logging, and checkpoint reload. A partial-batch score is not a validation result.
+2. **Run the control.** Unfreeze the entire backbone and head. Use ordinary BCEWithLogitsLoss, AdamW with backbone LR `1e-5` and head LR `1e-4`, betas `(0.9, 0.999)`, and weight decay `1e-2` on weights but not biases or normalization parameters. Keep effective batch 16 through accumulation; record the physical batch and accumulation factor. Clip gradient norm at 1.0. Warm the learning rates over the first epoch, then decay them with a step-based cosine schedule to 10% of their starting peak by the planned final update. Cap at ten epochs and stop after three validation epochs without improvement. Select one checkpoint by full-fold macro F1 at the fixed 0.25 threshold; macro AP is a diagnostic, not a second selection rule.
+3. **Use the first complete epoch as the timing gate.** Include image loading, backward passes, validation, logging, and checkpoint writes in the measurement. Project the remaining run time and leave room within the roughly 20-hour elapsed target for the custom comparison, diagnostics, and submission. If full fine-tuning will not fit on the available device, record the reason and either move the unchanged run to another device or define a new *partial-fine-tuning* control; do not silently change the control halfway through.
+4. **Evaluate and preserve the result.** Reload the selected checkpoint, predict every fold-0 image, and save probabilities keyed by image ID. Report macro and per-label F1 at 0.25, macro and per-label AP, F1 at 0.5 for context, the learning curves, gradient norms, epoch timings, peak memory, trainable-parameter count, device, code revision, and W&B run ID. Keep test inference and Kaggle submission separate and opt-in. Compare the fold-0 score with Experiment 1's 0.93577 under the same threshold and images; do not compare it numerically with the old five-fold or public-leaderboard scores as if they used the same evaluation.
+
+The custom ConvNeXt run must start from the same fold-0 backbone and head snapshot and use the same split, preprocessing, optimizer policy, schedule, effective batch, epoch cap, checkpoint rule, and threshold. The added block is then the principal difference. We will decide whether to spend compute on learning-rate, optimizer, or scheduler variants only after the control's measured learning curve and time are known; each change gets a separate run ID. If we extend either variant to all five folds, repeat the head warm-up separately within each fold's training partition (or restart both variants from a fresh pretrained backbone/head under a newly declared common protocol). Reusing the fold-0 head in other folds would leak their held-out images into training.
+
 ## Proposed experiment discipline
 
 - Begin with ordinary BCE on logits, a fixed shared threshold of 0.25, and conservative augmentation; also report F1 at 0.5 and threshold-free average precision.
@@ -77,9 +88,11 @@ The first implementation slice is `notebooks/04_convnext_profile.ipynb`, with a 
 
 The estimate includes measured image preparation and excludes logging, checkpoint saves, head-only work, diagnostics, test inference, and thermal effects. It is based on two timed updates after one warm-up, so it is a capacity estimate, not a full-epoch measurement. A serial five-fold, ten-epoch full fine-tuning run would exceed the 20-hour elapsed-time target on this Mac alone. Parallel teammate runs may still deliver multiple results within that deadline. Prioritize the two unmodified-architecture benchmarks and a matched custom-block comparison before broad optimizer sweeps. Do not commit to a five-fold run count or epoch count until the first pretrained one-fold benchmark shows convergence and checkpoint timing.
 
-The profiler deliberately does not download pretrained weights. Kaggle interactive execution remained queued, so the team moved the compute check to Colab. The next training gate is a pretrained checkpoint, then a short head-only and standard fine-tuning benchmark with logging. The custom block and DenseNet comparison follow with a revised time budget.
+The profiler deliberately did not download pretrained weights. Kaggle interactive execution remained queued, so the team moved the compute check to Colab. The pretrained head-only benchmark is now complete. The next training gate is a standard fine-tuning benchmark initialized from that head; the matched custom block and DenseNet comparison follow.
 
-The Kaggle interactive session remained queued before any code executed. A free Colab T4 then completed a synthetic 384-pixel ConvNeXt update at microbatch 2, with roughly 2.1 seconds per warmed-up effective batch of 16 and 2.14 GB peak allocated GPU memory. This excludes image loading, validation, checkpointing, and pretrained-weight setup; see `docs/colab-profile.md`. The next gate is a short real-data, pretrained, one-fold head-only and fine-tuning run. Time every stage before fixing the number of trials and epochs.
+The head-only gate is in `notebooks/05_convnext_head.ipynb`. It verifies that the saved folds exactly match shuffled, seed-42 `StratifiedKFold` over the five-label combinations, and keeps training, weight download, and test CSV formation disabled by default. Shared image loading, metric calculation, and CSV contracts live in `stage2/experiment.py`; the small Lightning adapter lives in `stage2/train.py`. Lightning writes local CSV curves and sends W&B telemetry online when training starts. The W&B key comes from the runtime environment or a Colab Secret, never the notebook or Git. An eight-batch pretrained smoke run on MPS and one on Colab completed; their partial validation scores are not model-quality results. The full head-only fold-0 run took 92 minutes for ten epochs plus validation and reached 0.93577 macro F1 and 0.96683 macro AP at the best checkpoint, using threshold 0.25. Its 2,452 held-out predictions and compact head are recorded under `experiments/00_shared_head/`. This is a single-fold screening result, not five-fold CV or a leaderboard score.
+
+The Kaggle interactive session remained queued before any code executed. A free Colab T4 then completed a synthetic 384-pixel ConvNeXt update at microbatch 2, with roughly 2.1 seconds per warmed-up effective batch of 16 and 2.14 GB peak allocated GPU memory. That estimate excluded image loading, validation, checkpointing, and pretrained-weight setup; see `docs/colab-profile.md`. The measured head-only run above supersedes the synthetic timing for that setup. Full fine-tuning still needs a real-data timing gate before fixing the remaining trial count and epoch budgets.
 
 ## Team execution
 
@@ -87,7 +100,7 @@ The proposed split is a shared head gate and standard ConvNeXt control for Herma
 
 Share source, configuration, fold-0 prediction CSVs, and metric records through ordinary Git. Selected model checkpoints can be shared through Git LFS under `experiments/*/checkpoints/`; temporary and per-epoch checkpoints stay outside Git. A run record must identify the code revision and pretrained checkpoint so teammates can reproduce a result. Parallel execution shortens elapsed time but does not reduce total GPU-hours. The goal is useful results within about 20 hours of elapsed time, not a pooled 20 GPU-hour quota.
 
-The first real-data run must determine whether 16 GB Macs fit the chosen physical microbatch, how long one epoch and validation take, and whether the learning curve warrants ten epochs. Until then, the six candidate trials are options rather than a promised schedule.
+The completed Colab head run establishes a roughly 9-minute-per-epoch training-and-validation pace for this frozen-backbone setup, but it does not measure full fine-tuning or the 16 GB Macs. Keep additional optimizer and scheduler trials as options until a pretrained fine-tuning fold gives a real learning curve and runtime.
 
 ## Sources
 

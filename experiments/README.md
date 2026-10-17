@@ -7,6 +7,10 @@ common labels. Our previous frozen ConvNeXt embeddings plus logistic
 regression scored 0.957 in the fair local CV check and **0.92922** on the
 public leaderboard. The saved split is in [`folds.csv`](../folds.csv); the
 full experiment rationale is in the [Stage 2 plan](../docs/stage-2-plan.md).
+The folds come from shuffled `StratifiedKFold(n_splits=5, random_state=42)`
+over the five-label combinations, not from a fresh random split in each
+notebook. One four-image combination cannot appear in every fold; the saved
+assignment is the common comparison point.
 
 We have about 20 hours to get useful results. That is elapsed time, not a
 shared compute quota: the three of us can run work in parallel on Macs or
@@ -44,19 +48,29 @@ These owners are a starting point, not a restriction on where a run happens.
 
 ## Run order
 
-1. The shared training code is still to be written; only the
-   [timing profiler](../notebooks/04_convnext_profile.ipynb) runs today. Build
-   the common data loading, metrics, and result saving first. That profiler
-   uses random weights and is not a trained model.
-2. Time a short training and validation pass on the device you will use.
-   Include image loading and checkpoint saving. On a 16 GB Mac, try a smaller
-   microbatch and accumulate gradients if needed.
-3. Train the head-only model, then the standard ConvNeXt on fold 0. The custom
-   model should start from the same pretrained backbone and trained head as
-   the standard model. DenseNet can run once the shared data and metrics work.
+1. The [head-only notebook](../notebooks/05_convnext_head.ipynb) has completed
+   its first fold-0 run. Its saved head and validation predictions are under
+   [`00_shared_head/`](00_shared_head/). The older
+   [timing profiler](../notebooks/04_convnext_profile.ipynb) uses random weights
+   and is not a trained model.
+   Training runs send telemetry to the `ai301-stage2` W&B project. Set
+   `WANDB_API_KEY` in the environment before launching Jupyter, or add a Colab
+   Secret with that name and grant the notebook access. The key never belongs
+   in a notebook, run record, shell command history, or Git. CSV curves are
+   also saved locally; W&B does not upload checkpoints or training photos.
+2. Smoke-test full fine-tuning with real images, then use its first complete
+   epoch to measure training and validation time, memory, and checkpoint cost.
+   On a 16 GB Mac, try a smaller physical batch and accumulate gradients if
+   needed. Do not extrapolate full fine-tuning time from the frozen-head run.
+3. Train the unchanged ConvNeXt on fold 0 as the control. The custom model
+   should start from the same pretrained backbone and trained fold-0 head,
+   with the same training settings. DenseNet can run in parallel once the
+   shared data and metrics work.
 4. Review the fold-0 results before spending time on extra folds or optimizer
-   changes. Fold 0 is a quick comparison, not a five-fold CV result. Leave
-   time for test inference and a submission from the strongest model.
+   changes. Fold 0 is a quick comparison, not a five-fold CV result. Reusing
+   the fold-0 head for other validation folds would leak data; each additional
+   fold needs its own training-only head warm-up or a fresh shared start.
+   Leave time for test inference and a submission from the strongest model.
 
 ## Keep comparisons fair
 
