@@ -1,0 +1,49 @@
+{
+  "run_id": "replace-with-unique-run-id",
+  "experiment": "00_shared_head | 01_convnext_standard | 02_convnext_custom | 03_densenet",
+  "status": "planned | completed | failed",
+  "git_commit": "replace-with-commit-hash",
+  "fold": 0,
+  "seed": 42,
+  "model": {
+    "name": "replace-with-timm-model-name",
+    "variant": "head_only | standard | custom | densenet",
+    "pretrained_checkpoint": "replace-with-model-id-and-revision",
+    "initial_head_checkpoint": null
+  },
+  "data": {
+    "image_size": null,
+    "transform": "replace-with-transform-description",
+    "fold_file": "folds.csv"
+  },
+  "training": {
+    "optimizer": "replace-with-name-and-parameters",
+    "scheduler": "replace-with-name-and-parameters",
+    "loss": "BCEWithLogitsLoss",
+    "epochs_completed": 0,
+    "physical_batch_size": null,
+    "effective_batch_size": 16,
+    "precision": "float32",
+    "stage_policy": "replace-with-frozen-and-trainable-stages"
+  },
+  "hardware": {
+    "device": "replace-with-GPU-or-MPS-name",
+    "system_memory_gb": null
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": null,
+    "per_label_f1": null,
+    "macro_ap": null,
+    "per_label_ap": null
+  },
+  "timings": {
+    "training_seconds": null,
+    "validation_seconds": null
+  },
+  "artifacts": {
+    "validation_probabilities_csv": null,
+    "checkpoint_reference": null
+  },
+  "error": null
+}
