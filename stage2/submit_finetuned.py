@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -12,16 +11,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from stage2.custom_convnext import CustomConvNeXt
+from stage2.ensemble import load_finetuned_network
 from stage2.experiment import LABEL_COLUMNS, ImageDataset, form_submission, read_csv, write_submission
-
-
-def file_sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def main() -> None:
@@ -38,14 +29,6 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     with args.record.open() as source:
         record = json.load(source)
-    if record["status"] != "completed" or record["model"]["variant"] not in {"standard", "residual_spatial_block"}:
-        raise ValueError("Expected a completed standard or custom ConvNeXt run.")
-    if record["data"]["label_columns"] != list(LABEL_COLUMNS):
-        raise ValueError("The recorded label order differs from the submission schema.")
-    expected_hash = record["artifacts"]["best_checkpoint_sha256"]
-    actual_hash = file_sha256(args.checkpoint)
-    if actual_hash != expected_hash:
-        raise ValueError(f"Checkpoint SHA-256 mismatch: {actual_hash}; expected {expected_hash}.")
     if args.output.exists() and args.limit is None:
         raise FileExistsError(f"Refusing to overwrite {args.output}")
 
@@ -59,16 +42,7 @@ def main() -> None:
         raise ValueError("Test and sample submission IDs must be unique and identical.")
 
     os.environ["HF_HUB_OFFLINE"] = "1"
-    import timm
-
-    backbone = timm.create_model(record["model"]["name"], pretrained=False, num_classes=len(LABEL_COLUMNS))
-    network = (
-        CustomConvNeXt(backbone, reduction=record["model"]["block_reduction"])
-        if record["model"]["variant"] == "residual_spatial_block" else backbone
-    )
-    checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
-    state = {name.removeprefix("network."): value for name, value in checkpoint["state_dict"].items()}
-    network.load_state_dict(state, strict=True)
+    network = load_finetuned_network(record, args.checkpoint)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     network.to(device).eval()
 

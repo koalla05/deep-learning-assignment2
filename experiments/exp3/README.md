@@ -1,13 +1,33 @@
-# Exp3: DenseNet comparison
+# Exp3: EfficientNetV2-S
 
-This is a planned comparison with pretrained `densenet121.ra_in1k`. It is a
-different CNN family, not the control for the Exp2 block. There is no completed
-run or reportable score yet.
+[Notebook](../../notebooks/09_efficientnet.ipynb)
 
-Use the saved fold and five-label metric contract. Profile memory and runtime
-before training, then record the DenseNet-specific learning rate, unfreezing
-policy, image preprocessing, and BatchNorm policy. Small physical batches make
-the treatment of BatchNorm running statistics especially important.
+A different CNN family for the ensemble: `tf_efficientnetv2_s.in21k_ft_in1k`
+from timm, pretrained on ImageNet only (21k classes, then fine-tuned on 1k).
+It has 20M parameters against 88M for ConvNeXt-base, and uses MBConv blocks with
+squeeze-and-excitation and BatchNorm, so its mistakes should overlap less with
+Exp1's. It is not a control for the Exp2 block. There is no completed run or
+reportable score yet.
 
-Keep each run under `results/<run-id>/` and selected checkpoints under
-`checkpoints/`, following the [experiments guide](../README.md).
+The protocol follows Exp1: fold 0 of the saved folds, 384-pixel letterbox,
+BCE loss, fixed 0.25 threshold, checkpoint chosen by fold-0 macro F1, flip-only
+augmentation, effective batch 16. Three things differ because the architecture
+does:
+
+- **Own head warm-up.** Exp0's head fits ConvNeXt's features, so phase 1 trains
+  a new linear head on the frozen backbone (3 epochs at LR `1e-3`), then phase 2
+  fine-tunes everything. As with Exp0, the head was selected on fold 0, so it is
+  valid for a fold-0 run only.
+- **Higher learning rates:** backbone `1e-4`, head `1e-3` (ConvNeXt used
+  `1e-5`/`1e-4`). These are untuned starting guesses.
+- **Frozen BatchNorm statistics** (`stage2/batchnorm.py`), because the physical
+  batch is small. BatchNorm scale and shift still train.
+
+The model name is not pinned to a Hugging Face revision; the run record stores
+timm's resolved source and library versions.
+
+Keep each run under `results/<run-id>/` and the selected checkpoint under
+`checkpoints/<run-id>_best.ckpt`, following the [experiments guide](../README.md).
+With `STAGE2_BUILD_TEST_PREDICTIONS=1` the notebook also saves test
+probabilities in `results/<run-id>_test/`, the layout the ensemble notebook
+reuses.
