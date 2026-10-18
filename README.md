@@ -138,9 +138,15 @@ If most of these were false alarms, the LB score would be much lower than 0.92, 
 
 ## 4. CNN experiments
 
-Our first Stage 2 experiment kept the pretrained ConvNeXt-base backbone frozen and trained a new five-output linear head. We used the saved folds: 9,808 images from folds 1–4 for training and 2,452 images from fold 0 for validation. On a Colab T4, ten epochs took 92 minutes. The best checkpoint reached **0.93577 macro F1** at threshold 0.25 and **0.96683 macro average precision** on fold 0. The named pets remained the hardest labels, especially Moris and Motya. We saved the trained head and fold-0 probabilities so the next ConvNeXt runs can start from the same weights and be compared on the same images. This is a single-fold screening result, not five-fold CV or a new public leaderboard score; it should not be compared directly with the earlier 0.957 CV result or 0.92922 leaderboard result. The [run record](experiments/00_shared_head/results/convnext_head_fold0_seed42_colab.json) has the full settings and per-label scores.
+We trained each CNN on folds 1–4 and evaluated on the same 2,452 images in fold 0. All three runs used 384-pixel inputs, BCEWithLogitsLoss, AdamW with weight decay 0.01, effective batch size 16, and a 0.25 decision threshold. The local figures below are single-fold macro F1, not five-fold CV.
 
-Next we will fine-tune the unchanged ConvNeXt, first timing a real training epoch before deciding how many runs fit. That model will be the control for the custom-block experiment. The [Stage 2 plan](docs/stage-2-plan.md) records the comparison rules and remaining work.
+| Experiment | Training | Fold-0 val F1 | Public LB |
+|---|---|---:|---:|
+| [Exp0: frozen ConvNeXt + linear head](experiments/exp0/results/convnext_head_fold0_seed42_colab/convnext_head_fold0_seed42_colab.json) | 10 epochs; head LR 1e-3; constant LR | 0.93577 | 0.93365 |
+| [Exp1: full ConvNeXt](experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/convnext_standard_fold0_seed42_20261018_full1.json) | 5 epochs; backbone/head LR 1e-5/1e-4; warm-up + cosine | 0.97518 | 0.97003 |
+| [Exp2: ConvNeXt + residual spatial block](experiments/exp2/results/convnext_custom_fold0_seed42_mps_gradcam3/convnext_custom_fold0_seed42_mps_gradcam3.json) | 8 epochs; backbone/block/head LR 1e-5/1e-5/1e-4; warm-up + cosine | 0.97401 | 0.96043 |
+
+The local settings and scores come from the linked run records. The public scores were checked against Kaggle's submission history. Exp1 leads Exp2 by 0.00960 on the public leaderboard. Both started from Exp0's head, which was selected using fold 0, so their local scores are screening results rather than independent holdout estimates. The [Stage 2 plan](docs/stage-2-plan.md) records the remaining comparison work.
 
 ---
 

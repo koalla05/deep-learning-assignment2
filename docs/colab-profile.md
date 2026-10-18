@@ -47,7 +47,7 @@ float32, and a frozen backbone. Ten epochs plus validation took 5,520 seconds
 (92 minutes) on a free T4; predicting the complete held-out fold from the best
 checkpoint took another 112 seconds. The best fold-0 macro F1 at threshold
 0.25 was 0.93577, with macro average precision 0.96683. The run is recorded
-in `experiments/00_shared_head/results/convnext_head_fold0_seed42_colab.json`
+in `experiments/exp0/results/convnext_head_fold0_seed42_colab/convnext_head_fold0_seed42_colab.json`
 and [W&B](https://wandb.ai/models-kyiv-school-of-economics/ai301-stage2/runs/v93j8869).
 This is a single-fold head benchmark, not a full fine-tuning speed estimate or
 five-fold CV score. The small head weights and held-out probabilities were
