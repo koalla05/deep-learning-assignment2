@@ -89,6 +89,13 @@ class RunRecordTests(unittest.TestCase):
             path = root / "original.json"
             path.write_text(json.dumps(record))
             self.assertEqual(validate_evaluation_record(path, checkpoint, expected)["run_id"], "original")
+            moved_head = deepcopy(expected)
+            moved_head["model"]["initial_head_checkpoint"] = "experiments/exp0/checkpoints/head.pt"
+            self.assertEqual(validate_evaluation_record(path, checkpoint, moved_head)["run_id"], "original")
+            missing_head_hash = deepcopy(expected)
+            missing_head_hash["model"]["initial_head_sha256"] = None
+            with self.assertRaisesRegex(ValueError, "provenance"):
+                validate_evaluation_record(path, checkpoint, missing_head_hash)
             for section, key, value in (
                 ("training", "max_epochs", 10), ("training", "optimizer", "SGD"),
                 ("model", "initial_head_sha256", "other-head"),

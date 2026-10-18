@@ -1,0 +1,9 @@
+{
+  "device": "mps:0",
+  "system_memory_bytes": 34359738368,
+  "mps_sampled_allocated_high_water_bytes": 1428182784,
+  "mps_sampled_driver_high_water_bytes": 4033429504,
+  "cuda_peak_allocated_bytes": null,
+  "process_lifetime_peak_rss_bytes": 1204207616,
+  "scope": "Training and validation; excludes model setup and final inference. MPS is sampled at batch/epoch boundaries, not a true allocator peak. RSS is the process-lifetime high-water mark, not isolated to this run."
+}

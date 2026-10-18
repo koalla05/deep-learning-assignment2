@@ -33,7 +33,7 @@ class CustomNotebookTests(unittest.TestCase):
     def test_defaults_do_not_train_download_or_build_artifacts(self) -> None:
         config = self.configure({})
         for flag in ("LOCAL_SMOKE_TEST", "RUN_TRAINING", "PROFILE_RUNTIME", "ALLOW_WEIGHT_DOWNLOAD",
-                     "BACKUP_TO_DRIVE", "BUILD_SUBMISSION", "SUBMIT_TO_KAGGLE"):
+                     "BACKUP_TO_DRIVE", "BUILD_SUBMISSION", "BUILD_GRADCAM", "SUBMIT_TO_KAGGLE"):
             with self.subTest(flag=flag):
                 self.assertFalse(config[flag])
 
@@ -231,7 +231,8 @@ class CustomNotebookTests(unittest.TestCase):
         }
         config["source_run_record"] = {
             **record,
-            "model": {**record["model"], "variant": "residual_spatial_block"},
+            "model": {**record["model"], "variant": "residual_spatial_block",
+                      "initial_head_checkpoint": "experiments/exp0/checkpoints/head.pt"},
             "training": {
                 **record["training"],
                 "optimizer": record["training"]["optimizer"].replace("backbone_lr=", "backbone_and_block_lr="),

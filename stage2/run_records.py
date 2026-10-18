@@ -29,7 +29,7 @@ def validate_evaluation_record(
     if record.get("status") != "completed" or record.get("experiment") != experiment:
         raise ValueError("Evaluation requires a completed matching run record, not a smoke or timing run.")
     fields = {
-        "model": ("name", "variant", "initial_head_checkpoint", "initial_head_sha256"),
+        "model": ("name", "variant", "initial_head_sha256"),
         "data": ("image_size", "transform", "fold_file", "fold_sha256", "mean", "std", "label_columns"),
         "training": (
             "optimizer", "scheduler", "loss", "max_epochs", "patience", "physical_batch_size",
@@ -47,6 +47,11 @@ def validate_evaluation_record(
         or record[section][key] != expected_configuration[section][key]
     ]
     differences.extend(key for key in ("fold", "seed") if record.get(key) != expected_configuration[key])
+    # A file can move within the repo without changing the trained head it contains.
+    if not record.get("model", {}).get("initial_head_checkpoint") or not expected_configuration.get("model", {}).get("initial_head_checkpoint"):
+        differences.append("model.initial_head_checkpoint")
+    if not record.get("model", {}).get("initial_head_sha256") or not expected_configuration.get("model", {}).get("initial_head_sha256"):
+        differences.append("model.initial_head_sha256")
     if differences:
         raise ValueError(f"Saved settings differ or lack provenance: {differences}")
     checkpoint_hash = record.get("artifacts", {}).get("best_checkpoint_sha256")
@@ -61,7 +66,9 @@ def validate_matched_control(custom: dict, control: dict) -> list[str]:
         raise ValueError("The comparison run must be a completed standard ConvNeXt run.")
     checks = {
         "model": custom["model"]["name"] == control["model"]["name"],
-        "starting head": custom["model"]["initial_head_checkpoint"] == control["model"]["initial_head_checkpoint"],
+        "starting head": bool(custom["model"].get("initial_head_checkpoint") and control["model"].get("initial_head_checkpoint")
+                              and custom["model"].get("initial_head_sha256") and control["model"].get("initial_head_sha256"))
+                         and custom["model"].get("initial_head_sha256") == control["model"].get("initial_head_sha256"),
         "fold and seed": (custom["fold"], custom["seed"]) == (control["fold"], control["seed"]),
         "preprocessing": all(
             custom["data"][key] == control["data"][key]

@@ -1,0 +1,142 @@
+{
+  "fold": 0,
+  "seed": 42,
+  "model": {
+    "name": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "variant": "standard",
+    "pretrained_checkpoint": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "initial_head_checkpoint": "experiments/00_shared_head/checkpoints/convnext_head_fold0_seed42_colab_head.pt",
+    "initial_head_sha256": "659907f68c9fd74531f8914508a80744d16f4a2e8865e303ad9bdd28f4a0c24c"
+  },
+  "data": {
+    "image_size": 384,
+    "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5",
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "training": {
+    "optimizer": "AdamW(backbone_lr=1e-05, head_lr=0.0001, weight_decay=0.01 except bias/norm, betas=(0.9, 0.999))",
+    "scheduler": "one epoch step warmup then cosine to 0.1 peak",
+    "loss": "BCEWithLogitsLoss",
+    "max_epochs": 8,
+    "patience": 3,
+    "physical_batch_size": 2,
+    "effective_batch_size": 16,
+    "precision": "32-true",
+    "stage_policy": "full backbone and classifier trainable",
+    "checkpoint_selection": "best validation macro F1 at 0.25",
+    "gradient_clip_norm": 1.0,
+    "epochs_completed": 5
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9751849358283667,
+    "per_label_f1": {
+      "Cat": 0.9965568125922283,
+      "Dog": 0.9970149253731343,
+      "Moris": 1.0,
+      "Motya": 0.9411764705882353,
+      "Biatrix": 0.9411764705882353
+    },
+    "macro_ap": 0.9944286914422321,
+    "per_label_ap": {
+      "Cat": 0.9999740760019973,
+      "Dog": 0.9999471589869415,
+      "Moris": 0.9999999999999999,
+      "Motya": 0.9722222222222223,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9750861717351178,
+    "per_label_f1_at_0_5": {
+      "Cat": 0.9960629921259843,
+      "Dog": 0.9970149253731343,
+      "Moris": 1.0,
+      "Motya": 0.9411764705882353,
+      "Biatrix": 0.9411764705882353
+    }
+  },
+  "run_id": "convnext_standard_fold0_seed42_20261018_full1",
+  "experiment": "01_convnext_standard",
+  "status": "completed",
+  "git_commit": null,
+  "source_sha256": {
+    "notebooks/06_convnext_standard.ipynb": "442cd004124dba9d3e845cdf0344a6fa6068371d142827190b5f835a90dfb8e0",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501",
+    "stage2/train.py": "71ea58da57ba01f8eceb58d5c572301636d627fbbe71d92d9eb950ee999562aa",
+    "stage2/finetune.py": "b7112edd247aa94405ff7a0f987a607c5fe92905269db8a22d9fa80a09296879",
+    "stage2/run_records.py": "451c7fef05a7a03fe6a6d4293a9c3223b6a8351917bf3c5159829c9b3a91ef79",
+    "stage2/diagnostics.py": "ffe430d7af45fd7d44de97382c4bc2f992316f48817c198694955d7fb8dd110b",
+    "stage2/gradcam.py": "589bc18006d012b362c91c425afbd7e45f35aa802b48181931d4d3ab3876b56e"
+  },
+  "hardware": {
+    "device": "cuda:0",
+    "system_memory_bytes": 13605822464,
+    "mps_sampled_allocated_high_water_bytes": null,
+    "mps_sampled_driver_high_water_bytes": null,
+    "cuda_peak_allocated_bytes": 3196974592,
+    "process_lifetime_peak_rss_bytes": 4343283712,
+    "scope": "Training and validation; excludes model setup and final inference. MPS is sampled at batch/epoch boundaries, not a true allocator peak. RSS is the process-lifetime high-water mark, not isolated to this run."
+  },
+  "trainable_parameters": 87571589,
+  "timings": {
+    "training_and_validation_seconds": 8458.106930671,
+    "epoch_seconds": [
+      1704.8239347010003,
+      1703.4197868780002,
+      1680.1902606820004,
+      1683.2384876640008,
+      1684.193181749999
+    ],
+    "first_epoch_projected_seconds": 15002.450625368803,
+    "best_checkpoint_prediction_seconds": 112.3626452160006
+  },
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/01_convnext_standard/results/convnext_standard_fold0_seed42_20261018_full1_val.csv",
+    "best_checkpoint_local": "artifacts/convnext_standard_fold0_seed42_20261018_full1/checkpoints/best.ckpt",
+    "best_checkpoint_sha256": "4d027ce525e10e7cbe20a59aebfa8c3c5befbbeafbb41f26dee44729428a2d26",
+    "curves_csv": "artifacts/convnext_standard_fold0_seed42_20261018_full1/curves/version_0/metrics.csv",
+    "layer_gradients_csv": "artifacts/convnext_standard_fold0_seed42_20261018_full1/diagnostics/layer_gradients.csv",
+    "gradient_flow_png": "artifacts/convnext_standard_fold0_seed42_20261018_full1/gradient_flow.png",
+    "memory_json": "artifacts/convnext_standard_fold0_seed42_20261018_full1/diagnostics/memory.json",
+    "gradcam_images": [
+      "artifacts/convnext_standard_fold0_seed42_20261018_full1/gradcam/cat_116d851cb24f39d28f719a743d10df086eb2c793.png",
+      "artifacts/convnext_standard_fold0_seed42_20261018_full1/gradcam/dog_e6aea26b070dfe40f6a6121538f00cab344dc03a.png",
+      "artifacts/convnext_standard_fold0_seed42_20261018_full1/gradcam/moris_055cb6e1fe1eb7fc077bd98717851ae53de3113c.png",
+      "artifacts/convnext_standard_fold0_seed42_20261018_full1/gradcam/motya_cfbc890562e329131f546b43be873f41a06ad195.png",
+      "artifacts/convnext_standard_fold0_seed42_20261018_full1/gradcam/biatrix_14ababeb09beeaf8dd430e851e671475ab15fc46.png"
+    ],
+    "drive_backup_dir": "/content/drive/MyDrive/AI301-stage2/01_convnext_standard/convnext_standard_fold0_seed42_20261018_full1"
+  },
+  "versions": {
+    "python": "3.13.15",
+    "torch": "2.11.0+cu130",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  },
+  "telemetry": {
+    "wandb_enabled": true,
+    "wandb_mode": "online",
+    "wandb_project": "ai301-stage2",
+    "wandb_run_id": "jmc0gm5i",
+    "model_upload": false
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}
