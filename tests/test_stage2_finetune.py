@@ -72,6 +72,26 @@ class FineTuneTests(unittest.TestCase):
         self.assertFalse(checkpoint.exceeded_budget)
         self.assertTrue(trainer.should_stop)
 
+    def test_budget_override_keeps_timing_without_stopping_training(self) -> None:
+        for enforce_budget, profile_only, should_stop in (
+            (True, False, True), (False, False, False), (False, True, True),
+        ):
+            with self.subTest(enforce_budget=enforce_budget, profile_only=profile_only):
+                checkpoint = TimedBudgetCheckpoint(
+                    maximum_hours=0.1, enforce_budget=enforce_budget, profile_only=profile_only,
+                )
+                checkpoint._epoch_started = 100.0
+                trainer = SimpleNamespace(sanity_checking=False, max_epochs=8, should_stop=False)
+                module = SimpleNamespace(device=torch.device("cpu"))
+                with patch.object(ModelCheckpoint, "on_validation_end"), patch(
+                    "stage2.finetune.time.perf_counter", return_value=220.0
+                ):
+                    checkpoint.on_validation_end(trainer, module)
+                self.assertEqual(checkpoint.epoch_seconds, [120.0])
+                self.assertAlmostEqual(checkpoint.projected_seconds, 1056.0)
+                self.assertTrue(checkpoint.exceeded_budget)
+                self.assertEqual(trainer.should_stop, should_stop)
+
     def test_verified_copy_does_not_replace_existing_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

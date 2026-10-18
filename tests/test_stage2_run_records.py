@@ -35,6 +35,50 @@ def custom_record() -> dict:
 
 
 class RunRecordTests(unittest.TestCase):
+    def test_standard_evaluation_requires_completed_matching_run(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            checkpoint = root / "best.ckpt"
+            checkpoint.write_bytes(b"standard weights")
+            expected = custom_record()
+            expected["experiment"] = "01_convnext_standard"
+            expected["model"] = {key: value for key, value in expected["model"].items() if key != "block_reduction"}
+            expected["model"]["variant"] = "standard"
+            record = {**expected, "artifacts": {"best_checkpoint_sha256": file_sha256(checkpoint)}}
+            path = root / "standard.json"
+            path.write_text(json.dumps(record))
+            self.assertEqual(validate_evaluation_record(path, checkpoint, expected, experiment="01_convnext_standard")["run_id"], "original")
+            with self.assertRaisesRegex(ValueError, "matching"):
+                validate_evaluation_record(path, checkpoint, expected)
+            checkpoint.write_bytes(b"changed weights")
+            with self.assertRaisesRegex(ValueError, "SHA256"):
+                validate_evaluation_record(path, checkpoint, expected, experiment="01_convnext_standard")
+
+    def test_failure_backup_is_best_effort_and_never_masks_original(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            backup = root / "drive" / "failure.json"
+            error = RuntimeError("secret=do-not-persist")
+
+            def save_failure(path: Path) -> None:
+                backup.parent.mkdir()
+                backup.write_bytes(path.read_bytes())
+
+            with self.assertRaises(RuntimeError) as raised:
+                with record_failures(root / "run", {"run_id": "test"}, "training", save_failure):
+                    raise error
+            self.assertIs(raised.exception, error)
+            self.assertEqual(backup.read_bytes(), (root / "run" / "failure.json").read_bytes())
+            self.assertNotIn("do-not-persist", backup.read_text())
+
+            other = RuntimeError("original")
+            with self.assertRaises(RuntimeError) as raised:
+                with record_failures(root / "another", {}, "training", lambda path: (_ for _ in ()).throw(OSError("drive failed"))):
+                    raise other
+            self.assertIs(raised.exception, other)
+            self.assertTrue((root / "another" / "failure.json").is_file())
+            self.assertIn("OSError", other.__notes__[0])
+
     def test_evaluation_accepts_only_original_completed_checkpoint_and_recipe(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

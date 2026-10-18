@@ -13,7 +13,7 @@ from unittest.mock import patch
 import lightning as L
 import torch
 
-from stage2.diagnostics import TrainingDiagnostics
+from stage2.diagnostics import TrainingDiagnostics, plot_gradient_flow
 from stage2.finetune import FineTuneClassifier
 from test_stage2_finetune import TinyNetwork
 
@@ -47,6 +47,11 @@ class DiagnosticsTests(unittest.TestCase):
             self.assertGreater(memory["system_memory_bytes"], 0)
             self.assertIsNone(memory["cuda_peak_allocated_bytes"])
             self.assertIsNone(memory["mps_sampled_allocated_high_water_bytes"])
+            plot_path = Path(directory) / "gradient_flow.png"
+            self.assertEqual(plot_gradient_flow(Path(directory) / "layer_gradients.csv", plot_path), plot_path)
+            self.assertGreater(plot_path.stat().st_size, 0)
+            with self.assertRaises(FileExistsError):
+                plot_gradient_flow(Path(directory) / "layer_gradients.csv", plot_path)
 
     def test_mps_high_water_is_sampled_and_never_mislabeled_as_peak(self) -> None:
         diagnostics = TrainingDiagnostics(Path("unused"))

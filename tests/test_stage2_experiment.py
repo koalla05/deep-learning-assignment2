@@ -8,11 +8,25 @@ import unittest
 from pathlib import Path
 
 import numpy as np
+from PIL import Image
 
-from stage2.experiment import LABEL_COLUMNS, form_submission, score_probabilities, split_rows, write_probabilities
+from stage2.experiment import LABEL_COLUMNS, form_submission, preflight_images, score_probabilities, split_rows, write_probabilities
 
 
 class ExperimentContractTests(unittest.TestCase):
+    def test_image_preflight_checks_every_file_and_decodes_it(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            Image.new("RGB", (2, 2), "red").save(root / "a.jpg")
+            rows = [{"image_id": "a"}, {"image_id": "b"}]
+            with self.assertRaisesRegex(FileNotFoundError, "b.jpg"):
+                preflight_images(rows, root)
+            (root / "b.jpg").write_bytes(b"not a JPEG")
+            with self.assertRaisesRegex(ValueError, "b.jpg"):
+                preflight_images(rows, root)
+            Image.new("RGB", (2, 2), "blue").save(root / "b.jpg")
+            preflight_images(rows, root)
+
     def test_fold_join_uses_image_ids(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

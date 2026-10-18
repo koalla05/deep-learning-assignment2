@@ -33,7 +33,7 @@ class CustomNotebookTests(unittest.TestCase):
     def test_defaults_do_not_train_download_or_build_artifacts(self) -> None:
         config = self.configure({})
         for flag in ("LOCAL_SMOKE_TEST", "RUN_TRAINING", "PROFILE_RUNTIME", "ALLOW_WEIGHT_DOWNLOAD",
-                     "BACKUP_TO_DRIVE", "BUILD_SUBMISSION", "BUILD_GRADCAM", "SUBMIT_TO_KAGGLE"):
+                     "BACKUP_TO_DRIVE", "BUILD_SUBMISSION", "SUBMIT_TO_KAGGLE"):
             with self.subTest(flag=flag):
                 self.assertFalse(config[flag])
 
@@ -61,6 +61,51 @@ class CustomNotebookTests(unittest.TestCase):
     def test_saved_evaluation_requires_original_run_record(self) -> None:
         with self.assertRaisesRegex(ValueError, "STAGE2_EVAL_RUN_RECORD"):
             self.configure({"STAGE2_EVAL_CHECKPOINT": "saved.ckpt"})
+
+    def test_all_run_modes_use_unique_experiment_result_directories(self) -> None:
+        import ast
+
+        block = next(
+            node for node in ast.parse(cell_source("31a52846")).body
+            if isinstance(node, ast.If) and ast.unparse(node.test) == "RUN_TRAINING or EVAL_CHECKPOINT"
+        )
+        for training, smoke, checkpoint, suffix in (
+            (True, False, None, ""), (True, True, None, "_smoke"),
+            (False, True, "saved.ckpt", "_evaluation"), (False, True, None, None),
+        ):
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                namespace = {
+                    "ROOT": root, "RUN_ID": "new-run", "RUN_TRAINING": training,
+                    "SMOKE_TEST": smoke, "EVAL_CHECKPOINT": checkpoint, "run_dir": None,
+                }
+                source = compile(ast.Module(body=[block], type_ignores=[]), str(NOTEBOOK), "exec")
+                exec(source, namespace)
+                if suffix is None:
+                    self.assertIsNone(namespace["run_dir"])
+                    self.assertEqual(list(root.iterdir()), [])
+                else:
+                    expected = root / "experiments/exp2/results" / f"new-run{suffix}"
+                    self.assertEqual(namespace["run_dir"], expected)
+                    self.assertTrue(expected.is_dir())
+                    with self.assertRaises(FileExistsError):
+                        exec(source, namespace)
+                self.assertFalse((root / "artifacts").exists())
+
+    def test_approved_budget_override_does_not_block_full_evaluation(self) -> None:
+        import ast
+        from types import SimpleNamespace
+
+        config = self.configure({})
+        self.assertFalse(config["ENFORCE_RUNTIME_BUDGET"])
+        config.update(SMOKE_TEST=False, checkpoint=SimpleNamespace(exceeded_budget=True))
+        assignment = next(
+            node for node in ast.walk(ast.parse(cell_source("c33f51c5")))
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == "budget_exceeded" for target in node.targets)
+        )
+        exec(compile(ast.Module(body=[assignment], type_ignores=[]), str(NOTEBOOK), "exec"), config)
+        self.assertFalse(config["budget_exceeded"])
 
     def test_half_threshold_reports_each_label(self) -> None:
         import numpy as np
@@ -124,7 +169,7 @@ class CustomNotebookTests(unittest.TestCase):
             original = root / "original.json"
             original.write_text(json.dumps(source))
             before = original.read_bytes()
-            run_dir = root / "artifacts" / "reevaluation_evaluation"
+            run_dir = root / "experiments/exp2/results/reevaluation_evaluation"
             run_dir.mkdir(parents=True)
             metrics = {"macro_f1": 1.0, "per_label_f1": dict.fromkeys(LABEL_COLUMNS, 1.0)}
             namespace = {
@@ -197,7 +242,7 @@ class CustomNotebookTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             config["ROOT"] = Path(directory)
             config["head_path"] = Path(directory) / "head.pt"
-            path = Path(directory) / "experiments/01_convnext_standard/results/control.json"
+            path = Path(directory) / "experiments/exp1/results/control/control.json"
             path.parent.mkdir(parents=True)
             path.write_text(json.dumps(record))
             with contextlib.redirect_stdout(io.StringIO()):
