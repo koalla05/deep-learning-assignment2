@@ -8,6 +8,8 @@
 .env.*
 !.env.example
 /artifacts/
+/experiments/*/results/**/checkpoints/
+/experiments/*/results/**/wandb/
 *.ckpt
 *.pth
 *.pt
