@@ -24,12 +24,14 @@ def main() -> None:
         parser.error("--batch-size must be positive.")
 
     root = Path(__file__).resolve().parents[1]
-    record_path = root / "experiments/00_shared_head/results/convnext_head_fold0_seed42_colab.json"
+    record_path = root / "experiments/exp0/results/convnext_head_fold0_seed42_colab/convnext_head_fold0_seed42_colab.json"
     with record_path.open() as record_file:
         record = json.load(record_file)
     if record["status"] != "completed" or record["model"]["variant"] != "head_only":
         raise ValueError("Expected a completed head-only run.")
     head_path = root / record["artifacts"]["head_checkpoint"]
+    if not head_path.is_file():
+        head_path = root / "experiments/exp0/checkpoints" / Path(record["artifacts"]["head_checkpoint"]).name
     if not head_path.is_file():
         raise FileNotFoundError(f"Missing trained head: {head_path}")
     submission_path = root / "submissions" / f"{record['run_id']}_025.csv"

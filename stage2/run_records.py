@@ -7,7 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import traceback
-from typing import Iterator
+from typing import Callable, Iterator
 
 from stage2.experiment import write_run_record
 
@@ -20,13 +20,16 @@ def file_sha256(path: Path) -> str:
 
 def validate_evaluation_record(
     record_path: Path, checkpoint_path: Path, expected_configuration: dict,
+    experiment: str = "02_convnext_custom",
 ) -> dict:
     """Reject unverified checkpoints or configuration changes before evaluation."""
     record = json.loads(record_path.read_text())
-    if record.get("status") != "completed" or record.get("experiment") != "02_convnext_custom":
-        raise ValueError("Evaluation requires a completed custom run record, not a smoke or timing run.")
+    if experiment not in {"01_convnext_standard", "02_convnext_custom"}:
+        raise ValueError("Unknown experiment for checkpoint evaluation.")
+    if record.get("status") != "completed" or record.get("experiment") != experiment:
+        raise ValueError("Evaluation requires a completed matching run record, not a smoke or timing run.")
     fields = {
-        "model": ("name", "variant", "block_reduction", "initial_head_checkpoint", "initial_head_sha256"),
+        "model": ("name", "variant", "initial_head_checkpoint", "initial_head_sha256"),
         "data": ("image_size", "transform", "fold_file", "fold_sha256", "mean", "std", "label_columns"),
         "training": (
             "optimizer", "scheduler", "loss", "max_epochs", "patience", "physical_batch_size",
@@ -34,6 +37,8 @@ def validate_evaluation_record(
         ),
         "metrics": ("threshold",),
     }
+    if experiment == "02_convnext_custom":
+        fields["model"] += ("block_reduction",)
     differences = [
         f"{section}.{key}"
         for section, keys in fields.items()
@@ -43,7 +48,7 @@ def validate_evaluation_record(
     ]
     differences.extend(key for key in ("fold", "seed") if record.get(key) != expected_configuration[key])
     if differences:
-        raise ValueError(f"Saved custom settings differ or lack provenance: {differences}")
+        raise ValueError(f"Saved settings differ or lack provenance: {differences}")
     checkpoint_hash = record.get("artifacts", {}).get("best_checkpoint_sha256")
     if not checkpoint_hash or file_sha256(checkpoint_path) != checkpoint_hash:
         raise ValueError("Checkpoint SHA256 does not match the original completed run record.")
@@ -83,7 +88,10 @@ def validate_matched_control(custom: dict, control: dict) -> list[str]:
 
 
 @contextmanager
-def record_failures(directory: Path | None, configuration: dict, phase: str) -> Iterator[None]:
+def record_failures(
+    directory: Path | None, configuration: dict, phase: str,
+    backup_failure: Callable[[Path], None] | None = None,
+) -> Iterator[None]:
     """Persist safe failure metadata and always propagate the original exception."""
     try:
         yield
@@ -99,7 +107,13 @@ def record_failures(directory: Path | None, configuration: dict, phase: str) -> 
                 ]},
             }
             try:
-                write_run_record(directory / "failure.json", failure)
+                path = directory / "failure.json"
+                write_run_record(path, failure)
+                if backup_failure is not None:
+                    try:
+                        backup_failure(path)
+                    except Exception as backup_error:
+                        error.add_note(f"Failure record could not be backed up: {type(backup_error).__name__}")
             except Exception as recording_error:
                 error.add_note(f"Failure record could not be written: {type(recording_error).__name__}")
         raise

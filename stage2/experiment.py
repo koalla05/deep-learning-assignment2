@@ -20,6 +20,21 @@ from torchvision.transforms import Normalize, ToTensor
 LABEL_COLUMNS = ("Cat", "Dog", "Moris", "Motya", "Biatrix")
 
 
+def preflight_images(rows: Sequence[dict[str, str]], image_dir: Path) -> None:
+    """Decode required images before an expensive run starts."""
+    if not image_dir.is_dir():
+        raise FileNotFoundError(f"Missing image directory: {image_dir}")
+    for row in rows:
+        path = image_dir / f"{row['image_id']}.jpg"
+        if not path.is_file():
+            raise FileNotFoundError(f"Missing image: {path}")
+        try:
+            with Image.open(path) as image:
+                image.load()
+        except (OSError, ValueError) as error:
+            raise ValueError(f"Cannot decode image: {path}") from error
+
+
 def read_csv(path: Path, expected_columns: Sequence[str]) -> list[dict[str, str]]:
     if not path.is_file():
         raise FileNotFoundError(f"Missing {path}. Put the competition data under data/.")

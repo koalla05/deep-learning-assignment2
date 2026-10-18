@@ -205,11 +205,11 @@ class SmokeRuntimeProfile(L.Callback):
 
 
 class TimedBudgetCheckpoint(ModelCheckpoint):
-    """Time complete epochs, including checkpoint saves, and stop an over-budget run."""
+    """Time complete epochs and optionally enforce a runtime budget."""
 
     def __init__(
         self, *args, maximum_hours: float, projection_margin: float = 1.1,
-        profile_only: bool = False,
+        profile_only: bool = False, enforce_budget: bool = True,
         epoch_backup: Callable[[L.Trainer, Path, int], None] | None = None,
         **kwargs,
     ) -> None:
@@ -220,6 +220,7 @@ class TimedBudgetCheckpoint(ModelCheckpoint):
         self.maximum_hours = maximum_hours
         self.projection_margin = projection_margin
         self.profile_only = profile_only
+        self.enforce_budget = enforce_budget
         self.epoch_backup = epoch_backup
         self.epoch_seconds: list[float] = []
         self.projected_seconds: float | None = None
@@ -250,12 +251,14 @@ class TimedBudgetCheckpoint(ModelCheckpoint):
                 f"projected {trainer.max_epochs}-epoch run with margin: "
                 f"{self.projected_seconds / 3600:.2f} h."
             )
-            if self.exceeded_budget or self.profile_only:
-                if self.exceeded_budget:
+            if self.profile_only or (self.exceeded_budget and self.enforce_budget):
+                if self.exceeded_budget and self.enforce_budget:
                     print("Over the runtime gate. Stop after this epoch and discuss a smaller run or another device.")
                 else:
                     print("Profile-only run: stop after the first complete epoch.")
                 trainer.should_stop = True
+            elif self.exceeded_budget:
+                print("Over the runtime estimate; budget enforcement is disabled. Continuing training.")
 
 
 def copy_verified(source: Path, destination: Path) -> dict[str, str | int]:

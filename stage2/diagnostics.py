@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import math
 import os
 from pathlib import Path
 import platform
@@ -12,6 +13,42 @@ import lightning as L
 import torch
 
 from stage2.experiment import write_run_record
+
+
+def plot_gradient_flow(csv_path: Path, image_path: Path) -> Path:
+    """Plot layer-wise gradient norms across epochs from a training diagnostics CSV."""
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    with csv_path.open(newline="") as file:
+        rows = list(csv.DictReader(file))
+    if not rows:
+        raise ValueError("No layer-gradient measurements to plot.")
+    epochs = sorted({int(row["epoch"]) for row in rows})
+    layers = list(dict.fromkeys(row["layer"] for row in rows))
+    values = np.full((len(epochs), len(layers)), np.nan)
+    epoch_index = {epoch: index for index, epoch in enumerate(epochs)}
+    layer_index = {layer: index for index, layer in enumerate(layers)}
+    for row in rows:
+        norm = float(row["mean_l2_norm"])
+        if not math.isfinite(norm) or norm < 0:
+            raise ValueError("Layer-gradient norms must be finite and nonnegative.")
+        values[epoch_index[int(row["epoch"])], layer_index[row["layer"]]] = math.log10(max(norm, 1e-12))
+    figure, axis = plt.subplots(figsize=(max(10, min(20, len(layers) * 0.12)), 3 + len(epochs) * 0.35))
+    heatmap = axis.imshow(values, aspect="auto", cmap="viridis", interpolation="nearest")
+    axis.set(xlabel="Layers in model order", ylabel="Epoch", title="Mean pre-clipping gradient norm (log10 L2)")
+    axis.set_yticks(range(len(epochs)), [str(epoch + 1) for epoch in epochs])
+    ticks = sorted(set(np.linspace(0, len(layers) - 1, min(12, len(layers)), dtype=int)))
+    axis.set_xticks(ticks, [layers[index] for index in ticks], rotation=70, ha="right", fontsize=7)
+    figure.colorbar(heatmap, ax=axis, label="log10 gradient L2 norm")
+    figure.tight_layout()
+    if image_path.exists():
+        plt.close(figure)
+        raise FileExistsError(f"Refusing to overwrite {image_path}")
+    image_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(image_path, dpi=140)
+    plt.close(figure)
+    return image_path
 
 
 class TrainingDiagnostics(L.Callback):
