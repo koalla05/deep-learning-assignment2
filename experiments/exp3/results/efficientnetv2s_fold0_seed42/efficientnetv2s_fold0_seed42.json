@@ -1,0 +1,158 @@
+{
+  "fold": 0,
+  "seed": 42,
+  "model": {
+    "name": "tf_efficientnetv2_s.in21k_ft_in1k",
+    "variant": "standard",
+    "family": "efficientnetv2",
+    "pretrained_source": {
+      "hf_hub_id": "timm/tf_efficientnetv2_s.in21k_ft_in1k",
+      "tag": "in21k_ft_in1k",
+      "architecture": "tf_efficientnetv2_s"
+    },
+    "initial_head_checkpoint": "experiments/exp3/results/efficientnetv2s_fold0_seed42/head.pt",
+    "initial_head_sha256": "6a7c6021284e20bfd21ea035c6541434664a87dd655fca8c7c2b094de5242ea8",
+    "head_warmup": {
+      "optimizer": "AdamW(lr=0.001, weight_decay=0.01)",
+      "epochs_completed": 8,
+      "best_fold0_macro_f1": 0.9101786017417908,
+      "seconds": 1947.1378830419999
+    }
+  },
+  "data": {
+    "image_size": 384,
+    "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5",
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "mean": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "std": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  "training": {
+    "optimizer": "AdamW(backbone_lr=0.0001, head_lr=0.001, weight_decay=0.01 except bias/norm, betas=(0.9, 0.999))",
+    "scheduler": "one epoch step warmup then cosine to 0.1 peak",
+    "loss": "BCEWithLogitsLoss",
+    "max_epochs": 8,
+    "patience": 3,
+    "physical_batch_size": 8,
+    "effective_batch_size": 16,
+    "precision": "32-true",
+    "stage_policy": "full network and classifier trainable; BatchNorm running statistics frozen",
+    "checkpoint_selection": "best validation macro F1 at 0.25",
+    "gradient_clip_norm": 1.0,
+    "epochs_completed": 8
+  },
+  "run_id": "efficientnetv2s_fold0_seed42",
+  "experiment": "03_efficientnetv2_s",
+  "status": "completed",
+  "git_commit": "ce77c779fb626533558580f0ec10a1da2e8a445a",
+  "source_sha256": {
+    "notebooks/09_efficientnet.ipynb": "673a03d694b5163bc4dcdc55b043ac942920ffff8862049bb21fa1f7395f9d8d",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501",
+    "stage2/train.py": "71ea58da57ba01f8eceb58d5c572301636d627fbbe71d92d9eb950ee999562aa",
+    "stage2/finetune.py": "b7112edd247aa94405ff7a0f987a607c5fe92905269db8a22d9fa80a09296879",
+    "stage2/batchnorm.py": "7290cc90ad97a8b5dab798fb25dd8daea28ed6d0f8b863c51731061877976437",
+    "stage2/run_records.py": "49f1422b938dbf284e046a7ccba74af8c9e4a32fe130fd793cb7461e30c5a860",
+    "stage2/diagnostics.py": "ffe430d7af45fd7d44de97382c4bc2f992316f48817c198694955d7fb8dd110b",
+    "stage2/gradcam.py": "589bc18006d012b362c91c425afbd7e45f35aa802b48181931d4d3ab3876b56e"
+  },
+  "hardware": {
+    "device": "mps:0",
+    "system_memory_bytes": 25769803776,
+    "mps_sampled_allocated_high_water_bytes": 353064192,
+    "mps_sampled_driver_high_water_bytes": 5185978368,
+    "cuda_peak_allocated_bytes": null,
+    "process_lifetime_peak_rss_bytes": 1171701760,
+    "scope": "Training and validation; excludes model setup and final inference. MPS is sampled at batch/epoch boundaries, not a true allocator peak. RSS is the process-lifetime high-water mark, not isolated to this run."
+  },
+  "trainable_parameters": 20183893,
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9983149573233134,
+    "per_label_f1": {
+      "Cat": 0.9970501474926253,
+      "Dog": 0.9945246391239423,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_ap": 0.9999812493994795,
+    "per_label_ap": {
+      "Cat": 0.9999883920273361,
+      "Dog": 0.9999178549700615,
+      "Moris": 0.9999999999999999,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9983153465821907,
+    "per_label_f1_at_0_5": {
+      "Cat": 0.9965568125922283,
+      "Dog": 0.9950199203187251,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    }
+  },
+  "timings": {
+    "head_warmup_seconds": 1947.1378830419999,
+    "training_and_validation_seconds": 6562.915740833996,
+    "epoch_seconds": [
+      820.6883083339999,
+      820.2826308329968,
+      819.915681833998,
+      820.101101166998,
+      819.7286560830034,
+      819.2766169160022,
+      819.7321851669985,
+      819.9984299580028
+    ],
+    "first_epoch_projected_seconds": 7222.0571133391995,
+    "best_checkpoint_prediction_seconds": 51.48947075000615
+  },
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/exp3/results/efficientnetv2s_fold0_seed42/efficientnetv2s_fold0_seed42_val.csv",
+    "best_checkpoint_local": "experiments/exp3/results/efficientnetv2s_fold0_seed42/checkpoints/best.ckpt",
+    "best_checkpoint_sha256": "d54b5495af69adfd47fb6e9aeda4a2d0529c6cce877304ffb07302a39b592bc7",
+    "curves_csv": "experiments/exp3/results/efficientnetv2s_fold0_seed42/curves/version_0/metrics.csv",
+    "layer_gradients_csv": "experiments/exp3/results/efficientnetv2s_fold0_seed42/diagnostics/layer_gradients.csv",
+    "gradient_flow_png": "experiments/exp3/results/efficientnetv2s_fold0_seed42/gradient_flow.png",
+    "memory_json": "experiments/exp3/results/efficientnetv2s_fold0_seed42/diagnostics/memory.json",
+    "gradcam_images": [
+      "experiments/exp3/results/efficientnetv2s_fold0_seed42/gradcam/cat_116d851cb24f39d28f719a743d10df086eb2c793.png",
+      "experiments/exp3/results/efficientnetv2s_fold0_seed42/gradcam/dog_e6aea26b070dfe40f6a6121538f00cab344dc03a.png",
+      "experiments/exp3/results/efficientnetv2s_fold0_seed42/gradcam/moris_055cb6e1fe1eb7fc077bd98717851ae53de3113c.png",
+      "experiments/exp3/results/efficientnetv2s_fold0_seed42/gradcam/motya_cfbc890562e329131f546b43be873f41a06ad195.png",
+      "experiments/exp3/results/efficientnetv2s_fold0_seed42/gradcam/biatrix_14ababeb09beeaf8dd430e851e671475ab15fc46.png"
+    ],
+    "drive_backup_dir": null
+  },
+  "versions": {
+    "python": "3.12.15",
+    "torch": "2.14.1",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  },
+  "telemetry": {
+    "wandb_enabled": true,
+    "wandb_mode": "online",
+    "wandb_project": "ai301-stage2",
+    "wandb_run_id": "l9niad77",
+    "model_upload": false
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}

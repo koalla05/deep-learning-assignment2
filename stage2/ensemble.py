@@ -79,6 +79,25 @@ def write_test_probabilities(path: Path, image_ids: Sequence[str], probabilities
         writer.writerows((image_id, *map(float, values)) for image_id, values in zip(image_ids, probabilities))
 
 
+@torch.inference_mode()
+def predict_flipped_probabilities(network: torch.nn.Module, batches, device: torch.device) -> tuple[list[str], np.ndarray]:
+    """Probabilities for the left-right mirror of every image, in loader order.
+
+    The loader's images are already letterboxed. Competition photos are 450x375, so
+    they fill the 384-pixel width and only the top and bottom are padded; flipping the
+    canvas is therefore the same as flipping the photo first, as the training flip did.
+    """
+    network.to(device).eval()
+    image_ids: list[str] = []
+    probabilities: list[np.ndarray] = []
+    for ids, images, _ in batches:
+        image_ids.extend(ids)
+        probabilities.append(network(images.to(device).flip(-1)).sigmoid().cpu().numpy())
+    if not probabilities:
+        raise ValueError("Cannot predict an empty dataset.")
+    return image_ids, np.concatenate(probabilities)
+
+
 def mean_probabilities(members: Sequence[np.ndarray]) -> np.ndarray:
     """Equal-weight average; weights are not tuned on the small fold-0 sample."""
     if len(members) < 2 or any(member.shape != members[0].shape for member in members):

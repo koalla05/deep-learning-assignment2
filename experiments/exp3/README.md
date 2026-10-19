@@ -15,7 +15,7 @@ augmentation, effective batch 16. Three things differ because the architecture
 does:
 
 - **Own head warm-up.** Exp0's head fits ConvNeXt's features, so phase 1 trains
-  a new linear head on the frozen backbone (3 epochs at LR `1e-3`), then phase 2
+  a new linear head on the frozen backbone (up to 8 epochs at LR `1e-3`; three epochs were not enough for the rare labels), then phase 2
   fine-tunes everything. As with Exp0, the head was selected on fold 0, so it is
   valid for a fold-0 run only.
 - **Higher learning rates:** backbone `1e-4`, head `1e-3` (ConvNeXt used

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from stage2.ensemble import architecture_name, load_finetuned_network, mean_probabilities, read_probabilities, write_test_probabilities
+from stage2.ensemble import architecture_name, load_finetuned_network, mean_probabilities, predict_flipped_probabilities, read_probabilities, write_test_probabilities
 from stage2.experiment import LABEL_COLUMNS, write_probabilities
 
 
@@ -78,6 +78,35 @@ class EfficientNetNotebookTests(unittest.TestCase):
             self.assertIn(expected, source)
         self.assertIn("MODEL_NAME = 'tf_efficientnetv2_s.in21k_ft_in1k'", source)
         self.assertNotIn("jft", source)
+
+
+class EnsembleExp1Exp3NotebookTests(unittest.TestCase):
+    def test_defaults_do_not_predict_or_write_and_members_are_exp1_and_exp3(self) -> None:
+        cells = json.loads(NOTEBOOK.with_name("10_ensemble_exp1_exp3.ipynb").read_text())["cells"]
+        flags = "".join(next(cell for cell in cells if cell["id"] == "a1f0e002")["source"])
+        self.assertIn("BUILD_SUBMISSION = False", flags)
+        self.assertIn("SUBMIT_TO_KAGGLE = False", flags)
+        self.assertIn("'STAGE2_RUN_TEST_INFERENCE', '0'", flags)
+        self.assertIn("'exp1':", flags)
+        self.assertIn("'exp3':", flags)
+        self.assertNotIn("'exp2':", flags)
+
+
+class FlipPredictionTests(unittest.TestCase):
+    def test_predicts_the_mirror_image_in_loader_order(self) -> None:
+        import torch
+
+        torch.manual_seed(0)
+        network = torch.nn.Sequential(torch.nn.Conv2d(3, 4, 3), torch.nn.AdaptiveAvgPool2d(1), torch.nn.Flatten(), torch.nn.Linear(4, 5))
+        images = torch.randn(5, 3, 8, 8)
+        batches = [(["a", "b"], images[:2], torch.empty(0)), (["c", "d", "e"], images[2:], torch.empty(0))]
+        ids, probabilities = predict_flipped_probabilities(network, batches, torch.device("cpu"))
+        self.assertEqual(ids, list("abcde"))
+        expected = network(images.flip(-1)).sigmoid().detach().numpy()
+        np.testing.assert_allclose(probabilities, expected, atol=1e-6)
+        self.assertGreater(float(np.abs(probabilities - network(images).sigmoid().detach().numpy()).max()), 1e-4)
+        with self.assertRaises(ValueError):
+            predict_flipped_probabilities(network, [], torch.device("cpu"))
 
 
 if __name__ == "__main__":

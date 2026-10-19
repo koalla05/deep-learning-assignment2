@@ -11,7 +11,7 @@ experimental rationale; the [root report](../README.md) holds the score table.
 | [exp1](exp1/) | What does full fine-tuning add without changing the architecture? | [06](../notebooks/06_convnext_standard.ipynb) |
 | [exp2](exp2/) | Does a residual spatial block help under the same recipe? | [07](../notebooks/07_convnext_custom.ipynb) |
 | [exp3](exp3/) | Does a different CNN family (EfficientNetV2-S) add to the ensemble? | [09](../notebooks/09_efficientnet.ipynb) |
-| [exp4](exp4/) | Does averaging completed runs beat the best single model? | [08](../notebooks/08_ensemble.ipynb) |
+| [exp4](exp4/) | Does averaging completed runs beat the best single model? | [08](../notebooks/08_ensemble.ipynb), [10](../notebooks/10_ensemble_exp1_exp3.ipynb) |
 
 ## Folder convention
 
