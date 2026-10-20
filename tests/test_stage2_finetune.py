@@ -105,6 +105,20 @@ class FineTuneTests(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 copy_verified(source, destination)
 
+    def test_result_backup_reuses_only_identical_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            local = root / "local"
+            local.mkdir()
+            result = local / "results.json"
+            result.write_text('{"score": 0.9}')
+            backup = DriveRunBackup(local, root / "drive")
+            backup.save_results([result])
+            backup.save_results([result])
+            result.write_text('{"score": 0.8}')
+            with self.assertRaises(IOError):
+                backup.save_results([result])
+
     def test_epoch_backup_includes_resume_state_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -126,6 +140,20 @@ class FineTuneTests(unittest.TestCase):
             self.assertTrue((drive / "backup_epoch_01.json").is_file())
             backup.save_epoch(trainer, best, 2)
             self.assertTrue((drive / "checkpoints" / "resume_epoch_02.ckpt").is_file())
+            self.assertFalse((drive / "checkpoints" / "best_epoch_02.ckpt").exists())
+
+    def test_resumed_backup_preserves_selected_epoch_name(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            local = root / "local"
+            drive = root / "drive"
+            best = local / "checkpoints" / "best_epoch_01.ckpt"
+            best.parent.mkdir(parents=True)
+            best.write_bytes(b"selected model")
+            trainer = SimpleNamespace(save_checkpoint=lambda path, weights_only: path.write_bytes(b"resume state"))
+            DriveRunBackup(local, drive).save_epoch(trainer, best, 1)
+            DriveRunBackup(local, drive).save_epoch(trainer, best, 2)
+            self.assertTrue((drive / "checkpoints" / "best_epoch_01.ckpt").is_file())
             self.assertFalse((drive / "checkpoints" / "best_epoch_02.ckpt").exists())
 
     def test_lightning_writes_full_epoch_checkpoint_inside_callback(self) -> None:

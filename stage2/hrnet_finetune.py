@@ -6,10 +6,12 @@ import argparse
 import csv
 import json
 import math
+import os
 import platform
 import random
 import subprocess
 import time
+import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -163,6 +165,7 @@ def profile_epoch(root: Path, head_dir: Path, config: Config) -> Path:
                "per_label_f1": {label: float(metrics[f"val_f1_{label.lower()}"]) for label in LABEL_COLUMNS},
                "macro_ap": float(metrics["val_macro_ap"]),
                "per_label_ap": {label: float(metrics[f"val_ap_{label.lower()}"]) for label in LABEL_COLUMNS},
+               "per_label_bce": {label: float(metrics[f"val_bce_{label.lower()}"]) for label in LABEL_COLUMNS},
                "note": "Throughput profile only; its selected metric is not a model comparison."}
     profile_path.parent.mkdir(parents=True, exist_ok=True)
     profile_path.write_text(json.dumps(profile, indent=2, allow_nan=False) + "\n")
@@ -190,15 +193,11 @@ def prediction_rows(rows: list[dict], directory: Path, config: Config, mean: tup
 
 
 class SelectedCheckpoint(L.Callback):
-    """Select by macro F1, then validation BCE; save full resume state each epoch."""
+    """Select by macro F1, then validation BCE, and record epoch metrics."""
 
-    def __init__(self, run_dir: Path, backup: DriveRunBackup | None, config: Config, started: float) -> None:
+    def __init__(self, run_dir: Path, started: float) -> None:
         super().__init__()
         self.run_dir = run_dir
-        self.backup = backup
-        self.patience = config.patience
-        self.budget_seconds = config.budget_hours * 3600
-        self.reserve_seconds = config.export_reserve_minutes * 60
         self.best_f1 = -1.0
         self.best_loss = math.inf
         self.best_epoch = 0
@@ -206,10 +205,6 @@ class SelectedCheckpoint(L.Callback):
         self.stale_epochs = 0
         self.history: list[dict] = []
         self.started = started
-        self.epoch_started: float | None = None
-
-    def on_train_epoch_start(self, trainer: L.Trainer, module: L.LightningModule) -> None:
-        self.epoch_started = time.monotonic()
 
     @property
     def state_key(self) -> str:
@@ -247,6 +242,7 @@ class SelectedCheckpoint(L.Callback):
                   "val_loss": loss, "macro_f1": f1, "macro_ap": float(metrics["val_macro_ap"]),
                   **{f"f1_{label}": float(metrics[f"val_f1_{label.lower()}"]) for label in LABEL_COLUMNS},
                   **{f"ap_{label}": float(metrics[f"val_ap_{label.lower()}"]) for label in LABEL_COLUMNS},
+                  **{f"bce_{label}": float(metrics[f"val_bce_{label.lower()}"]) for label in LABEL_COLUMNS},
                   "elapsed_minutes": (time.monotonic() - self.started) / 60}
         self.history.append(record)
         history_path = self.run_dir / "history.csv"
@@ -254,25 +250,60 @@ class SelectedCheckpoint(L.Callback):
             writer = csv.DictWriter(stream, fieldnames=record.keys())
             writer.writeheader()
             writer.writerows(self.history)
-        resume_path = self.run_dir / "checkpoints" / f"resume_epoch_{epoch:02d}.ckpt"
-        if resume_path.exists():
-            raise FileExistsError(resume_path)
-        if self.backup:
-            self.backup.save_epoch(trainer, Path(self.best_path), epoch)
-        else:
-            trainer.save_checkpoint(resume_path, weights_only=False)
         print(f"epoch {epoch}: macro F1 {f1:.5f}; per-label F1 "
               f"{ {label: round(record[f'f1_{label}'], 4) for label in LABEL_COLUMNS} }; "
               f"macro AP {record['macro_ap']:.5f}; train/val BCE "
               f"{record['train_loss']:.5f}/{loss:.5f}; best epoch {self.best_epoch}", flush=True)
-        elapsed = time.monotonic() - self.started
+
+
+class EpochBackup(L.Callback):
+    """Persist complete optimizer state after selection state has been updated."""
+
+    def __init__(self, run_dir: Path, selected: SelectedCheckpoint, backup: DriveRunBackup | None) -> None:
+        super().__init__()
+        self.run_dir = run_dir
+        self.selected = selected
+        self.backup = backup
+
+    def on_validation_end(self, trainer: L.Trainer, module: L.LightningModule) -> None:
+        if trainer.sanity_checking:
+            return
+        epoch = trainer.current_epoch + 1
+        resume_path = self.run_dir / "checkpoints" / f"resume_epoch_{epoch:02d}.ckpt"
+        if resume_path.exists():
+            raise FileExistsError(resume_path)
+        if self.backup:
+            self.backup.save_epoch(trainer, Path(self.selected.best_path), epoch)
+        else:
+            trainer.save_checkpoint(resume_path, weights_only=False)
+
+
+class StopAfterSelection(L.Callback):
+    """Stop on stale validation scores or before the export time reserve."""
+
+    def __init__(self, selected: SelectedCheckpoint, config: Config, started: float) -> None:
+        super().__init__()
+        self.selected = selected
+        self.patience = config.patience
+        self.budget_seconds = config.budget_hours * 3600
+        self.reserve_seconds = config.export_reserve_minutes * 60
+        self.started = started
+        self.epoch_started: float | None = None
+
+    def on_train_epoch_start(self, trainer: L.Trainer, module: L.LightningModule) -> None:
+        self.epoch_started = time.monotonic()
+
+    def on_validation_end(self, trainer: L.Trainer, module: L.LightningModule) -> None:
+        if trainer.sanity_checking:
+            return
         if self.epoch_started is None:
             raise RuntimeError("Validation ended without a training epoch start")
+        elapsed = time.monotonic() - self.started
         latest_epoch_seconds = time.monotonic() - self.epoch_started
         if elapsed + 1.30 * latest_epoch_seconds >= self.budget_seconds - self.reserve_seconds:
             print("Stopping at the time budget boundary to preserve prediction export time.", flush=True)
             trainer.should_stop = True
-        if self.stale_epochs >= self.patience:
+        if self.selected.stale_epochs >= self.patience:
             trainer.should_stop = True
 
 
@@ -283,6 +314,20 @@ class HRNetClassifier(FineTuneClassifier):
                  weight_decay: float, threshold: float) -> None:
         super().__init__(network, backbone_lr, head_lr, weight_decay, threshold)
         self.training_losses: list[tuple[float, int]] = []
+        self.validation_label_losses: list[np.ndarray] = []
+
+    def on_validation_epoch_start(self) -> None:
+        super().on_validation_epoch_start()
+        self.validation_label_losses.clear()
+
+    def validation_step(self, batch: tuple, batch_index: int) -> None:
+        _, images, targets = batch
+        logits = self(images)
+        losses = torch.nn.functional.binary_cross_entropy_with_logits(logits, targets, reduction="none")
+        self.log("val_loss", losses.mean(), on_step=False, on_epoch=True, batch_size=len(images))
+        self.validation_targets.append(targets.detach().cpu().numpy())
+        self.validation_probabilities.append(logits.sigmoid().detach().cpu().numpy())
+        self.validation_label_losses.append(losses.detach().sum(dim=0).cpu().numpy())
 
     def on_train_epoch_start(self) -> None:
         super().on_train_epoch_start()
@@ -302,11 +347,14 @@ class HRNetClassifier(FineTuneClassifier):
             self.log("train_loss_current", weighted / sum(count for _, count in self.training_losses))
         self.log("val_macro_f1", metrics["macro_f1"], prog_bar=True)
         self.log("val_macro_ap", metrics["macro_ap"])
+        label_losses = np.sum(self.validation_label_losses, axis=0) / len(targets)
         for label in LABEL_COLUMNS:
             self.log(f"val_f1_{label.lower()}", metrics["per_label_f1"][label])
             self.log(f"val_ap_{label.lower()}", metrics["per_label_ap"][label])
+            self.log(f"val_bce_{label.lower()}", float(label_losses[LABEL_COLUMNS.index(label)]))
         self.validation_targets.clear()
         self.validation_probabilities.clear()
+        self.validation_label_losses.clear()
 
 
 @torch.inference_mode()
@@ -325,13 +373,34 @@ def predict_logits(module: HRNetClassifier, loader: DataLoader, device: torch.de
 
 
 def write_matrix(path: Path, image_ids: list[str], values: np.ndarray, fold: int | None = None) -> None:
-    if path.exists() or len(image_ids) != len(set(image_ids)) or values.shape != (len(image_ids), len(LABEL_COLUMNS)):
-        raise ValueError(f"Existing path or invalid prediction alignment: {path}")
-    with path.open("x", newline="") as stream:
+    if len(image_ids) != len(set(image_ids)) or values.shape != (len(image_ids), len(LABEL_COLUMNS)):
+        raise ValueError(f"Invalid prediction alignment: {path}")
+    if not np.isfinite(values).all():
+        raise ValueError(f"Nonfinite prediction values: {path}")
+    fields = ["image_id", *(("fold",) if fold is not None else ()), *LABEL_COLUMNS]
+    if path.exists():
+        with path.open(newline="") as stream:
+            reader = csv.DictReader(stream)
+            if reader.fieldnames != fields:
+                raise ValueError(f"Existing prediction schema differs: {path}")
+            rows = list(reader)
+        saved_ids = [row["image_id"] for row in rows]
+        saved = np.asarray([[float(row[label]) for label in LABEL_COLUMNS] for row in rows])
+        if (saved_ids != image_ids or saved.shape != values.shape or
+                (fold is not None and any(row["fold"] != str(fold) for row in rows)) or
+                not np.allclose(saved, values, atol=1e-6, rtol=0)):
+            raise ValueError(f"Existing prediction differs from selected checkpoint: {path}")
+        return
+    temporary = path.with_name(f"{path.name}.partial-{uuid.uuid4().hex}")
+    with temporary.open("x", newline="") as stream:
         writer = csv.writer(stream)
-        writer.writerow(("image_id", *(("fold",) if fold is not None else ()), *LABEL_COLUMNS))
+        writer.writerow(fields)
         for image_id, row in zip(image_ids, values):
             writer.writerow((image_id, *((fold,) if fold is not None else ()), *map(float, row)))
+    if path.exists():
+        temporary.unlink()
+        raise FileExistsError(path)
+    os.replace(temporary, path)
 
 
 def verify_prediction_pair(logits_path: Path, probabilities_path: Path, expected_ids: list[str]) -> None:
@@ -408,6 +477,67 @@ def export_predictions(
     return results
 
 
+def finish_exports(
+    root: Path, run_dir: Path, config: Config, identity: dict, record: dict,
+    checkpoint: Path, best_epoch: int, validation: list[dict], backup: DriveRunBackup | None,
+) -> Path:
+    results = export_predictions(root, run_dir, config, identity, checkpoint, validation, backup)
+    results.update({"selected_epoch": best_epoch, "label_order": list(LABEL_COLUMNS),
+                    "threshold": config.threshold, "head_checkpoint_sha256": record["head_checkpoint_sha256"]})
+    notebook = root / "notebooks" / "17_hrnet_w32_finetune.ipynb"
+    if notebook.is_file():
+        results["source_notebook_sha256"] = sha256(notebook)
+    results_path = run_dir / "results.json"
+    if results_path.exists():
+        if json.loads(results_path.read_text()) != results:
+            raise ValueError(f"Existing export record differs: {results_path}")
+    else:
+        temporary = results_path.with_suffix(".json.partial")
+        temporary.write_text(json.dumps(results, indent=2, allow_nan=False) + "\n")
+        os.replace(temporary, results_path)
+    if backup:
+        paths = [run_dir / "history.csv", results_path]
+        if notebook.is_file():
+            paths.append(notebook)
+        backup.save_results(paths)
+    print(f"Selected epoch {best_epoch}; macro F1 {results['metrics']['macro_f1']:.5f}; "
+          f"per-label F1 {results['metrics']['per_label_f1']}; macro AP {results['metrics']['macro_ap']:.5f}; "
+          f"per-label AP {results['metrics']['per_label_ap']}; artifacts {run_dir}", flush=True)
+    return run_dir
+
+
+def export_saved_run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resume: Path) -> Path:
+    """Finish an interrupted export without another optimizer step."""
+    if not torch.cuda.is_available():
+        raise RuntimeError("Selected-checkpoint export requires a CUDA GPU")
+    _, validation, identity = preflight_inputs(root, head_dir, config)
+    run_dir = root / "artifacts" / "hrnet_finetune" / config.run_id
+    record_path = run_dir / "run.json"
+    if not resume.is_file() or not record_path.is_file():
+        raise FileNotFoundError("Export recovery needs a resume checkpoint and run.json")
+    record = json.loads(record_path.read_text())
+    if record["config"] != asdict(config):
+        raise ValueError("Export recovery configuration differs from original run")
+    state = torch.load(resume, map_location="cpu", weights_only=False)
+    selection = state["callbacks"]["hrnet_selected_checkpoint"]
+    best_epoch = int(selection["best_epoch"])
+    checkpoint = run_dir / "checkpoints" / f"best_epoch_{best_epoch:02d}.ckpt"
+    if best_epoch < 1 or not checkpoint.is_file():
+        raise FileNotFoundError(f"Selected checkpoint missing for export: {checkpoint}")
+    history_path = run_dir / "history.csv"
+    if not history_path.exists():
+        history = selection["history"]
+        if not history or int(history[-1]["epoch"]) != int(state["epoch"]) + 1:
+            raise ValueError("Resume checkpoint has incomplete epoch history")
+        with history_path.open("x", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=history[0].keys())
+            writer.writeheader()
+            writer.writerows(history)
+    backup = DriveRunBackup(run_dir, drive_dir / config.run_id) if drive_dir else None
+    return finish_exports(root, run_dir, config, identity, record,
+                          checkpoint, best_epoch, validation, backup)
+
+
 def run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resume: Path | None) -> Path:
     started = time.monotonic()
     if not torch.cuda.is_available():
@@ -439,7 +569,7 @@ def run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resu
                               num_workers=config.num_workers, pin_memory=True)
     val_loader = prediction_rows(validation, root / "data" / "train", config, mean, std)
     module = HRNetClassifier(network, config.backbone_lr, config.head_lr, config.weight_decay, config.threshold)
-    selected = SelectedCheckpoint(run_dir, backup, config, started)
+    selected = SelectedCheckpoint(run_dir, started)
     record_path = run_dir / "run.json"
     if resume is None:
         staged_manifest = root / "source_manifest.json"
@@ -472,7 +602,8 @@ def run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resu
     trainer = L.Trainer(
         accelerator="gpu", devices=1, precision=config.precision, max_epochs=config.max_epochs,
         accumulate_grad_batches=config.effective_batch_size // config.batch_size,
-        callbacks=[FrozenBatchNormStatistics(), selected], logger=logger,
+        callbacks=[FrozenBatchNormStatistics(), selected, EpochBackup(run_dir, selected, backup),
+                   StopAfterSelection(selected, config, started)], logger=logger,
         enable_checkpointing=False, enable_progress_bar=False, deterministic="warn",
     )
     try:
@@ -482,19 +613,8 @@ def run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resu
             logger.experiment.finish()
     if not selected.best_path:
         raise RuntimeError("Training ended without a selected checkpoint")
-    results = export_predictions(root, run_dir, config, identity, Path(selected.best_path), validation, backup)
-    results.update({"selected_epoch": selected.best_epoch, "label_order": list(LABEL_COLUMNS),
-                    "threshold": config.threshold, "head_checkpoint_sha256": record["head_checkpoint_sha256"]})
-    results_path = run_dir / "results.json"
-    if results_path.exists():
-        raise FileExistsError(results_path)
-    results_path.write_text(json.dumps(results, indent=2, allow_nan=False) + "\n")
-    if backup:
-        backup.save_results([run_dir / "history.csv", results_path])
-    print(f"Selected epoch {selected.best_epoch}; macro F1 {results['metrics']['macro_f1']:.5f}; "
-          f"per-label F1 {results['metrics']['per_label_f1']}; macro AP {results['metrics']['macro_ap']:.5f}; "
-          f"per-label AP {results['metrics']['per_label_ap']}; artifacts {run_dir}", flush=True)
-    return run_dir
+    return finish_exports(root, run_dir, config, identity, record, Path(selected.best_path),
+                          selected.best_epoch, validation, backup)
 
 
 def main() -> None:
@@ -512,6 +632,7 @@ def main() -> None:
     action.add_argument("--preflight-only", action="store_true")
     action.add_argument("--smoke-only", action="store_true")
     action.add_argument("--profile-epoch", action="store_true")
+    action.add_argument("--export-only", action="store_true")
     args = parser.parse_args()
     config = Config(run_id=args.run_id, batch_size=args.batch_size,
                     max_epochs=args.max_epochs, precision=args.precision,
@@ -525,6 +646,13 @@ def main() -> None:
         return
     if args.profile_epoch:
         profile_epoch(root, args.head_dir.resolve(), config)
+        return
+    if args.export_only:
+        if args.resume is None:
+            parser.error("--export-only needs --resume to identify the selected checkpoint")
+        export_saved_run(root, args.head_dir.resolve(),
+                         args.drive_dir.resolve() if args.drive_dir else None,
+                         config, args.resume.resolve())
         return
     run(root, args.head_dir.resolve(),
         args.drive_dir.resolve() if args.drive_dir else None, config,

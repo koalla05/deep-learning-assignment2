@@ -2,6 +2,8 @@
 
 Status: the local frozen-feature and linear-head stage completed at epoch 40. The Colab CLI and notebook are implemented but the GPU fine-tuning and prediction export have not run.
 
+Recovery review: the Colab workflow now records per-label validation BCE each epoch, keeps each full resume checkpoint under its true epoch, restores the selected best checkpoint named in the resume state, and supports `--export-only` after an interrupted export. Prediction and Drive result files are reused only after content verification. The source notebook is archived with results; the executed copy stays in Colab Drive.
+
 The selected local head reached 0.91747 fold-0 macro F1 at threshold 0.25 (Cat 0.98927, Dog 0.99208, Moris 0.84211, Motya 0.88889, Biatrix 0.87500). Macro AP was 0.95109. This is a checkpoint-selection score on one fold, not independent evidence of an ensemble gain. The head checkpoint and metadata are under ignored `artifacts/hrnet_head/hrnet_w32_head_fold0_seed42/`.
 
 ## Settled requirements
@@ -44,7 +46,7 @@ These settings are hypotheses, not measured optima.
 - The local head must use the same training fold, label order, preprocessing, and exact pretrained HRNet backbone as the Colab run. Verify this metadata on transfer; start a fresh joint-training optimizer after loading the selected head.
 - Save validation/test probabilities from the same selected checkpoint, with finite values in [0, 1], unique image IDs, complete expected coverage, and verified label order.
 - Save corresponding finite logits with identical IDs and label order, and verify that their sigmoid matches the probability files within serialization precision. Save validation targets for local evaluation; competition test targets are unavailable.
-- Save configuration, checkpoint source, package versions, code revision, folds/data identity, preprocessing, curves, timing, and executed notebook.
+- Save configuration, checkpoint source, package versions, code revision, folds/data identity, preprocessing, curves, timing, and a checksum-verified source notebook. Retain the executed notebook through Colab's normal Drive save.
 - Report macro and per-label F1 at the fixed baseline threshold, plus macro/per-label average precision. Do not describe a selected-checkpoint validation score as an unbiased final evaluation.
 - Keep each run in a distinct directory. Verify persistent copies before treating a Colab run as safely archived.
 - Separate setup/authentication and explicit artifact transfer from the experiment. Reuse prior Drive transfer conventions where practical.
@@ -59,7 +61,7 @@ These settings are hypotheses, not measured optima.
 4. Mount Drive through the existing interactive authentication step, transfer the required inputs, and verify the Colab starting state. Further manual interaction should only be needed for an actionable failure.
 5. Measure HRNet throughput and memory on the available GPU; choose physical batch, mixed precision, and an affordable epoch count while retaining effective batch 16. Record these choices before joint training.
 6. Fine-tune both body and head with the agreed scheduler, selection rule, loss curves, and per-epoch verified Drive backups. Implement explicit checkpoint restoration with optimizer and scheduler state for interrupted Colab runs.
-7. Reload the selected checkpoint, export validation/test probabilities and logits, verify alignment and checksums, and archive weights, results, and the executed notebook to Drive.
+7. Reload the selected checkpoint, export validation/test probabilities and logits, verify alignment and checksums, and archive weights, results, and the source notebook to Drive. Colab retains the executed notebook through its normal Drive save. If export is interrupted, use the selected checkpoint to rerun export without another optimizer step.
 8. Evaluate and adjust thresholds locally from saved predictions. No automatic Kaggle submission.
 
 No remaining design questions. Hardware-dependent settings are determined by the smoke test and recorded in the run configuration. This plan does not claim that the five-hour limit guarantees a particular epoch count or leaderboard improvement.
