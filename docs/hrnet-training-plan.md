@@ -1,6 +1,8 @@
 # HRNet-W32 training plan
 
-Status: agreed plan. Implementation and training have not started.
+Status: the local frozen-feature and linear-head stage completed at epoch 40. The Colab CLI and notebook are implemented but the GPU fine-tuning and prediction export have not run.
+
+The selected local head reached 0.91747 fold-0 macro F1 at threshold 0.25 (Cat 0.98927, Dog 0.99208, Moris 0.84211, Motya 0.88889, Biatrix 0.87500). Macro AP was 0.95109. This is a checkpoint-selection score on one fold, not independent evidence of an ensemble gain. The head checkpoint and metadata are under ignored `artifacts/hrnet_head/hrnet_w32_head_fold0_seed42/`.
 
 ## Settled requirements
 
