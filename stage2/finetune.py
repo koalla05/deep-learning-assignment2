@@ -288,6 +288,14 @@ def copy_verified(source: Path, destination: Path) -> dict[str, str | int]:
     return {"file": destination.name, "bytes": source.stat().st_size, "sha256": digest.hexdigest()}
 
 
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        while chunk := stream.read(8 * 1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 class DriveRunBackup:
     """Keep epoch-level recovery files outside Colab's temporary VM."""
 
@@ -306,10 +314,18 @@ class DriveRunBackup:
         backed_up = [copy_verified(resume_path, self.drive_dir / "checkpoints" / resume_path.name)]
         best_stat = best_model_path.stat()
         best_stamp = (best_stat.st_mtime_ns, best_stat.st_size)
-        if self.last_best_stamp != best_stamp:
+        selected_name = best_model_path.name
+        if selected_name.startswith("best_epoch_") and selected_name.endswith(".ckpt"):
+            best_destination = self.drive_dir / "checkpoints" / selected_name
+            if best_destination.exists():
+                if file_sha256(best_destination) != file_sha256(best_model_path):
+                    raise IOError(f"Drive best checkpoint differs from local selected checkpoint: {best_destination}")
+            else:
+                backed_up.append(copy_verified(best_model_path, best_destination))
+        elif self.last_best_stamp != best_stamp:
             best_name = f"best_epoch_{epoch:02d}.ckpt"
             backed_up.append(copy_verified(best_model_path, self.drive_dir / "checkpoints" / best_name))
-            self.last_best_stamp = best_stamp
+        self.last_best_stamp = best_stamp
         manifest = self.local_dir / f"backup_epoch_{epoch:02d}.json"
         manifest.write_text(json.dumps({"epoch": epoch, "files": backed_up}, indent=2) + "\n")
         copy_verified(manifest, self.drive_dir / manifest.name)
@@ -317,7 +333,12 @@ class DriveRunBackup:
 
     def save_results(self, paths: list[Path]) -> None:
         for path in paths:
-            copy_verified(path, self.drive_dir / "results" / path.name)
+            destination = self.drive_dir / "results" / path.name
+            if destination.exists():
+                if file_sha256(path) != file_sha256(destination):
+                    raise IOError(f"Drive result differs from local artifact: {destination}")
+            else:
+                copy_verified(path, destination)
 
 
 class StopAfterEpochs(L.Callback):

@@ -1,0 +1,79 @@
+{
+  "run_id": "weighted_top2_double_exp1_exp3_exp5_exp7_fold0",
+  "experiment": "04_ensemble",
+  "status": "completed",
+  "fold": 0,
+  "method": "weighted mean of member probabilities (weights from a simple rule, not tuned), then fixed threshold",
+  "weighting": "top2_double",
+  "weights": {
+    "exp1": 0.3333333333333333,
+    "exp3": 0.3333333333333333,
+    "exp5": 0.16666666666666666,
+    "exp07": 0.16666666666666666
+  },
+  "members": [
+    {
+      "experiment": "01_convnext_standard",
+      "run_id": "convnext_standard_fold0_seed42_20261018_full1",
+      "checkpoint_sha256": "4d027ce525e10e7cbe20a59aebfa8c3c5befbbeafbb41f26dee44729428a2d26"
+    },
+    {
+      "experiment": "03_efficientnetv2_s",
+      "run_id": "efficientnetv2s_fold0_seed42",
+      "checkpoint_sha256": "d54b5495af69adfd47fb6e9aeda4a2d0529c6cce877304ffb07302a39b592bc7"
+    },
+    {
+      "experiment": "05_bit_resnetv2_50x1",
+      "run_id": "bit_r50x1_fold0_seed42",
+      "checkpoint_sha256": "8ede7547533baed45a0b2b84830f6e50c4cb1c524f436aea180db0c88a4b75f3"
+    },
+    {
+      "experiment": "07_hrnet_w32",
+      "run_id": "hrnet_w32_finetune_fold0_seed42",
+      "checkpoint_sha256": "c8a8a36762400162cbfa3c439b7fee748091f7f7c133c0ead126b7fc297ec071"
+    }
+  ],
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9866550005732437,
+    "per_label_f1": {
+      "Cat": 0.9960707269155207,
+      "Dog": 0.9960278053624627,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 0.9411764705882353
+    },
+    "macro_ap": 0.999991048279302,
+    "per_label_ap": {
+      "Cat": 0.9999826351789337,
+      "Dog": 0.9999726062175758,
+      "Moris": 0.9999999999999999,
+      "Motya": 1.0000000000000002,
+      "Biatrix": 1.0
+    }
+  },
+  "test_cells_changed_vs_reference": 48,
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/exp4/results/weighted_top2_double_exp1_exp3_exp5_exp7_fold0/weighted_top2_double_exp1_exp3_exp5_exp7_fold0_val.csv",
+    "submission_csv": "submissions/exp4_weighted_top2_double_exp1_exp3_exp5_exp7_025.csv"
+  },
+  "git_commit": "499b27c524e9e136095848d17b33e33a5ee9fd47",
+  "source_sha256": {
+    "notebooks/19_weighted_ensemble_exp1_exp3_exp5_exp7.ipynb": "5a44aa6c1d5f5c288ac6b4ca3268a51540be71f8edda3be80d78c90a5f76b99b",
+    "stage2/ensemble.py": "546c3a40a1e0f276a2e35cac24c4c84d9c4b7e86cf0c062f647a1844a99d3400",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501"
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}

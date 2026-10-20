@@ -103,3 +103,13 @@ def mean_probabilities(members: Sequence[np.ndarray]) -> np.ndarray:
     if len(members) < 2 or any(member.shape != members[0].shape for member in members):
         raise ValueError("An ensemble needs at least two aligned probability matrices.")
     return np.mean(np.stack(members), axis=0)
+
+
+def weighted_mean_probabilities(members: Sequence[np.ndarray], weights: Sequence[float]) -> np.ndarray:
+    """Weighted average of aligned probability matrices; the weights are normalized to sum to one."""
+    if len(members) < 2 or len(weights) != len(members) or any(member.shape != members[0].shape for member in members):
+        raise ValueError("A weighted ensemble needs one weight per aligned probability matrix, at least two.")
+    weights = np.asarray(weights, dtype=float)
+    if not np.isfinite(weights).all() or np.any(weights < 0) or weights.sum() <= 0:
+        raise ValueError("Weights must be finite and non-negative, with a positive sum.")
+    return np.tensordot(weights / weights.sum(), np.stack(members), axes=1)
