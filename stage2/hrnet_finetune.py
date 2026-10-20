@@ -51,6 +51,43 @@ class Config:
     run_id: str = "hrnet_w32_finetune_fold0_seed42"
 
 
+def training_device() -> torch.device:
+    """CUDA on Colab, the Apple GPU on a Mac; never a silent CPU run."""
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    raise RuntimeError("HRNet fine-tuning needs a CUDA or Apple MPS GPU")
+
+
+def check_precision(device: torch.device, precision: str) -> None:
+    if device.type == "mps" and precision != "32-true":
+        raise ValueError("Use --precision 32-true on MPS; the fp16 mixed-precision path is CUDA-only")
+
+
+def reset_peak_memory(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats()
+
+
+def synchronize(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize()
+    elif device.type == "mps":
+        torch.mps.synchronize()
+
+
+def peak_memory_gib(device: torch.device) -> float:
+    """CUDA's peak allocation; MPS keeps no peak, so report the driver's current allocation."""
+    if device.type == "cuda":
+        return torch.cuda.max_memory_allocated() / 2**30
+    return torch.mps.driver_allocated_memory() / 2**30
+
+
+def device_name(device: torch.device) -> str:
+    return torch.cuda.get_device_name() if device.type == "cuda" else f"Apple MPS ({platform.machine()})"
+
+
 def read_head_identity(root: Path, head_dir: Path, config: Config) -> dict:
     """Reject a head trained on different labels, folds, or image processing."""
     meta_path = head_dir / "head_best.json"
@@ -95,39 +132,39 @@ def preflight_inputs(root: Path, head_dir: Path, config: Config) -> tuple[list[d
 
 
 def smoke_test(root: Path, head_dir: Path, config: Config) -> None:
-    if not torch.cuda.is_available():
-        raise RuntimeError("Smoke test requires a CUDA GPU")
+    device = training_device()
+    check_precision(device, config.precision)
     training, validation, identity = preflight_inputs(root, head_dir, config)
-    network = load_initialized_network(config, head_dir, identity).cuda().train()
+    network = load_initialized_network(config, head_dir, identity).to(device).train()
     freeze_batchnorm_statistics(network)
     mean = tuple(identity["head"]["normalization"]["mean"])
     std = tuple(identity["head"]["normalization"]["std"])
     batches = prediction_rows(training[:config.batch_size], root / "data" / "train", config, mean, std)
     _, images, targets = next(iter(batches))
-    images, targets = images.cuda(), targets.cuda()
+    images, targets = images.to(device), targets.to(device)
     optimizer = torch.optim.AdamW(network.parameters(), lr=config.backbone_lr)
-    use_fp16 = config.precision == "16-mixed"
+    use_fp16 = device.type == "cuda" and config.precision == "16-mixed"
     scaler = torch.amp.GradScaler("cuda", enabled=use_fp16)
-    torch.cuda.reset_peak_memory_stats()
+    reset_peak_memory(device)
     start = time.perf_counter()
-    with torch.autocast("cuda", dtype=torch.float16 if use_fp16 else torch.bfloat16,
-                        enabled=config.precision in {"16-mixed", "bf16-mixed"}):
+    with torch.autocast(device.type, dtype=torch.float16 if use_fp16 else torch.bfloat16,
+                        enabled=device.type == "cuda" and config.precision in {"16-mixed", "bf16-mixed"}):
         loss = torch.nn.functional.binary_cross_entropy_with_logits(network(images), targets)
     scaler.scale(loss).backward()
     scaler.step(optimizer)
     scaler.update()
-    torch.cuda.synchronize()
+    synchronize(device)
     if not torch.isfinite(loss):
         raise ValueError("Smoke update produced nonfinite loss")
-    print(f"Smoke update: batch {config.batch_size}, precision {config.precision}, "
+    print(f"Smoke update on {device_name(device)}: batch {config.batch_size}, precision {config.precision}, "
           f"loss {float(loss):.5f}, {time.perf_counter() - start:.1f}s, "
-          f"peak allocated {torch.cuda.max_memory_allocated() / 2**30:.2f} GiB", flush=True)
+          f"GPU memory {peak_memory_gib(device):.2f} GiB", flush=True)
 
 
 def profile_epoch(root: Path, head_dir: Path, config: Config) -> Path:
     """Measure one complete epoch before fixing the real run's scheduler horizon."""
-    if not torch.cuda.is_available():
-        raise RuntimeError("Full-epoch profile requires a CUDA GPU")
+    device = training_device()
+    check_precision(device, config.precision)
     random.seed(config.seed)
     np.random.seed(config.seed)
     L.seed_everything(config.seed, workers=True)
@@ -148,17 +185,17 @@ def profile_epoch(root: Path, head_dir: Path, config: Config) -> Path:
                               num_workers=config.num_workers, pin_memory=True)
     val_loader = prediction_rows(validation, root / "data" / "train", config, mean, std)
     module = HRNetClassifier(network, config.backbone_lr, config.head_lr, config.weight_decay, config.threshold)
-    trainer = L.Trainer(accelerator="gpu", devices=1, precision=config.precision,
+    trainer = L.Trainer(accelerator=device.type, devices=1, precision=config.precision,
                         max_epochs=1, accumulate_grad_batches=config.effective_batch_size // config.batch_size,
                         callbacks=[FrozenBatchNormStatistics()], logger=False,
                         enable_checkpointing=False, enable_progress_bar=False, deterministic="warn")
-    torch.cuda.reset_peak_memory_stats()
+    reset_peak_memory(device)
     started = time.monotonic()
     trainer.fit(module, train_loader, val_loader)
     seconds = time.monotonic() - started
     metrics = trainer.callback_metrics
-    profile = {"config": asdict(config), "full_epoch_seconds": seconds,
-               "peak_allocated_gib": torch.cuda.max_memory_allocated() / 2**30,
+    profile = {"config": asdict(config), "full_epoch_seconds": seconds, "device": device_name(device),
+               "peak_allocated_gib": peak_memory_gib(device),
                "train_loss": float(metrics["train_loss_current"]),
                "val_loss": float(metrics["val_loss"]),
                "macro_f1": float(metrics["val_macro_f1"]),
@@ -339,6 +376,13 @@ class HRNetClassifier(FineTuneClassifier):
         return loss
 
     def on_validation_epoch_end(self) -> None:
+        if self.trainer.sanity_checking:
+            # Lightning's 2-batch sanity pass has too few images for per-label AP (a label with no
+            # positives has none); the full fold-0 validation always contains every label.
+            self.validation_targets.clear()
+            self.validation_probabilities.clear()
+            self.validation_label_losses.clear()
+            return
         targets = np.concatenate(self.validation_targets)
         probabilities = np.concatenate(self.validation_probabilities)
         metrics = score_probabilities(targets, probabilities, self.threshold)
@@ -430,11 +474,11 @@ def export_predictions(
     root: Path, run_dir: Path, config: Config, identity: dict,
     checkpoint: Path, validation: list[dict], backup: DriveRunBackup | None,
 ) -> dict:
-    device = torch.device("cuda")
+    device = training_device()
     model = timm.create_model(config.model_name, pretrained=False, num_classes=len(LABEL_COLUMNS))
     module = HRNetClassifier.load_from_checkpoint(
         checkpoint, network=model, backbone_lr=config.backbone_lr, head_lr=config.head_lr,
-        weight_decay=config.weight_decay, threshold=config.threshold, map_location=device,
+        weight_decay=config.weight_decay, threshold=config.threshold, map_location="cpu",
     )
     mean = tuple(identity["head"]["normalization"]["mean"])
     std = tuple(identity["head"]["normalization"]["std"])
@@ -508,8 +552,7 @@ def finish_exports(
 
 def export_saved_run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resume: Path) -> Path:
     """Finish an interrupted export without another optimizer step."""
-    if not torch.cuda.is_available():
-        raise RuntimeError("Selected-checkpoint export requires a CUDA GPU")
+    training_device()  # Export needs the same GPU check as training.
     _, validation, identity = preflight_inputs(root, head_dir, config)
     run_dir = root / "artifacts" / "hrnet_finetune" / config.run_id
     record_path = run_dir / "run.json"
@@ -540,8 +583,8 @@ def export_saved_run(root: Path, head_dir: Path, drive_dir: Path | None, config:
 
 def run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resume: Path | None) -> Path:
     started = time.monotonic()
-    if not torch.cuda.is_available():
-        raise RuntimeError("Joint fine-tuning requires a Colab CUDA GPU")
+    device = training_device()
+    check_precision(device, config.precision)
     if config.effective_batch_size % config.batch_size or config.max_epochs < 1 or config.patience < 1:
         raise ValueError("Invalid batch size, epoch cap, or patience")
     random.seed(config.seed)
@@ -581,7 +624,7 @@ def run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resu
                   "train_rows": len(training), "validation_rows": len(validation),
                   "torch": torch.__version__, "timm": timm.__version__,
                   "lightning": L.__version__, "python": platform.python_version(),
-                  "gpu": torch.cuda.get_device_name(), "git_revision": (
+                  "gpu": device_name(device), "git_revision": (
                       staged["git_revision"] if staged else subprocess.run(
                           ["git", "rev-parse", "HEAD"], cwd=root,
                           capture_output=True, text=True).stdout.strip()),
@@ -600,7 +643,7 @@ def run(root: Path, head_dir: Path, drive_dir: Path | None, config: Config, resu
                              id=config.run_id, save_dir=str(run_dir), log_model=False)
         logger.log_hyperparams(asdict(config))
     trainer = L.Trainer(
-        accelerator="gpu", devices=1, precision=config.precision, max_epochs=config.max_epochs,
+        accelerator=device.type, devices=1, precision=config.precision, max_epochs=config.max_epochs,
         accumulate_grad_batches=config.effective_batch_size // config.batch_size,
         callbacks=[FrozenBatchNormStatistics(), selected, EpochBackup(run_dir, selected, backup),
                    StopAfterSelection(selected, config, started)], logger=logger,

@@ -1,0 +1,18 @@
+{
+  "run_id": "hrnet_w32_finetune_fold0_seed42_test",
+  "experiment": "07_hrnet_w32",
+  "status": "test_predicted",
+  "source_run_id": "hrnet_w32_finetune_fold0_seed42",
+  "source_checkpoint_sha256": "c8a8a36762400162cbfa3c439b7fee748091f7f7c133c0ead126b7fc297ec071",
+  "test_images": 18673,
+  "transform": "mean-colour letterbox, bicubic, ImageNet normalization; no augmentation",
+  "logits_csv": "experiments/exp07/results/hrnet_w32_finetune_fold0_seed42_test/hrnet_w32_finetune_fold0_seed42_test_logits.csv",
+  "git_commit": "499b27c524e9e136095848d17b33e33a5ee9fd47",
+  "device": "Apple MPS (arm64)",
+  "versions": {
+    "python": "3.12.15",
+    "torch": "2.14.1",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  }
+}

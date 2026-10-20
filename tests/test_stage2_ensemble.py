@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from stage2.ensemble import architecture_name, load_finetuned_network, mean_probabilities, predict_flipped_probabilities, read_probabilities, write_test_probabilities
+from stage2.ensemble import architecture_name, load_finetuned_network, mean_probabilities, predict_flipped_probabilities, read_probabilities, weighted_mean_probabilities, write_test_probabilities
 from stage2.experiment import LABEL_COLUMNS, write_probabilities
 
 
@@ -17,6 +17,16 @@ NOTEBOOK = Path(__file__).resolve().parents[1] / "notebooks" / "08_ensemble.ipyn
 
 
 class EnsembleContractTests(unittest.TestCase):
+    def test_weighted_mean_normalizes_weights_and_equal_weights_match_the_mean(self) -> None:
+        a, b = np.full((2, 5), 0.2), np.full((2, 5), 0.8)
+        np.testing.assert_allclose(weighted_mean_probabilities([a, b], [1, 1]), mean_probabilities([a, b]))
+        np.testing.assert_allclose(weighted_mean_probabilities([a, b], [3, 1]), np.full((2, 5), 0.35))
+        np.testing.assert_allclose(weighted_mean_probabilities([a, b], [0.3, 0.1]), np.full((2, 5), 0.35))
+        np.testing.assert_allclose(weighted_mean_probabilities([a, b], [1, 0]), a)
+        for bad in ([1], [1, -1], [0, 0], [1, float("nan")]):
+            with self.assertRaises(ValueError):
+                weighted_mean_probabilities([a, b], bad)
+
     def test_probabilities_are_aligned_by_id_not_row_order(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "val.csv"
@@ -133,6 +143,20 @@ class EnsembleThreeMemberNotebookTests(unittest.TestCase):
         for member in ("'exp1':", "'exp3':", "'exp5':"):
             self.assertIn(member, flags)
         self.assertNotIn("'exp2':", flags)
+
+
+class EnsembleHrnetNotebookTests(unittest.TestCase):
+    def test_members_are_exp1_exp3_exp5_exp07_and_nothing_is_uploaded(self) -> None:
+        cells = json.loads(NOTEBOOK.with_name("18_ensemble_exp1_exp3_exp5_exp7.ipynb").read_text())["cells"]
+        flags = "".join(next(cell for cell in cells if cell["id"] == "b8e00002")["source"])
+        code = "".join("".join(cell["source"]) for cell in cells if cell["cell_type"] == "code")
+        self.assertIn("SUBMIT_TO_KAGGLE = False", flags)
+        self.assertIn("'STAGE2_RUN_TEST_INFERENCE', '0'", flags)
+        for member in ("'exp1':", "'exp3':", "'exp5':", "'exp07':"):
+            self.assertIn(member, flags)
+        self.assertNotIn("'exp2':", flags)
+        self.assertIn("Refusing to overwrite", code)
+        self.assertNotIn("kaggle competitions submit", code)
 
 
 class FullDataNotebookTests(unittest.TestCase):
