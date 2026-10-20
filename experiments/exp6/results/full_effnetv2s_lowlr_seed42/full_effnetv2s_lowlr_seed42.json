@@ -1,0 +1,98 @@
+{
+  "run_id": "full_effnetv2s_lowlr_seed42",
+  "experiment": "06_full_data",
+  "status": "completed",
+  "fold": null,
+  "seed": 42,
+  "smoke_test": false,
+  "model": {
+    "name": "tf_efficientnetv2_s.in21k_ft_in1k",
+    "variant": "standard",
+    "family": "exp3",
+    "title": "EfficientNetV2-S (Exp3), lower learning rate",
+    "initial_head_checkpoint": "experiments/exp3/results/efficientnetv2s_fold0_seed42/head.pt",
+    "initial_head_sha256": "6a7c6021284e20bfd21ea035c6541434664a87dd655fca8c7c2b094de5242ea8",
+    "replaces_fold0_run": "efficientnetv2s_fold0_seed42"
+  },
+  "data": {
+    "training_images": 12260,
+    "training_folds": "all (0-4)",
+    "image_size": 384,
+    "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5",
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "mean": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "std": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  "training": {
+    "optimizer": "AdamW(backbone_lr=5e-05, head_lr=0.0005, weight_decay=0.01 except bias/norm, betas=(0.9, 0.999))",
+    "scheduler": "one epoch step warmup then cosine to 0.1 peak over 8 epochs; stopped after 8",
+    "loss": "BCEWithLogitsLoss",
+    "epochs": 8,
+    "physical_batch_size": 8,
+    "effective_batch_size": 16,
+    "precision": "32-true",
+    "gradient_clip_norm": 1.0,
+    "batchnorm_statistics_frozen": true,
+    "checkpoint": "final weights; no held-out data, so no selection",
+    "before": "backbone 1e-4, head 1e-3; best fold-0 epoch 8 of 8",
+    "final_train_loss": 2.0783540094271302e-05
+  },
+  "timings": {
+    "training_seconds": 7423.794139416001,
+    "epoch_seconds": [
+      927.8255182499997,
+      928.7986418749933,
+      928.7830749580025,
+      927.340431042001,
+      927.0844006660045,
+      927.1859712500009,
+      926.2921979590028,
+      927.8667737499927
+    ]
+  },
+  "artifacts": {
+    "final_checkpoint": "experiments/exp6/results/full_effnetv2s_lowlr_seed42/final.ckpt",
+    "best_checkpoint_sha256": "e0ed90dfa80aab36890561cb7dd0db655bec6c52e6582186e3f159cebc8cb313",
+    "curves_csv": "experiments/exp6/results/full_effnetv2s_lowlr_seed42/curves/version_0/metrics.csv"
+  },
+  "hardware": {
+    "device": "mps"
+  },
+  "versions": {
+    "python": "3.12.15",
+    "torch": "2.14.1",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  },
+  "git_commit": "6d3c0a7997020e033dc0e286578f2ab560551cda",
+  "source_sha256": {
+    "notebooks/14_full_data_final.ipynb": "9b6025d4c6a5aca1205374f98059019bdf844d35a78c9ec89f6bc0a53fa4c78d",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501",
+    "stage2/train.py": "71ea58da57ba01f8eceb58d5c572301636d627fbbe71d92d9eb950ee999562aa",
+    "stage2/finetune.py": "87b71c292aeddb8ef900555dcfdf9777c42662cd00c944dd044daeb25d316d35",
+    "stage2/batchnorm.py": "7290cc90ad97a8b5dab798fb25dd8daea28ed6d0f8b863c51731061877976437",
+    "stage2/ensemble.py": "31ef61e9800f17bc0280b45f52c0896e332306325e2c8d09cd5320b2761bce6f",
+    "stage2/thresholds.py": "0ce98882d153b8073770b36e65d2dd223f376810ab93939b0d3cf8840d45e5cd"
+  },
+  "telemetry": {
+    "wandb_run_id": "2in50hq4"
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}

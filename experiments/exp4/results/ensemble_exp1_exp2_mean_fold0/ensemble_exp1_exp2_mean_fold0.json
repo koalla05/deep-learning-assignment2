@@ -1,0 +1,65 @@
+{
+  "run_id": "ensemble_exp1_exp2_mean_fold0",
+  "experiment": "04_ensemble",
+  "status": "completed",
+  "fold": 0,
+  "method": "equal-weight mean of member probabilities, then fixed threshold",
+  "members": [
+    {
+      "experiment": "01_convnext_standard",
+      "run_id": "convnext_standard_fold0_seed42_20261018_full1",
+      "checkpoint_sha256": "4d027ce525e10e7cbe20a59aebfa8c3c5befbbeafbb41f26dee44729428a2d26",
+      "fold0_macro_f1": 0.9751849358283667
+    },
+    {
+      "experiment": "02_convnext_custom",
+      "run_id": "convnext_custom_fold0_seed42_mps_gradcam3",
+      "checkpoint_sha256": "4472928174f259f6b688f7ad99d9310d701fb0cf70ca51b7c91a13b50d709804",
+      "fold0_macro_f1": 0.9740114388686489
+    }
+  ],
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9752846857114722,
+    "per_label_f1": {
+      "Cat": 0.9965568125922283,
+      "Dog": 0.9975136747886624,
+      "Moris": 1.0,
+      "Motya": 0.9411764705882353,
+      "Biatrix": 0.9411764705882353
+    },
+    "macro_ap": 0.9999878449603538,
+    "per_label_ap": {
+      "Cat": 0.999975039996755,
+      "Dog": 0.9999641848050134,
+      "Moris": 0.9999999999999999,
+      "Motya": 1.0000000000000002,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.973911688739256
+  },
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/exp4/results/ensemble_exp1_exp2_mean_fold0/ensemble_exp1_exp2_mean_fold0_val.csv",
+    "submission_csv": "submissions/exp4_ensemble_exp1_exp2_mean_025.csv"
+  },
+  "git_commit": "bb0398bb88113a58b37d448800502b4b3691b1d3",
+  "source_sha256": {
+    "notebooks/08_ensemble.ipynb": "9664f5cb7b07f2f03597a87de2b4f13530601de38726c208c9c89985a0a2ca86",
+    "stage2/ensemble.py": "9ed8942e6f68395275821a8cbe042aa43fbc57bd09f65308d848aaebe9a48cf8",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501",
+    "stage2/custom_convnext.py": "394b84fe6fb3d2a57a4d9ac05505d1eb9385efd3ca0462ff5921f0db00b75743"
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}

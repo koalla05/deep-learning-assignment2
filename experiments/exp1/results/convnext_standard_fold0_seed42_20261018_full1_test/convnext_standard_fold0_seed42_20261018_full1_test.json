@@ -1,0 +1,22 @@
+{
+  "run_id": "convnext_standard_fold0_seed42_20261018_full1_test",
+  "experiment": "01_convnext_standard",
+  "status": "test_predicted",
+  "source_run_id": "convnext_standard_fold0_seed42_20261018_full1",
+  "source_checkpoint_sha256": "4d027ce525e10e7cbe20a59aebfa8c3c5befbbeafbb41f26dee44729428a2d26",
+  "test_images": 18673,
+  "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5; no test-time augmentation",
+  "git_commit": "bb0398bb88113a58b37d448800502b4b3691b1d3",
+  "source_sha256": {
+    "notebooks/08_ensemble.ipynb": "9664f5cb7b07f2f03597a87de2b4f13530601de38726c208c9c89985a0a2ca86",
+    "stage2/ensemble.py": "9ed8942e6f68395275821a8cbe042aa43fbc57bd09f65308d848aaebe9a48cf8",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501",
+    "stage2/custom_convnext.py": "394b84fe6fb3d2a57a4d9ac05505d1eb9385efd3ca0462ff5921f0db00b75743"
+  },
+  "device": "mps",
+  "prediction_seconds": 1589.171645792001,
+  "versions": {
+    "python": "3.12.15",
+    "torch": "2.14.1"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "run_id": "stacking_logreg_exp1_exp3_exp5_fold0",
+  "experiment": "04_ensemble",
+  "status": "completed",
+  "fold": 0,
+  "method": "per-label logistic regression on the members' own-label logits (L2, C=1), fitted on fold-0 predictions, then fixed threshold",
+  "members": [
+    {
+      "experiment": "exp1",
+      "run_id": "convnext_standard_fold0_seed42_20261018_full1",
+      "checkpoint_sha256": "4d027ce525e10e7cbe20a59aebfa8c3c5befbbeafbb41f26dee44729428a2d26"
+    },
+    {
+      "experiment": "exp3",
+      "run_id": "efficientnetv2s_fold0_seed42",
+      "checkpoint_sha256": "d54b5495af69adfd47fb6e9aeda4a2d0529c6cce877304ffb07302a39b592bc7"
+    },
+    {
+      "experiment": "exp5",
+      "run_id": "bit_r50x1_fold0_seed42",
+      "checkpoint_sha256": "8ede7547533baed45a0b2b84830f6e50c4cb1c524f436aea180db0c88a4b75f3"
+    }
+  ],
+  "meta_model": {
+    "Cat": {
+      "weights": {
+        "exp1": 0.3392002789904042,
+        "exp3": 0.4387477331157334,
+        "exp5": -0.04057196464679457
+      },
+      "intercept": -1.8094860026500266
+    },
+    "Dog": {
+      "weights": {
+        "exp1": 0.47088649851211717,
+        "exp3": 0.13520748180601624,
+        "exp5": 0.10644870518015895
+      },
+      "intercept": -0.3832926121634712
+    },
+    "Moris": {
+      "weights": {
+        "exp1": 0.3509440434954111,
+        "exp3": 0.39213391880188503,
+        "exp5": 0.3539880897573267
+      },
+      "intercept": -0.03411118821122966
+    },
+    "Motya": {
+      "weights": {
+        "exp1": 0.27418691106872833,
+        "exp3": 0.3193028672875537,
+        "exp5": 0.3067171275544388
+      },
+      "intercept": -0.044000178664070126
+    },
+    "Biatrix": {
+      "weights": {
+        "exp1": 0.13678668465570615,
+        "exp3": 0.33458113217843,
+        "exp5": 0.4683086708317052
+      },
+      "intercept": -0.2027358231894873
+    }
+  },
+  "validation": "10 repeats of stratified 5-fold CV inside fold 0, per label; out-of-fold macro F1 at 0.25",
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1_oof_mean": 0.9987846497833797,
+    "macro_f1_oof_worst": 0.9986149888634438,
+    "probability_mean_macro_f1": 0.9865572027600955
+  },
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/exp4/results/stacking_logreg_exp1_exp3_exp5_fold0/stacking_logreg_exp1_exp3_exp5_fold0_val.csv",
+    "submission_csv": "submissions/exp4_stacking_logreg_exp1_exp3_exp5_025.csv"
+  },
+  "git_commit": "6d3c0a7997020e033dc0e286578f2ab560551cda",
+  "source_sha256": {
+    "notebooks/15_stacking_logreg.ipynb": "3b3873031c7d86ceaf152f79de34667ec2681e7a3423ba5bfc2cb7c6f6163ff5",
+    "stage2/ensemble.py": "31ef61e9800f17bc0280b45f52c0896e332306325e2c8d09cd5320b2761bce6f",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501"
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}

@@ -1,0 +1,157 @@
+{
+  "fold": 0,
+  "seed": 42,
+  "model": {
+    "name": "resnetv2_50x1_bit.goog_in21k_ft_in1k",
+    "variant": "standard",
+    "family": "bit_resnetv2",
+    "pretrained_source": {
+      "hf_hub_id": "timm/resnetv2_50x1_bit.goog_in21k_ft_in1k",
+      "tag": "goog_in21k_ft_in1k",
+      "architecture": "resnetv2_50x1_bit"
+    },
+    "initial_head_checkpoint": "experiments/exp5/results/bit_r50x1_fold0_seed42/head.pt",
+    "initial_head_sha256": "7f79945a09663aac20de7a510300001fadd10e42b9f7f533fc4a373b7b16d6fe",
+    "head_warmup": {
+      "optimizer": "AdamW(lr=0.001, weight_decay=0.01)",
+      "epochs_completed": 8,
+      "best_heldout_macro_f1": 0.9536112546920776,
+      "seconds": 1819.0755348329985
+    }
+  },
+  "data": {
+    "image_size": 384,
+    "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5",
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "mean": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "std": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  "training": {
+    "optimizer": "AdamW(backbone_lr=3e-05, head_lr=0.0003, weight_decay=0.01 except bias/norm, betas=(0.9, 0.999))",
+    "scheduler": "one epoch step warmup then cosine to 0.1 peak",
+    "loss": "BCEWithLogitsLoss",
+    "max_epochs": 8,
+    "patience": 3,
+    "physical_batch_size": 8,
+    "effective_batch_size": 16,
+    "precision": "32-true",
+    "stage_policy": "full network and classifier trainable; GroupNorm has no running statistics",
+    "checkpoint_selection": "best validation macro F1 at 0.25",
+    "gradient_clip_norm": 1.0,
+    "epochs_completed": 8
+  },
+  "run_id": "bit_r50x1_fold0_seed42",
+  "experiment": "05_bit_resnetv2_50x1",
+  "status": "completed",
+  "git_commit": "6d3c0a7997020e033dc0e286578f2ab560551cda",
+  "source_sha256": {
+    "notebooks/12_bit_resnetv2.ipynb": "6d11baaa122e256d6fc70e3df595dbfac448d326f0641817f1111a95b7ba1361",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501",
+    "stage2/train.py": "71ea58da57ba01f8eceb58d5c572301636d627fbbe71d92d9eb950ee999562aa",
+    "stage2/finetune.py": "b7112edd247aa94405ff7a0f987a607c5fe92905269db8a22d9fa80a09296879",
+    "stage2/run_records.py": "49f1422b938dbf284e046a7ccba74af8c9e4a32fe130fd793cb7461e30c5a860",
+    "stage2/diagnostics.py": "ffe430d7af45fd7d44de97382c4bc2f992316f48817c198694955d7fb8dd110b",
+    "stage2/gradcam.py": "589bc18006d012b362c91c425afbd7e45f35aa802b48181931d4d3ab3876b56e"
+  },
+  "hardware": {
+    "device": "mps:0",
+    "system_memory_bytes": 25769803776,
+    "mps_sampled_allocated_high_water_bytes": 394671104,
+    "mps_sampled_driver_high_water_bytes": 3495018496,
+    "cuda_peak_allocated_bytes": null,
+    "process_lifetime_peak_rss_bytes": 1094713344,
+    "scope": "Training and validation; excludes model setup and final inference. MPS is sampled at batch/epoch boundaries, not a true allocator peak. RSS is the process-lifetime high-water mark, not isolated to this run."
+  },
+  "trainable_parameters": 23510597,
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9985134806755427,
+    "per_label_f1": {
+      "Cat": 0.9970472440944882,
+      "Dog": 0.9955201592832255,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_ap": 0.9997059026730059,
+    "per_label_ap": {
+      "Cat": 0.9987396836864212,
+      "Dog": 0.999789829678608,
+      "Moris": 0.9999999999999999,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9877883526661965,
+    "per_label_f1_at_0_5": {
+      "Cat": 0.9965534219596258,
+      "Dog": 0.9950199203187251,
+      "Moris": 0.9473684210526315,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    }
+  },
+  "timings": {
+    "head_warmup_seconds": 1819.0755348329985,
+    "training_and_validation_seconds": 5661.813777000003,
+    "epoch_seconds": [
+      705.6084683340014,
+      708.8641482079984,
+      707.0216073330084,
+      706.7427896660083,
+      709.4294620000001,
+      706.69095774999,
+      707.8739033750026,
+      707.5313119589991
+    ],
+    "first_epoch_projected_seconds": 6209.354521339213,
+    "best_checkpoint_prediction_seconds": 46.342453125005704
+  },
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/exp5/results/bit_r50x1_fold0_seed42/bit_r50x1_fold0_seed42_val.csv",
+    "best_checkpoint_local": "experiments/exp5/results/bit_r50x1_fold0_seed42/checkpoints/best.ckpt",
+    "best_checkpoint_sha256": "8ede7547533baed45a0b2b84830f6e50c4cb1c524f436aea180db0c88a4b75f3",
+    "curves_csv": "experiments/exp5/results/bit_r50x1_fold0_seed42/curves/version_0/metrics.csv",
+    "layer_gradients_csv": "experiments/exp5/results/bit_r50x1_fold0_seed42/diagnostics/layer_gradients.csv",
+    "gradient_flow_png": "experiments/exp5/results/bit_r50x1_fold0_seed42/gradient_flow.png",
+    "memory_json": "experiments/exp5/results/bit_r50x1_fold0_seed42/diagnostics/memory.json",
+    "gradcam_images": [
+      "experiments/exp5/results/bit_r50x1_fold0_seed42/gradcam/cat_116d851cb24f39d28f719a743d10df086eb2c793.png",
+      "experiments/exp5/results/bit_r50x1_fold0_seed42/gradcam/dog_e6aea26b070dfe40f6a6121538f00cab344dc03a.png",
+      "experiments/exp5/results/bit_r50x1_fold0_seed42/gradcam/moris_055cb6e1fe1eb7fc077bd98717851ae53de3113c.png",
+      "experiments/exp5/results/bit_r50x1_fold0_seed42/gradcam/motya_cfbc890562e329131f546b43be873f41a06ad195.png",
+      "experiments/exp5/results/bit_r50x1_fold0_seed42/gradcam/biatrix_14ababeb09beeaf8dd430e851e671475ab15fc46.png"
+    ],
+    "drive_backup_dir": null
+  },
+  "versions": {
+    "python": "3.12.15",
+    "torch": "2.14.1",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  },
+  "telemetry": {
+    "wandb_enabled": true,
+    "wandb_mode": "online",
+    "wandb_project": "ai301-stage2",
+    "wandb_run_id": "4t3z29jl",
+    "model_upload": false
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}

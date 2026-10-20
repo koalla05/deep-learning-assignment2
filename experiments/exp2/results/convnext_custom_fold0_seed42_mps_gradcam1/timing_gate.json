@@ -1,0 +1,15 @@
+{
+  "run_id": "convnext_custom_fold0_seed42_mps_gradcam1",
+  "status": "timing_gate_exceeded",
+  "fold": 0,
+  "first_epoch_seconds": 2532.820712625049,
+  "projection_margin": 1.1,
+  "projected_seconds": 22288.822271100435,
+  "training_and_validation_seconds": 2536.4607069578487,
+  "maximum_hours": 5.0,
+  "planned_epochs": 8,
+  "device": "mps",
+  "physical_batch_size": 2,
+  "effective_batch_size": 16,
+  "peak_cuda_allocated_bytes": null
+}

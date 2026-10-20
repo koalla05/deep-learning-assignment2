@@ -1,0 +1,21 @@
+{
+  "run_id": "efficientnetv2s_fold0_seed42_test_flip",
+  "experiment": "03_efficientnetv2_s",
+  "status": "flip_predicted",
+  "source_run_id": "efficientnetv2s_fold0_seed42",
+  "source_checkpoint_sha256": "d54b5495af69adfd47fb6e9aeda4a2d0529c6cce877304ffb07302a39b592bc7",
+  "images": 18673,
+  "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5; horizontal mirror applied after letterboxing",
+  "git_commit": "ce77c779fb626533558580f0ec10a1da2e8a445a",
+  "source_sha256": {
+    "notebooks/11_tta_ensemble.ipynb": "b4f0fa8e0031dbee4d4f1c47e2f7b6395e71927564532b3130dbb53a033544c4",
+    "stage2/ensemble.py": "31ef61e9800f17bc0280b45f52c0896e332306325e2c8d09cd5320b2761bce6f",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501"
+  },
+  "device": "mps",
+  "prediction_seconds": 506.0137828750012,
+  "versions": {
+    "python": "3.12.15",
+    "torch": "2.14.1"
+  }
+}

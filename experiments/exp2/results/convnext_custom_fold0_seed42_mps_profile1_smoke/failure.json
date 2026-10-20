@@ -1,0 +1,11 @@
+{
+  "run_id": "convnext_custom_fold0_seed42_mps_profile1",
+  "status": "failed",
+  "phase": "post-training smoke verification",
+  "device": "mps",
+  "optimizer_steps": 4,
+  "error": "Input type (MPSFloatType) and weight type (torch.FloatTensor) should be the same",
+  "cause": "Lightning moved the network to CPU after fit; the new pre-reload verification forwarded an MPS image without moving the module back.",
+  "resolution": "Move the module explicitly to DEVICE before checking logits. The fresh-kernel profile2 run passed.",
+  "quality_metrics": null
+}

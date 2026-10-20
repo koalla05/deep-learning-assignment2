@@ -1,0 +1,23 @@
+[project]
+name = "ai301-cats-and-dogs-stage2"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "ipykernel>=6.29,<7",
+    "lightning>=2.5,<3",
+    "matplotlib>=3.9,<4",
+    "pillow>=10,<13",
+    "scikit-learn>=1.5,<2",
+    "timm>=1.0,<2",
+    "torch>=2.5,<3",
+    "torchvision>=0.20,<1",
+    "wandb>=0.19,<1",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "nbclient>=0.10,<0.11",
+]

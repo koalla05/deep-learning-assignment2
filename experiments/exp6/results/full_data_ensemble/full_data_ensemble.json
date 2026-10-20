@@ -1,0 +1,108 @@
+{
+  "run_id": "full_data_ensemble",
+  "experiment": "06_full_data",
+  "status": "completed",
+  "method": "equal-weight mean of member probabilities, then thresholds",
+  "members": {
+    "exp3": "full data (full_effnetv2s_lowlr_seed42)",
+    "exp5": "full data (full_bit_r50x1_seed42)",
+    "exp1": "full data (full_convnext_base_seed42)"
+  },
+  "thresholds": {
+    "fixed": 0.25,
+    "tuned": {
+      "Cat": 0.45,
+      "Dog": 0.5,
+      "Moris": 0.25,
+      "Motya": 0.25,
+      "Biatrix": 0.25
+    }
+  },
+  "threshold_choice": [
+    {
+      "label": "Cat",
+      "positives": 1015,
+      "informative": 14,
+      "threshold": 0.45,
+      "tuned": true,
+      "f1_default": 0.9955817378497791,
+      "f1_chosen": 0.9975405804230202,
+      "plateau": [
+        0.35,
+        0.75
+      ],
+      "bootstrap_interval": [
+        0.4,
+        0.925
+      ]
+    },
+    {
+      "label": "Dog",
+      "positives": 1004,
+      "informative": 25,
+      "threshold": 0.5,
+      "tuned": true,
+      "f1_default": 0.9960278053624627,
+      "f1_chosen": 0.9975111996017919,
+      "plateau": [
+        0.35,
+        0.65
+      ],
+      "bootstrap_interval": [
+        0.3,
+        0.65
+      ]
+    },
+    {
+      "label": "Moris",
+      "positives": 10,
+      "informative": 2,
+      "threshold": 0.25,
+      "tuned": false,
+      "f1_default": 1.0,
+      "f1_chosen": 1.0,
+      "plateau": [
+        0.05,
+        0.8
+      ],
+      "bootstrap_interval": null
+    },
+    {
+      "label": "Motya",
+      "positives": 9,
+      "informative": 2,
+      "threshold": 0.25,
+      "tuned": false,
+      "f1_default": 1.0,
+      "f1_chosen": 1.0,
+      "plateau": [
+        0.05,
+        0.65
+      ],
+      "bootstrap_interval": null
+    },
+    {
+      "label": "Biatrix",
+      "positives": 8,
+      "informative": 1,
+      "threshold": 0.25,
+      "tuned": false,
+      "f1_default": 0.9411764705882353,
+      "f1_chosen": 0.9411764705882353,
+      "plateau": [
+        0.3,
+        0.95
+      ],
+      "bootstrap_interval": null
+    }
+  ],
+  "submissions": [
+    "submissions/exp6_full_data_ensemble_025.csv",
+    "submissions/exp6_full_data_ensemble_tuned.csv"
+  ],
+  "git_commit": "6d3c0a7997020e033dc0e286578f2ab560551cda",
+  "public_leaderboard_score": {
+    "0.25": null,
+    "tuned": null
+  }
+}

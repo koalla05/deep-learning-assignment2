@@ -1,0 +1,94 @@
+{
+  "run_id": "convnext_head_fold0_seed42_colab",
+  "experiment": "00_shared_head",
+  "status": "completed",
+  "git_commit": null,
+  "source_sha256": {
+    "notebooks/05_convnext_head.ipynb": "b92861d9d15f4e6a94634dbcbdccb296beae8817a2f9e5ddd0a2172f01ebb6d1",
+    "stage2/experiment.py": "f25fa056d6e32658f21d6c3799e3b7f37ff82af1b566dcbad7bd2e0d5c1db68a",
+    "stage2/train.py": "71ea58da57ba01f8eceb58d5c572301636d627fbbe71d92d9eb950ee999562aa"
+  },
+  "fold": 0,
+  "seed": 42,
+  "model": {
+    "name": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "variant": "head_only",
+    "pretrained_checkpoint": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "initial_head_checkpoint": null
+  },
+  "data": {
+    "image_size": 384,
+    "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5",
+    "fold_file": "folds.csv",
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "training": {
+    "optimizer": "AdamW(lr=0.001, weight_decay=0.01)",
+    "scheduler": "constant",
+    "loss": "BCEWithLogitsLoss",
+    "epochs_completed": 10,
+    "physical_batch_size": 2,
+    "effective_batch_size": 16,
+    "precision": "float32",
+    "stage_policy": "frozen backbone in eval mode; classifier trainable",
+    "checkpoint_selection": "best validation macro F1 at 0.25"
+  },
+  "hardware": {
+    "device": "cuda",
+    "system_memory_gb": null
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9357660566317454,
+    "per_label_f1": {
+      "Cat": 0.9955773955773956,
+      "Dog": 0.9975111996017919,
+      "Moris": 0.8695652173913043,
+      "Motya": 0.875,
+      "Biatrix": 0.9411764705882353
+    },
+    "macro_ap": 0.9668250618913227,
+    "per_label_ap": {
+      "Cat": 0.9999788420709081,
+      "Dog": 0.9999473331865711,
+      "Moris": 0.9651515151515151,
+      "Motya": 0.8690476190476193,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.918277669519572
+  },
+  "timings": {
+    "training_and_validation_seconds": 5520.045052768,
+    "best_checkpoint_prediction_seconds": 112.17003291000037
+  },
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/00_shared_head/results/convnext_head_fold0_seed42_colab_val.csv",
+    "head_checkpoint": "experiments/00_shared_head/checkpoints/convnext_head_fold0_seed42_colab_head.pt",
+    "full_checkpoint_local": "artifacts/convnext_head_fold0_seed42_colab/checkpoints/best.ckpt",
+    "curves_csv": "artifacts/convnext_head_fold0_seed42_colab/curves/version_0/metrics.csv"
+  },
+  "versions": {
+    "python": "3.13.15",
+    "torch": "2.11.0+cu130",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  },
+  "telemetry": {
+    "wandb_enabled": true,
+    "wandb_mode": "online",
+    "wandb_project": "ai301-stage2",
+    "wandb_run_id": "v93j8869",
+    "model_upload": false
+  },
+  "public_leaderboard_score": null,
+  "error": null
+}
