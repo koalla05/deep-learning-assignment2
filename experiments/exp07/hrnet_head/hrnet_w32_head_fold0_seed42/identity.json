@@ -1,0 +1,27 @@
+{
+  "config": {
+    "model_name": "hrnet_w32.ms_in1k",
+    "image_size": 384,
+    "validation_fold": 0,
+    "seed": 42,
+    "threshold": 0.25,
+    "batch_size": 2,
+    "chunk_images": 64,
+    "head_epochs": 40,
+    "head_lr": 0.001,
+    "weight_decay": 0.0001,
+    "run_id": "hrnet_w32_head_fold0_seed42"
+  },
+  "labels": [
+    "Cat",
+    "Dog",
+    "Moris",
+    "Motya",
+    "Biatrix"
+  ],
+  "train_csv_sha256": "d814f79e96b1673b734c661b42069632b6e5d56b1b404da688d65c0c42a43336",
+  "fold_csv_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+  "training_count": 9808,
+  "validation_count": 2452,
+  "initial_head_epochs": 8
+}
