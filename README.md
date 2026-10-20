@@ -8,6 +8,9 @@ Each photo gets five 0/1 labels: `Cat`, `Dog` and three named pets, `Moris`, `Mo
 | [01_eda.ipynb](notebooks/01_eda.ipynb) | Data checks, label combinations, image sizes |
 | [02_metric.ipynb](notebooks/02_metric.ipynb) | Macro F1 analysis, thresholds, PR AUC |
 | [03_validation.ipynb](notebooks/03_validation.ipynb) | Near copies, adversarial validation, folds, first submissions |
+| [04](notebooks/04_convnext_profile.ipynb)–[07](notebooks/07_convnext_custom.ipynb), [09](notebooks/09_efficientnet.ipynb), [12](notebooks/12_bit_resnetv2.ipynb) | Single CNNs (Exp0–3, Exp5) |
+| [08](notebooks/08_ensemble.ipynb), [10](notebooks/10_ensemble_exp1_exp3.ipynb), [11](notebooks/11_tta_ensemble.ipynb), [13](notebooks/13_ensemble_exp1_exp3_exp5.ipynb), [15](notebooks/15_stacking_logreg.ipynb) | Ensembles, TTA, stacking (Exp4) |
+| [14_full_data_final.ipynb](notebooks/14_full_data_final.ipynb) | Retraining on all labelled data (Exp6) |
 
 The fold assignment is saved in [folds.csv](folds.csv), so every model uses the same splits.
 
@@ -136,20 +139,138 @@ If most of these were false alarms, the LB score would be much lower than 0.92, 
 
 ---
 
-## 4. CNN experiments
+## 4. Single CNN models
 
-We trained each CNN on folds 1–4 and evaluated on the same 2,452 images in fold 0. All three runs used 384-pixel inputs, BCEWithLogitsLoss, AdamW with weight decay 0.01, effective batch size 16, and a 0.25 decision threshold. The local figures below are single-fold macro F1, not five-fold CV.
+### Setup
+- **Infrastructure:** PyTorch Lightning for training, W&B and CSV logs, and a JSON run record for every run (config, code hashes, metrics, checkpoint hash). Shared code is in [stage2/](stage2/), and per-experiment notes are in [experiments/](experiments/).
+- **Common protocol:** train on folds 1–4 and validate on fold 0 (2,452 images, 8–10 photos per named pet). Input is a 384-pixel letterbox, the only augmentation is a horizontal flip, the loss is BCEWithLogitsLoss, and the optimizer is AdamW (weight decay 0.01) with effective batch 16. The schedule is one warm-up epoch, then cosine decay. The checkpoint with the best fold-0 macro F1 is kept, and every submission uses threshold 0.25.
+- **Pretrained weights:** timm, ImageNet only.
+- **"CV" in this section is a single fold (fold 0), not 5-fold CV.** We had no time budget for 5 folds: one fine-tuning run took 2–6 hours on a Mac GPU. On fold 0, one named-pet photo moves macro F1 by about 0.012.
 
-| Experiment | Training | Fold-0 val F1 | Public LB |
-|---|---|---:|---:|
-| [Exp0: frozen ConvNeXt + linear head](experiments/exp0/results/convnext_head_fold0_seed42_colab/convnext_head_fold0_seed42_colab.json) | 10 epochs; head LR 1e-3; constant LR | 0.93577 | 0.93365 |
-| [Exp1: full ConvNeXt](experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/convnext_standard_fold0_seed42_20261018_full1.json) | 5 epochs; backbone/head LR 1e-5/1e-4; warm-up + cosine | 0.97518 | 0.97003 |
-| [Exp2: ConvNeXt + residual spatial block](experiments/exp2/results/convnext_custom_fold0_seed42_mps_gradcam3/convnext_custom_fold0_seed42_mps_gradcam3.json) | 8 epochs; backbone/block/head LR 1e-5/1e-5/1e-4; warm-up + cosine | 0.97401 | 0.96043 |
+### Architectures
 
-The local settings and scores come from the linked run records. The public scores were checked against Kaggle's submission history. Exp1 leads Exp2 by 0.00960 on the public leaderboard. Both started from Exp0's head, which was selected using fold 0, so their local scores are screening results rather than independent holdout estimates. The [Stage 2 plan](docs/stage-2-plan.md) records the remaining comparison work.
+![Three backbones](docs/figures/backbones.svg)
+
+- **ConvNeXt-base** (Exp0–2) is a classic CNN redesigned with ideas from Vision Transformers:
+  - a "patchify" stem (4×4 conv, stride 4);
+  - large 7×7 depthwise kernels;
+  - LayerNorm and GELU;
+  - an inverted bottleneck (C → 4C → C).
+
+  Most of its depth is in stage 3 (27 blocks). It is our largest model (87.6M parameters), and its pretrained weights were fine-tuned at 384 px, our input size.
+- **EfficientNetV2-S** (Exp3) was found by architecture search and scaled jointly in depth, width and resolution.
+  - The early stages use Fused-MBConv (one full 3×3 conv), which is faster on large feature maps.
+  - The later stages use MBConv: a 3×3 depthwise conv inside an expanded 1×1 bottleneck, plus squeeze-and-excitation, which reweights channels using global image context.
+  - It uses BatchNorm. Our physical batch was only 8, so we froze BatchNorm's running mean and variance (the pretrained values) and trained only its scale and shift.
+- **BiT ResNetV2-50x1** (Exp5) is a ResNet-50 built for transfer learning.
+  - Its bottlenecks are pre-activation: normalization and ReLU come before each conv, so the skip path is a clean identity.
+  - It uses GroupNorm and weight-standardized convolutions, neither of which depends on the batch, so it needs no special BatchNorm handling.
+  - Its native resolution is 448 px. We used 384 px.
+
+**Why these three:** they differ in block design and in normalization (LayerNorm, BatchNorm, GroupNorm), so we expected them to make different mistakes. This is what the ensembles in section 5 rely on. All three end in a 12 × 12 feature map. The only new layer is the 5-output classifier.
+
+### What was trained
+
+![Training phases](docs/figures/training_phases.svg)
+
+- **ConvNeXt:**
+  - Exp0 trains only the final Linear layer on frozen features.
+  - Exp1 and Exp2 start from that layer and unfreeze the whole network. The head gets 10× the backbone learning rate, so the pretrained features change only slightly while the head keeps adapting.
+- **EfficientNet and BiT:** Exp0's head fits ConvNeXt's 1024 features, not theirs, so each model first trains its own head on a frozen backbone (phase 1, 8 epochs), then fine-tunes everything (phase 2). Without phase 1, the gradients of a random head would hit the pretrained backbone in the first steps.
+- **Learning rates** are untuned starting guesses for each family. Exp3's 1e-4 / 1e-3 later looked too high (see the notes below).
+
+### Results
+
+| Exp | Model | Training | Fold-0 F1 | Public LB |
+|---|---|---|---:|---:|
+| — | LogReg on frozen ConvNeXt embeddings (section 3) | — | 0.957 (5-fold) | 0.92922 |
+| [Exp0](experiments/exp0/) | ConvNeXt-base, frozen backbone + linear head | 10 epochs, LR 1e-3 | 0.93577 | 0.93365 |
+| [Exp1](experiments/exp1/) | ConvNeXt-base, full fine-tune (88M) | LR 1e-5 / 1e-4 (backbone / head), early stop at epoch 5 | 0.97518 | 0.97003 |
+| [Exp2](experiments/exp2/) | ConvNeXt-base + our residual spatial block | Same as Exp1, 8 epochs | 0.97401 | 0.96043 |
+| [Exp3](experiments/exp3/) | EfficientNetV2-S (20M) | Own head warm-up, LR 1e-4 / 1e-3, frozen BN statistics | 0.99831 | 0.97015 |
+| [Exp5](experiments/exp5/) | BiT ResNetV2-50x1 (23.5M) | Own head warm-up, LR 3e-5 / 3e-4 | 0.99851 | 0.94035 |
+
+Solid baseline: 0.90624. Every model beats it.
+
+### Notes per experiment
+- **Exp0.** A frozen backbone with a trained head is barely better than the LogReg baseline. Its main purpose was to provide a starting head for Exp1 and Exp2.
+- **Exp1.** Fine-tuning the whole network gave +0.036 on the leaderboard over Exp0. It is our best single model, and the CV–LB gap is small (0.005).
+- **Exp2 (own building block).** A 1×1 reduce → 3×3 depthwise → 1×1 restore block with a residual connection is inserted before pooling. The last projection is initialized to zero, so the network starts identical to Exp1. It adds 0.53M parameters. Fold 0 is equal to Exp1 (−0.001, about 0.1 photo), but the leaderboard is 0.0096 lower. **The block did not help.** It came after the backbone has already downsampled the image, so it cannot recover detail of small pets.
+
+  ![Exp2 custom block](docs/figures/custom_block.svg)
+- **Exp3.** A different family, chosen for the ensemble. The leaderboard ties Exp1 (+0.0001). The fold-0 gain (+0.023) is exactly two named-pet photos and did not transfer. Validation loss rose after epoch 4 while training loss went to about 0, so the model overfit and became over-confident. The likely cause is a learning rate 10× higher than for ConvNeXt.
+- **Exp5.** Best on fold 0 (perfect on all three pets), but the weakest on the leaderboard (0.94035, a gap of 0.058). **Fold 0 is too small to rank models.** Possible causes (not tested): 384 px instead of the native 448 px for a model that sees small pets, and lucky checkpoint selection on fold 0.
+
+### Failed runs
+- The first EfficientNet head warm-up (3 epochs) stopped at macro F1 0.774 while the rare labels were still improving. We raised it to 8 epochs (0.910).
+- Exp2 smoke run: device mismatch, with CPU weights and an MPS input ("Input type (MPSFloatType) and weight type (torch.FloatTensor) should be the same"). We fixed this and reran.
+- Exp2 full run `mps_full1` was interrupted during training. A later run stopped at our timing gate because the first epoch took 42 minutes.
+
+### Diagnostics
+<!-- TODO: add plots and 1-2 sentences of interpretation each -->
+- Loss and metric curves: `experiments/exp*/results/<run>/curves.png`
+- Gradient flow: `experiments/exp*/results/<run>/gradient_flow.png`
+- GradCAM: `experiments/exp*/results/<run>/gradcam/`
+
+### Is the model adequate?
+<!-- TODO -->
+
+---
+
+## 5. Ensembling
+
+All ensembles reuse saved fold-0 and test probabilities. Nothing is retrained. Weights are equal and the threshold is 0.25, because fold 0 has too few pets to tune them.
+
+![Ensembles](docs/figures/ensembles.svg)
+
+**How each ensemble was built:**
+1. Every member was trained once (section 4) and saved its probabilities for the 2,452 fold-0 images and the 18,673 test images.
+2. An ensemble reads those files and combines them per image and label. For each recipe, the same combination is applied to fold 0 (local score) and to test (submission).
+   - **Mean:** average the members' probabilities.
+   - **Flip TTA:** each model also predicts the mirrored image, its two probabilities are averaged, and then the models are averaged.
+   - **Stacking:** probabilities are turned into logits, and one logistic regression per label is fitted on the fold-0 logits of the three members.
+3. Apply threshold 0.25 and write the CSV.
+
+| Ensemble | Fold-0 F1 | Public LB |
+|---|---:|---:|
+| Mean Exp1 + Exp2 | 0.97528 | 0.96824 |
+| Mean Exp1 + Exp3 | 0.98646 | 0.97761 |
+| Mean Exp1 + Exp3, flip TTA | 0.98636 | 0.97420 |
+| **Mean Exp1 + Exp3 + Exp5** | 0.98656 | **0.98047** |
+| LogReg stacking of Exp1 + Exp3 + Exp5 | 0.99878 (out-of-fold within fold 0) | 0.96685 |
+
+- **Exp1 + Exp2 did not help** (below Exp1 alone). Both models start from the same backbone and head, so they make the same mistakes: they disagree in only 66 test cells.
+- **Exp1 + Exp3 helped (+0.0075).** The two models come from different families and disagree in 219 test cells.
+- **Flip TTA hurt (−0.0034).** It changed only 32 test cells, 5 of them named-pet cells. On test, one named-pet cell is worth about 0.0007, so five wrong ones explain the drop. Fold 0 showed no effect at all.
+- **Adding Exp5 gave our best score (0.98047),** even though Exp5 alone is weak. It acts as a tie-breaker. Every named-pet decision it added was flagged by BiT, and every one it removed was supported by Exp1 or Exp3 but not by BiT.
+- **Stacking hurt (−0.0136)** ([notebook 15](notebooks/15_stacking_logreg.ipynb)). One logistic regression per label is fitted on the members' fold-0 logits and validated by repeated 5-fold CV inside fold 0. The learned weights are almost equal, so the model behaves like a mean of logits. Locally it beat the probability mean, but the whole gain is one Biatrix photo. On test it removed 26 named-pet positives, the ones where only one member was confident. The drop fits about 22 of them being real pets. Fold 0 (27 pet photos) is too small to learn a combination rule.
+
+---
+
+## 6. Retraining on all data (failed)
+
+We retrained the three members of the best ensemble on all 12,260 images ([notebook 14](notebooks/14_full_data_final.ipynb)). Each model trained for the fixed epoch count of its fold-0 best checkpoint, and Exp3's learning rate was halved.
+
+| Submission | Public LB |
+|---|---:|
+| Fold-0 members (folds 1–4), threshold 0.25 | **0.98047** |
+| Full-data members, threshold 0.25 | 0.97386 |
+| Full-data members, tuned thresholds (Cat 0.45, Dog 0.5) | not submitted |
+
+The score dropped by 0.0066, about 9–10 more wrong named-pet decisions. ConvNeXt added about 20 weak Moris positives (median probability 0.33). It stopped after 2 of 8 schedule epochs, near the peak learning rate. We changed several things at once (more data, no checkpoint selection, a different Exp3 LR), so the drop cannot be attributed to a single cause.
+
+---
+
+## 7. Final result and conclusions
+<!-- TODO -->
+- Best submission: mean of Exp1 + Exp3 + Exp5, public LB **0.98047** (solid baseline 0.90624).
+- Model diversity mattered more than the single-model score.
+- Fold 0 ranks models badly: 8–10 photos per pet, and the checkpoint was also chosen on it.
 
 ---
 
 ## AI tools
 
 Claude Code was used to help with structuring and organizing the report. The conversation transcripts are in [transcripts/](transcripts/).
+
+The diagrams in [docs/figures/](docs/figures/) and the architecture and training descriptions around them in sections 4 and 5 were generated with Claude Code using the **Claude Opus 5.5** model. The diagrams are drawn by [scripts/make_report_figures.py](scripts/make_report_figures.py). Layer shapes in them were checked against timm at 384 px, and the scores were checked against the run records.
