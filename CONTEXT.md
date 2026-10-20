@@ -20,4 +20,10 @@ Multi-label recognition of cats, dogs, and three named pets in competition image
 
 **Run**: One execution of an experiment with a fixed fold, seed, configuration, and code revision. A screening run on one fold is distinct from a five-fold evaluation.
 
+**Test probabilities**: Five independent label probabilities for each competition test image, before thresholding. These are inputs to the ensemble, distinct from a binary Kaggle submission.
+
+**Selected checkpoint**: The model state chosen by the run's declared validation selection rule. Validation and test probabilities attributed to that model must come from this same state.
+
+**Resume checkpoint**: The latest recoverable training state, including optimizer and schedule progress. It can differ from the selected checkpoint.
+
 **Head-only checkpoint**: The trained five-output classifier parameters produced while the pretrained ConvNeXt backbone remains frozen. The current checkpoint was trained on folds 1–4 and selected on fold 0, making it a shared starting point for matched fold-0 screening runs, not for other held-out folds.
