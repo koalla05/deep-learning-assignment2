@@ -1,0 +1,17 @@
+{
+  "run_id": "full_convnext_base_seed42_test",
+  "experiment": "06_full_data",
+  "status": "test_predicted",
+  "source_run_id": "full_convnext_base_seed42",
+  "source_checkpoint_sha256": "0a39a04a778bcf75c3267860325cbd3baf782dfac98816c5b9092fa481cdf1b7",
+  "test_images": 18673,
+  "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5; no test-time augmentation",
+  "device": "mps",
+  "prediction_seconds": 1009.1752123749902,
+  "versions": {
+    "python": "3.12.15",
+    "torch": "2.14.1",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  }
+}

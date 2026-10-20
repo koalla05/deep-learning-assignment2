@@ -318,3 +318,32 @@ class DriveRunBackup:
     def save_results(self, paths: list[Path]) -> None:
         for path in paths:
             copy_verified(path, self.drive_dir / "results" / path.name)
+
+
+class StopAfterEpochs(L.Callback):
+    """Stop after a fixed number of epochs while the LR schedule keeps its planned length.
+
+    Without held-out data there is no checkpoint to select, so the training length is
+    fixed in advance. The schedule still spans `trainer.max_epochs`, which reproduces
+    the learning rates the selected epoch of a validated run had.
+    """
+
+    def __init__(self, epochs: int) -> None:
+        super().__init__()
+        if epochs < 1:
+            raise ValueError("Train for at least one epoch.")
+        self.epochs = epochs
+        self.epoch_seconds: list[float] = []
+        self._started: float | None = None
+
+    def on_train_epoch_start(self, trainer: L.Trainer, pl_module: L.LightningModule) -> None:
+        self._started = time.perf_counter()
+
+    def on_train_epoch_end(self, trainer: L.Trainer, pl_module: L.LightningModule) -> None:
+        if self._started is not None:
+            self.epoch_seconds.append(time.perf_counter() - self._started)
+        loss = trainer.callback_metrics.get("train_loss")
+        loss_text = f"{float(loss):.5f}" if loss is not None else "n/a"
+        print(f"  epoch {trainer.current_epoch + 1}/{self.epochs}: {self.epoch_seconds[-1] / 60:.1f} min, train loss {loss_text}", flush=True)
+        if trainer.current_epoch + 1 >= self.epochs:
+            trainer.should_stop = True

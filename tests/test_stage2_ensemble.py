@@ -109,5 +109,44 @@ class FlipPredictionTests(unittest.TestCase):
             predict_flipped_probabilities(network, [], torch.device("cpu"))
 
 
+class BitNotebookTests(unittest.TestCase):
+    def test_defaults_do_not_train_download_or_build_artifacts(self) -> None:
+        cells = json.loads(NOTEBOOK.with_name("12_bit_resnetv2.ipynb").read_text())["cells"]
+        source = "".join(next(cell for cell in cells if cell["id"] == "b3f0e002")["source"])
+        for expected in (
+            "'STAGE2_RUN_TRAINING', '0'", "'STAGE2_SMOKE_TEST', '1'", "'STAGE2_ALLOW_WEIGHT_DOWNLOAD', '0'",
+            "'STAGE2_BUILD_TEST_PREDICTIONS', '0'", "BUILD_SUBMISSION = False", "SUBMIT_TO_KAGGLE = False",
+            "MODEL_NAME = 'resnetv2_50x1_bit.goog_in21k_ft_in1k'", "'STAGE2_VALIDATION_FOLD', '0'",
+        ):
+            self.assertIn(expected, source)
+        self.assertNotIn("jft", source.replace("JFT", ""))
+        self.assertNotIn("FrozenBatchNormStatistics", "".join("".join(cell["source"]) for cell in cells if cell["cell_type"] == "code"))
+
+
+class EnsembleThreeMemberNotebookTests(unittest.TestCase):
+    def test_defaults_do_not_predict_or_write_and_members_are_exp1_exp3_exp5(self) -> None:
+        cells = json.loads(NOTEBOOK.with_name("13_ensemble_exp1_exp3_exp5.ipynb").read_text())["cells"]
+        flags = "".join(next(cell for cell in cells if cell["id"] == "a1f0e002")["source"])
+        self.assertIn("BUILD_SUBMISSION = False", flags)
+        self.assertIn("SUBMIT_TO_KAGGLE = False", flags)
+        self.assertIn("'STAGE2_RUN_TEST_INFERENCE', '0'", flags)
+        for member in ("'exp1':", "'exp3':", "'exp5':"):
+            self.assertIn(member, flags)
+        self.assertNotIn("'exp2':", flags)
+
+
+class FullDataNotebookTests(unittest.TestCase):
+    def test_trains_all_members_on_all_folds_and_never_uploads(self) -> None:
+        cells = json.loads(NOTEBOOK.with_name("14_full_data_final.ipynb").read_text())["cells"]
+        config = "".join(next(cell for cell in cells if cell["id"] == "c14e0003")["source"])
+        code = "".join("".join(cell["source"]) for cell in cells if cell["cell_type"] == "code")
+        self.assertIn("SUBMIT_TO_KAGGLE = False", config)
+        self.assertIn("TRAIN_ORDER = ['exp3', 'exp5', 'exp1']", config)
+        self.assertIn("'backbone_lr': 5e-5, 'head_lr': 5e-4", config)
+        self.assertIn("all_rows = folds_1_to_4 + fold_0", code)
+        self.assertIn("MIN_POSITIVES_TO_TUNE = 100", config)
+        self.assertNotIn("kaggle competitions submit", code)
+
+
 if __name__ == "__main__":
     unittest.main()
