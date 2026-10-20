@@ -207,13 +207,47 @@ Solid baseline: 0.90624. Every model beats it.
 - Exp2 full run `mps_full1` was interrupted during training. A later run stopped at our timing gate because the first epoch took 42 minutes.
 
 ### Diagnostics
-<!-- TODO: add plots and 1-2 sentences of interpretation each -->
-- Loss and metric curves: `experiments/exp*/results/<run>/curves.png`
-- Gradient flow: `experiments/exp*/results/<run>/gradient_flow.png`
-- GradCAM: `experiments/exp*/results/<run>/gradcam/`
+We show the full diagnostics for **Exp1** (our best single ConvNeXt) and **Exp3** (the model that overfit most). The same files exist for every run under `experiments/exp*/results/<run>/`.
+
+**Loss and metric curves.**
+
+Exp1 (ConvNeXt, LR 1e-5 / 1e-4):
+![Exp1 curves](experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/curves.png)
+
+Exp3 (EfficientNetV2-S, LR 1e-4 / 1e-3):
+![Exp3 curves](experiments/exp3/results/efficientnetv2s_fold0_seed42/curves.png)
+
+- Training loss goes to about 0 in both runs, so both models memorise the training folds. Validation loss stops improving after epoch 3-4 in Exp1 (flat at about 0.003). In Exp3 it rises again after epoch 4 (0.0055 → 0.0071), which is overfitting.
+- In Exp1 fold-0 macro F1 peaks at epochs 2-3 (0.975) and then falls to 0.962, while macro AP stays at 1.0 from epoch 3. The ranking of the images is perfect, but the fixed threshold 0.25 no longer fits: the model has become over-confident, so a few probabilities are pushed to the wrong side. This is the same message as in section 2 (a threshold effect, not a ranking error), and the reason we select the checkpoint by F1 and stop early.
+- The F1 curve is a staircase of a few photos: one named-pet photo on fold 0 is about 0.012, so differences of 0.01 between epochs are noise-level.
+
+**Gradient flow** (mean gradient norm per layer, before clipping, log scale; x axis is the layer order from the stem to the head, y axis is the epoch):
+
+![Exp1 gradient flow](experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/gradient_flow.png)
+
+- No vanishing or exploding gradients. The earliest layers (stem, stage 1) get gradients as large as the layers near the head, so the signal reaches the whole depth of the 88M-parameter network. We think the reasons are the residual connections and LayerNorm, but we did not ablate them.
+- Gradients drop by about 2-3 orders of magnitude from epoch 1 to epoch 5 as the training loss goes to 0 and the cosine schedule lowers the learning rate. The gradient norm per part (right panel of the curves) agrees: the backbone is much larger than the head (the head has few parameters), and both die out together.
+- Exp3 (EfficientNetV2-S) has about 10× larger gradients at the start (backbone norm 1.5 against 0.17), consistent with our note that its learning rate was too high. One column in the middle of its network (a late `blocks.4`/`blocks.5` layer) is dark in all epochs, meaning this layer gets almost no gradient. We did not investigate it.
+- In Exp2 the gradient of our new block is the smallest of the three parts in every epoch (green line in `experiments/exp2/.../curves.png`). The block starts as an identity (zero-initialised last layer), and the network never needed it: this fits the result that it did not help.
+
+**GradCAM** (Exp1, last ConvNeXt stage, 12×12 map upsampled to the 384 px input; for each label, the first positive fold-0 photo, chosen before looking at predictions):
+
+| Moris | Motya | Biatrix |
+|---|---|---|
+| ![Moris](experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/gradcam/moris_055cb6e1fe1eb7fc077bd98717851ae53de3113c.png) | ![Motya](experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/gradcam/motya_cfbc890562e329131f546b43be873f41a06ad195.png) | ![Biatrix](experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/gradcam/biatrix_14ababeb09beeaf8dd430e851e671475ab15fc46.png) |
+
+- **Biatrix and Moris:** the attention is on the animal (ears, body, chest and paws), not on the room. This is the good sign we looked for in section 1, where we worried the model might learn the home background.
+- **Motya:** the cat is small and half hidden on a person's lap, and the model still looks mostly at the cat's face. Part of the heat also falls on the dark chair region next to it, so it is not a clean "only the pet" explanation.
+- Three photos are only illustrations, not proof. The map is coarse (12×12), and we did not run the check where the pet is masked out and the prediction is re-scored. Cat and Dog maps for the same run are in the `gradcam/` folder.
 
 ### Is the model adequate?
-<!-- TODO -->
+**In short, yes**
+
+- **It beats the baseline by a large margin.** Every single model scores above it (0.934-0.970; the fine-tuned ConvNeXt and EfficientNet reach 0.970) against the solid baseline 0.90624; the best ensemble scores 0.98047.
+- **Local validation and the leaderboard agree for the main model.** Exp1: fold 0 0.975 against LB 0.970 (gap 0.005, within the noise of about 2 named-pet photos). The frozen-feature models behave the same way (Exp0 0.936 → 0.934). The CV gap of 0.02-0.03 seen for the LogReg baseline in section 3 disappeared once the model was fine-tuned, which supports our explanation there that the baseline was too weak on rare pets.
+- **Local validation is not reliable for ranking close models.** Exp3 (+0.023 on fold 0) and Exp5 (+0.023, perfect on all pets) beat Exp1 on fold 0 but tie it (Exp3) or lose by 0.03 (Exp5) on the leaderboard. Fold 0 has 8-10 photos per pet, and checkpoints were selected on it, so it is optimistic. We therefore trust the leaderboard order for these comparisons only roughly: it is the public part of the test set, and ties within 0.005 are noise.
+- **What the model gets right, and what it does not.** Cat and Dog F1 are about 0.997 for every model. All remaining loss comes from the three rare pets (Motya and Biatrix F1 0.94 in Exp1, one photo wrong each). The diagnostics show no optimisation problem (healthy gradients, no divergence); the models overfit the training folds, but early stopping and checkpoint selection handled it.
+- **Where we would not trust it.** (1) Everything rests on one fold and one seed; we have no confidence intervals. (2) Our decisions on threshold (0.25) and equal ensemble weights were made without enough rare-pet data to tune them. (3) The public leaderboard is a part of test, and the private score may differ. (4) The retraining on all data (section 6) lowered the score, which shows that our results are sensitive to small changes and not fully reproducible by simply adding data.
 
 ---
 
@@ -262,10 +296,38 @@ The score dropped by 0.0066, about 9–10 more wrong named-pet decisions. ConvNe
 ---
 
 ## 7. Final result and conclusions
-<!-- TODO -->
-- Best submission: mean of Exp1 + Exp3 + Exp5, public LB **0.98047** (solid baseline 0.90624).
-- Model diversity mattered more than the single-model score.
-- Fold 0 ranks models badly: 8–10 photos per pet, and the checkpoint was also chosen on it.
+
+### Summary of all experiments (fold-0 score and public LB)
+
+All "CV" values are fold 0, not 5-fold CV (see section 4). Exp6 has no held-out data, so it has only an LB score.
+
+| Experiment | Fold-0 macro F1 | Public LB |
+|---|---:|---:|
+| LogReg on frozen ConvNeXt embeddings (threshold 0.25) | 0.957 (5-fold) | 0.92922 |
+| Exp0 ConvNeXt, frozen + linear head | 0.93577 | 0.93365 |
+| Exp1 ConvNeXt, full fine-tune | 0.97518 | 0.97003 |
+| Exp2 ConvNeXt + residual spatial block | 0.97401 | 0.96043 |
+| Exp3 EfficientNetV2-S | 0.99831 | 0.97015 |
+| Exp5 BiT ResNetV2-50x1 | 0.99851 | 0.94035 |
+| Exp4 mean Exp1 + Exp2 | 0.97528 | 0.96824 |
+| Exp4 mean Exp1 + Exp3 | 0.98646 | 0.97761 |
+| Exp4 mean Exp1 + Exp3, flip TTA | 0.98636 | 0.97420 |
+| **Exp4 mean Exp1 + Exp3 + Exp5** | 0.98656 | **0.98047** |
+| Exp4 LogReg stacking Exp1 + Exp3 + Exp5 | 0.99878 (inner CV) | 0.96685 |
+| Exp6 same three models, all data | n/a | 0.97386 |
+
+- **Best submission:** mean of Exp1 + Exp3 + Exp5, public LB **0.98047** (solid baseline 0.90624).
+- **What worked:** full fine-tuning (+0.036 over a frozen backbone), and averaging models from different families, even a weak one (Exp5).
+- **What did not work:** our residual block (Exp2), flip TTA, logistic regression stacking, and retraining on all data. These failures are in the report on purpose: each one is explained by the very small number of rare-pet photos, where one photo changes the score by 0.001-0.012.
+- **Fold 0 ranks models badly** (8-10 photos per pet, and checkpoints were also chosen on it). The leaderboard and fold 0 agree only for the models in which the difference is larger than the noise.
+
+### Limitations and what we would do next
+- Run all five folds with several seeds and report the mean and standard deviation. This is the main missing piece, and the reason for the weak fold-0/LB agreement.
+- We tried one optimiser (AdamW) and one schedule (warm-up + cosine). Learning rates were starting guesses and were not tuned; Exp3's looked too high. A small sweep (LR, weight decay, a one-cycle or constant schedule, label smoothing or a class-weighted/focal loss for rare pets) was not done.
+- Augmentation was only a horizontal flip, to avoid cropping out small pets. A mild-augmentation experiment (colour jitter, small scale/rotation) is untested.
+- Use 448 px for BiT (native resolution), which could explain its weak LB score.
+- Keep the Exp3 training epoch count for the full-data retraining and keep the same learning rates, so that only one factor (more data) changes.
+- Choose thresholds per label from out-of-fold predictions of all five folds, where there are 40-56 pets per label instead of 8-10.
 
 ---
 
@@ -274,3 +336,12 @@ The score dropped by 0.0066, about 9–10 more wrong named-pet decisions. ConvNe
 Claude Code was used to help with structuring and organizing the report. The conversation transcripts are in [transcripts/](transcripts/).
 
 The diagrams in [docs/figures/](docs/figures/) and the architecture and training descriptions around them in sections 4 and 5 were generated with Claude Code using the **Claude Opus 5.5** model. The diagrams are drawn by [scripts/make_report_figures.py](scripts/make_report_figures.py). Layer shapes in them were checked against timm at 384 px, and the scores were checked against the run records.
+
+
+**AI usage**: Claude Code/Codex was used to create some of the core functions in stage2 + to correctly set up notebooks and experiments.
+
+**Example prompts:**
+- "Please, help me set up this notebook to be executed locally on MAC/Colab"
+- "Run a quick check for the notebook to be ready for overnight training"
+- "Create a function read_probabilities() to process csv file with raw numbers to produce clean binary results for 5 output channels", etc.
+
