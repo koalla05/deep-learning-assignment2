@@ -122,6 +122,55 @@ def smoke_test(root: Path, head_dir: Path, config: Config) -> None:
           f"peak allocated {torch.cuda.max_memory_allocated() / 2**30:.2f} GiB", flush=True)
 
 
+def profile_epoch(root: Path, head_dir: Path, config: Config) -> Path:
+    """Measure one complete epoch before fixing the real run's scheduler horizon."""
+    if not torch.cuda.is_available():
+        raise RuntimeError("Full-epoch profile requires a CUDA GPU")
+    random.seed(config.seed)
+    np.random.seed(config.seed)
+    L.seed_everything(config.seed, workers=True)
+    training, validation, identity = preflight_inputs(root, head_dir, config)
+    profile_path = root / "artifacts" / "hrnet_profile" / f"{config.run_id}.json"
+    if profile_path.exists():
+        previous = json.loads(profile_path.read_text())
+        if previous["config"] != asdict(config):
+            raise ValueError("Existing profile used a different configuration")
+        print(f"Reusing full-epoch profile: {profile_path}", flush=True)
+        return profile_path
+    network = load_initialized_network(config, head_dir, identity)
+    freeze_batchnorm_statistics(network)
+    mean = tuple(identity["head"]["normalization"]["mean"])
+    std = tuple(identity["head"]["normalization"]["std"])
+    train_set = ImageDataset(training, root / "data" / "train", config.image_size, mean, std, horizontal_flip=True)
+    train_loader = DataLoader(train_set, batch_size=config.batch_size, shuffle=True,
+                              num_workers=config.num_workers, pin_memory=True)
+    val_loader = prediction_rows(validation, root / "data" / "train", config, mean, std)
+    module = HRNetClassifier(network, config.backbone_lr, config.head_lr, config.weight_decay, config.threshold)
+    trainer = L.Trainer(accelerator="gpu", devices=1, precision=config.precision,
+                        max_epochs=1, accumulate_grad_batches=config.effective_batch_size // config.batch_size,
+                        callbacks=[FrozenBatchNormStatistics()], logger=False,
+                        enable_checkpointing=False, enable_progress_bar=False, deterministic="warn")
+    torch.cuda.reset_peak_memory_stats()
+    started = time.monotonic()
+    trainer.fit(module, train_loader, val_loader)
+    seconds = time.monotonic() - started
+    metrics = trainer.callback_metrics
+    profile = {"config": asdict(config), "full_epoch_seconds": seconds,
+               "peak_allocated_gib": torch.cuda.max_memory_allocated() / 2**30,
+               "train_loss": float(metrics["train_loss_current"]),
+               "val_loss": float(metrics["val_loss"]),
+               "macro_f1": float(metrics["val_macro_f1"]),
+               "per_label_f1": {label: float(metrics[f"val_f1_{label.lower()}"]) for label in LABEL_COLUMNS},
+               "macro_ap": float(metrics["val_macro_ap"]),
+               "per_label_ap": {label: float(metrics[f"val_ap_{label.lower()}"]) for label in LABEL_COLUMNS},
+               "note": "Throughput profile only; its selected metric is not a model comparison."}
+    profile_path.parent.mkdir(parents=True, exist_ok=True)
+    profile_path.write_text(json.dumps(profile, indent=2, allow_nan=False) + "\n")
+    print(f"Full epoch: {seconds / 60:.1f} min; peak GPU memory "
+          f"{profile['peak_allocated_gib']:.2f} GiB; profile {profile_path}", flush=True)
+    return profile_path
+
+
 def load_initialized_network(config: Config, head_dir: Path, identity: dict) -> torch.nn.Module:
     network = timm.create_model(config.model_name, pretrained=True, num_classes=0)
     actual = model_state_sha256(network)
@@ -157,6 +206,10 @@ class SelectedCheckpoint(L.Callback):
         self.stale_epochs = 0
         self.history: list[dict] = []
         self.started = started
+        self.epoch_started: float | None = None
+
+    def on_train_epoch_start(self, trainer: L.Trainer, module: L.LightningModule) -> None:
+        self.epoch_started = time.monotonic()
 
     @property
     def state_key(self) -> str:
@@ -213,8 +266,10 @@ class SelectedCheckpoint(L.Callback):
               f"macro AP {record['macro_ap']:.5f}; train/val BCE "
               f"{record['train_loss']:.5f}/{loss:.5f}; best epoch {self.best_epoch}", flush=True)
         elapsed = time.monotonic() - self.started
-        average_epoch = elapsed / epoch
-        if elapsed + average_epoch >= self.budget_seconds - self.reserve_seconds:
+        if self.epoch_started is None:
+            raise RuntimeError("Validation ended without a training epoch start")
+        latest_epoch_seconds = time.monotonic() - self.epoch_started
+        if elapsed + 1.30 * latest_epoch_seconds >= self.budget_seconds - self.reserve_seconds:
             print("Stopping at the time budget boundary to preserve prediction export time.", flush=True)
             trainer.should_stop = True
         if self.stale_epochs >= self.patience:
@@ -450,20 +505,26 @@ def main() -> None:
     parser.add_argument("--run-id", default=Config.run_id)
     parser.add_argument("--batch-size", type=int, default=Config.batch_size)
     parser.add_argument("--max-epochs", type=int, default=Config.max_epochs)
+    parser.add_argument("--budget-hours", type=float, default=Config.budget_hours)
     parser.add_argument("--precision", default=Config.precision)
     parser.add_argument("--resume", type=Path)
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--preflight-only", action="store_true")
     action.add_argument("--smoke-only", action="store_true")
+    action.add_argument("--profile-epoch", action="store_true")
     args = parser.parse_args()
     config = Config(run_id=args.run_id, batch_size=args.batch_size,
-                    max_epochs=args.max_epochs, precision=args.precision)
+                    max_epochs=args.max_epochs, precision=args.precision,
+                    budget_hours=args.budget_hours)
     root = repository_root(args.root)
     if args.preflight_only:
         preflight_inputs(root, args.head_dir.resolve(), config)
         return
     if args.smoke_only:
         smoke_test(root, args.head_dir.resolve(), config)
+        return
+    if args.profile_epoch:
+        profile_epoch(root, args.head_dir.resolve(), config)
         return
     run(root, args.head_dir.resolve(),
         args.drive_dir.resolve() if args.drive_dir else None, config,
