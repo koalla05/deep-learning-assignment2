@@ -1,0 +1,76 @@
+{
+  "run_id": "ensemble_exp1_exp3_exp5_exp7_mean_fold0",
+  "experiment": "04_ensemble",
+  "status": "completed",
+  "fold": 0,
+  "method": "equal-weight mean of member probabilities, then fixed threshold",
+  "members": [
+    {
+      "experiment": "01_convnext_standard",
+      "run_id": "convnext_standard_fold0_seed42_20261018_full1",
+      "checkpoint_sha256": "4d027ce525e10e7cbe20a59aebfa8c3c5befbbeafbb41f26dee44729428a2d26",
+      "fold0_macro_f1": 0.9751849358283667
+    },
+    {
+      "experiment": "03_efficientnetv2_s",
+      "run_id": "efficientnetv2s_fold0_seed42",
+      "checkpoint_sha256": "d54b5495af69adfd47fb6e9aeda4a2d0529c6cce877304ffb07302a39b592bc7",
+      "fold0_macro_f1": 0.9983149573233134
+    },
+    {
+      "experiment": "05_bit_resnetv2_50x1",
+      "run_id": "bit_r50x1_fold0_seed42",
+      "checkpoint_sha256": "8ede7547533baed45a0b2b84830f6e50c4cb1c524f436aea180db0c88a4b75f3",
+      "fold0_macro_f1": 0.9985134806755427
+    },
+    {
+      "experiment": "07_hrnet_w32",
+      "run_id": "hrnet_w32_finetune_fold0_seed42",
+      "checkpoint_sha256": "c8a8a36762400162cbfa3c439b7fee748091f7f7c133c0ead126b7fc297ec071",
+      "fold0_macro_f1": 0.9973272700601438
+    }
+  ],
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9983219086424484,
+    "per_label_f1": {
+      "Cat": 0.9955817378497791,
+      "Dog": 0.9960278053624627,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_ap": 0.999990665457075,
+    "per_label_ap": {
+      "Cat": 0.9999797664612496,
+      "Dog": 0.9999735608241251,
+      "Moris": 0.9999999999999999,
+      "Motya": 1.0000000000000002,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9988112434350491
+  },
+  "artifacts": {
+    "validation_probabilities_csv": "experiments/exp4/results/ensemble_exp1_exp3_exp5_exp7_mean_fold0/ensemble_exp1_exp3_exp5_exp7_mean_fold0_val.csv",
+    "submission_csv": "submissions/exp4_ensemble_exp1_exp3_exp5_exp7_mean_025.csv"
+  },
+  "git_commit": "499b27c524e9e136095848d17b33e33a5ee9fd47",
+  "source_sha256": {
+    "notebooks/18_ensemble_exp1_exp3_exp5_exp7.ipynb": "4b2a8cab8b2cf7552cbcc619e47016a6ecabeb40a7496be67b8ab8539c5f1ac7",
+    "stage2/ensemble.py": "31ef61e9800f17bc0280b45f52c0896e332306325e2c8d09cd5320b2761bce6f",
+    "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501"
+  },
+  "public_leaderboard_score": 0.97816,
+  "error": null
+}
