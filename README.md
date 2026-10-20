@@ -1,5 +1,7 @@
 # AI301 Assignment 2: Cats and Dogs++
 
+**Repository link** - https://github.com/koalla05/deep-learning-assignment2
+
 Multi-label image classification (Kaggle In-Class competition "Cats and Dogs++").
 Each photo gets five 0/1 labels: `Cat`, `Dog` and three named pets, `Moris`, `Motya`, `Biatrix`. The target metric is **macro F1**.
 
