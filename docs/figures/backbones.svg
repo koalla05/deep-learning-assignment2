@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="948" height="730" viewBox="0 0 948 730" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/></marker>
+<pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="6" stroke="#d1d5db" stroke-width="2"/></pattern></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="20.0" y="22.0" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="start">Three pretrained backbones (shapes at our 384 px input: channels × height²)</text>
+<rect x="20.0" y="34.0" width="14.0" height="14.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="40.0" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">backbone (pretrained)</text>
+<rect x="190.1" y="34.0" width="14.0" height="14.0" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="210.1" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">head (new, 5 outputs)</text>
+<rect x="360.2" y="34.0" width="14.0" height="14.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="380.2" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">conv</text>
+<rect x="426.6" y="34.0" width="14.0" height="14.0" rx="3" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="446.6" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">normalization</text>
+<rect x="547.9" y="34.0" width="14.0" height="14.0" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+<text x="567.9" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">activation</text>
+<rect x="650.9" y="34.0" width="14.0" height="14.0" rx="3" fill="#fce7f3" stroke="#db2777" stroke-width="1.4"/>
+<text x="670.9" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">squeeze-excite</text>
+<text x="20.0" y="80.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">ConvNeXt-base</text>
+<text x="136.6" y="80.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">used in Exp0, Exp1, Exp2  ·  87.6M parameters · LayerNorm + GELU · pretrained ImageNet-22k → 1k at 384 px</text>
+<rect x="20.0" y="92.0" width="70.0" height="74.0" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+<text x="55.0" y="126.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Input</text>
+<text x="55.0" y="140.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 × 384²</text>
+<line x1="92.0" y1="129.0" x2="104.0" y2="129.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="106.0" y="92.0" width="91.2" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="151.6" y="119.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stem</text>
+<text x="151.6" y="133.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">4×4 conv, s4</text>
+<text x="151.6" y="147.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">128 × 96²</text>
+<line x1="199.2" y1="129.0" x2="211.2" y2="129.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="213.2" y="92.0" width="72.9" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="249.6" y="119.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 1</text>
+<text x="249.6" y="133.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 blocks</text>
+<text x="249.6" y="147.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">128 × 96²</text>
+<line x1="288.1" y1="129.0" x2="300.1" y2="129.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="302.1" y="92.0" width="72.9" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="338.6" y="119.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 2</text>
+<text x="338.6" y="133.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 blocks</text>
+<text x="338.6" y="147.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">256 × 48²</text>
+<line x1="377.0" y1="129.0" x2="389.0" y2="129.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="391.0" y="92.0" width="72.9" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="427.4" y="119.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 3</text>
+<text x="427.4" y="133.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">27 blocks</text>
+<text x="427.4" y="147.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">512 × 24²</text>
+<line x1="465.9" y1="129.0" x2="477.9" y2="129.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="479.9" y="92.0" width="79.0" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="519.4" y="119.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 4</text>
+<text x="519.4" y="133.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 blocks</text>
+<text x="519.4" y="147.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">1024 × 12²</text>
+<line x1="560.9" y1="129.0" x2="572.9" y2="129.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="574.9" y="92.0" width="133.9" height="74.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="641.8" y="119.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="641.8" y="133.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">avg pool, LayerNorm</text>
+<text x="641.8" y="147.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">Linear 1024 → 5</text>
+<text x="20.0" y="216.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">ConvNeXt block:</text>
+<line x1="126.4" y1="211.0" x2="138.4" y2="211.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="140.4" y="198.0" width="127.8" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="204.3" y="215.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">7×7 depthwise conv</text>
+<line x1="270.2" y1="211.0" x2="280.2" y2="211.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="282.2" y="198.0" width="72.9" height="26.0" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="318.6" y="215.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">LayerNorm</text>
+<line x1="357.1" y1="211.0" x2="367.1" y2="211.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="369.1" y="198.0" width="109.5" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="423.9" y="215.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">1×1 conv C → 4C</text>
+<line x1="480.6" y1="211.0" x2="490.6" y2="211.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="492.6" y="198.0" width="42.4" height="26.0" rx="13" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+<text x="513.8" y="215.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">GELU</text>
+<line x1="537.0" y1="211.0" x2="547.0" y2="211.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="549.0" y="198.0" width="109.5" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="603.8" y="215.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">1×1 conv 4C → C</text>
+<line x1="660.5" y1="211.0" x2="670.5" y2="211.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<circle cx="683.5" cy="211.0" r="11" fill="#ffffff" stroke="#374151" stroke-width="1.4"/>
+<text x="683.5" y="216.0" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="middle">+</text>
+<path d="M130.4,211.0 L130.4,184.0 L683.5,184.0 L683.5,198.0" fill="none" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="404.9" y="180.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="middle" font-style="italic">identity (skip connection)</text>
+<text x="20.0" y="250.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">Between stages: LayerNorm + 2×2 conv with stride 2 halves the resolution and doubles the channels.</text>
+<text x="20.0" y="294.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">EfficientNetV2-S</text>
+<text x="161.2" y="294.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">used in Exp3  ·  20.2M parameters · BatchNorm + SiLU · pretrained ImageNet-21k → 1k</text>
+<rect x="20.0" y="306.0" width="70.0" height="74.0" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+<text x="55.0" y="340.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Input</text>
+<text x="55.0" y="354.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 × 384²</text>
+<line x1="92.0" y1="343.0" x2="104.0" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="106.0" y="306.0" width="91.2" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="151.6" y="333.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stem</text>
+<text x="151.6" y="347.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3×3 conv, s2</text>
+<text x="151.6" y="361.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">24 × 192²</text>
+<line x1="199.2" y1="343.0" x2="211.2" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="213.2" y="306.0" width="72.9" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="249.6" y="333.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 1</text>
+<text x="249.6" y="347.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">2× conv</text>
+<text x="249.6" y="361.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">24 × 192²</text>
+<line x1="288.1" y1="343.0" x2="300.1" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="302.1" y="306.0" width="70.0" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="337.1" y="333.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 2</text>
+<text x="337.1" y="347.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">4× Fused</text>
+<text x="337.1" y="361.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">48 × 96²</text>
+<line x1="374.1" y1="343.0" x2="386.1" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="388.1" y="306.0" width="70.0" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="423.1" y="333.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 3</text>
+<text x="423.1" y="347.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">4× Fused</text>
+<text x="423.1" y="361.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">64 × 48²</text>
+<line x1="460.1" y1="343.0" x2="472.1" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="474.1" y="306.0" width="72.9" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="510.6" y="333.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 4</text>
+<text x="510.6" y="347.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">6× MBConv</text>
+<text x="510.6" y="361.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">128 × 24²</text>
+<line x1="549.0" y1="343.0" x2="561.0" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="563.0" y="306.0" width="72.9" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="599.5" y="333.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 5</text>
+<text x="599.5" y="347.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">9× MBConv</text>
+<text x="599.5" y="361.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">160 × 24²</text>
+<line x1="637.9" y1="343.0" x2="649.9" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="651.9" y="306.0" width="79.0" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="691.4" y="333.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 6</text>
+<text x="691.4" y="347.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">15× MBConv</text>
+<text x="691.4" y="361.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">256 × 12²</text>
+<line x1="732.9" y1="343.0" x2="744.9" y2="343.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="746.9" y="306.0" width="109.5" height="74.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="801.6" y="326.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="801.6" y="340.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">1×1 conv → 1280</text>
+<text x="801.6" y="354.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">avg pool</text>
+<text x="801.6" y="368.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">Linear 1280 → 5</text>
+<text x="20.0" y="430.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">MBConv block:</text>
+<line x1="113.2" y1="425.0" x2="125.2" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="127.2" y="412.0" width="152.2" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="203.3" y="429.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">1×1 conv, expand ×4/×6</text>
+<line x1="281.4" y1="425.0" x2="291.4" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="293.4" y="412.0" width="72.9" height="26.0" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="329.8" y="429.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">BN + SiLU</text>
+<line x1="368.3" y1="425.0" x2="378.3" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="380.3" y="412.0" width="127.8" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="444.2" y="429.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">3×3 depthwise conv</text>
+<line x1="510.1" y1="425.0" x2="520.1" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="522.1" y="412.0" width="72.9" height="26.0" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="558.5" y="429.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">BN + SiLU</text>
+<line x1="597.0" y1="425.0" x2="607.0" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="609.0" y="412.0" width="103.4" height="26.0" rx="13" fill="#fce7f3" stroke="#db2777" stroke-width="1.4"/>
+<text x="660.7" y="429.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">Squeeze-Excite</text>
+<line x1="714.4" y1="425.0" x2="724.4" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="726.4" y="412.0" width="121.7" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="787.2" y="429.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">1×1 conv, project</text>
+<line x1="850.1" y1="425.0" x2="860.1" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="862.1" y="412.0" width="30.2" height="26.0" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="877.2" y="429.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">BN</text>
+<line x1="894.3" y1="425.0" x2="904.3" y2="425.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<circle cx="917.3" cy="425.0" r="11" fill="#ffffff" stroke="#374151" stroke-width="1.4"/>
+<text x="917.3" y="430.0" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="middle">+</text>
+<path d="M117.2,425.0 L117.2,398.0 L917.3,398.0 L917.3,412.0" fill="none" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="515.2" y="394.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="middle" font-style="italic">identity (skip connection)</text>
+<text x="20.0" y="464.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">Fused-MBConv (stages 2–3) replaces the 1×1 expand + 3×3 depthwise pair with one full 3×3 conv and has no SE.</text>
+<text x="20.0" y="508.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">BiT ResNetV2-50x1</text>
+<text x="169.4" y="508.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">used in Exp5  ·  23.5M parameters · GroupNorm + weight-standardized conv · pretrained ImageNet-21k → 1k at 448 px</text>
+<rect x="20.0" y="520.0" width="70.0" height="74.0" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+<text x="55.0" y="554.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Input</text>
+<text x="55.0" y="568.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 × 384²</text>
+<line x1="92.0" y1="557.0" x2="104.0" y2="557.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="106.0" y="520.0" width="103.4" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="157.7" y="540.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stem</text>
+<text x="157.7" y="554.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">7×7 conv, s2</text>
+<text x="157.7" y="568.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">+ max pool, s2</text>
+<text x="157.7" y="582.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">64 × 96²</text>
+<line x1="211.4" y1="557.0" x2="223.4" y2="557.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="225.4" y="520.0" width="97.3" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="274.0" y="547.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 1</text>
+<text x="274.0" y="561.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 bottlenecks</text>
+<text x="274.0" y="575.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">256 × 96²</text>
+<line x1="324.7" y1="557.0" x2="336.7" y2="557.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="338.7" y="520.0" width="97.3" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="387.3" y="547.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 2</text>
+<text x="387.3" y="561.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">4 bottlenecks</text>
+<text x="387.3" y="575.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">512 × 48²</text>
+<line x1="438.0" y1="557.0" x2="450.0" y2="557.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="452.0" y="520.0" width="97.3" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="500.6" y="547.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 3</text>
+<text x="500.6" y="561.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">6 bottlenecks</text>
+<text x="500.6" y="575.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">1024 × 24²</text>
+<line x1="551.3" y1="557.0" x2="563.3" y2="557.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="565.3" y="520.0" width="97.3" height="74.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="613.9" y="547.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Stage 4</text>
+<text x="613.9" y="561.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">3 bottlenecks</text>
+<text x="613.9" y="575.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">2048 × 12²</text>
+<line x1="664.6" y1="557.0" x2="676.6" y2="557.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="678.6" y="520.0" width="133.9" height="74.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="745.5" y="547.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="745.5" y="561.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">GN + ReLU, avg pool</text>
+<text x="745.5" y="575.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">1×1 conv 2048 → 5</text>
+<text x="20.0" y="644.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">Pre-activation bottleneck:</text>
+<line x1="199.0" y1="639.0" x2="211.0" y2="639.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="213.0" y="626.0" width="72.9" height="26.0" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="249.4" y="643.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">GN + ReLU</text>
+<line x1="287.9" y1="639.0" x2="297.9" y2="639.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="299.9" y="626.0" width="79.0" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="339.4" y="643.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">1×1 conv ↓</text>
+<line x1="380.9" y1="639.0" x2="390.9" y2="639.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="392.9" y="626.0" width="72.9" height="26.0" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="429.3" y="643.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">GN + ReLU</text>
+<line x1="467.8" y1="639.0" x2="477.8" y2="639.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="479.8" y="626.0" width="66.8" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="513.2" y="643.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">3×3 conv</text>
+<line x1="548.6" y1="639.0" x2="558.6" y2="639.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="560.6" y="626.0" width="72.9" height="26.0" rx="13" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+<text x="597.0" y="643.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">GN + ReLU</text>
+<line x1="635.5" y1="639.0" x2="645.5" y2="639.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="647.5" y="626.0" width="97.3" height="26.0" rx="13" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="696.1" y="643.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="middle">1×1 conv ↑ ×4</text>
+<line x1="746.8" y1="639.0" x2="756.8" y2="639.0" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<circle cx="769.8" cy="639.0" r="11" fill="#ffffff" stroke="#374151" stroke-width="1.4"/>
+<text x="769.8" y="644.0" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="middle">+</text>
+<path d="M203.0,639.0 L203.0,612.0 L769.8,612.0 L769.8,626.0" fill="none" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="484.4" y="608.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="middle" font-style="italic">identity (skip connection)</text>
+<text x="20.0" y="678.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">Normalization comes before each conv (pre-activation). GroupNorm does not depend on the batch, so no batch statistics are kept.</text>
+<line x1="20" y1="266" x2="928" y2="266" stroke="#e5e7eb"/>
+<line x1="20" y1="480" x2="928" y2="480" stroke="#e5e7eb"/>
+<line x1="20" y1="694" x2="928" y2="694" stroke="#e5e7eb"/>
+<text x="20.0" y="714.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">All three end with a 12 × 12 feature map (stride 32). The head pools it to one vector and maps it to the 5 label logits.</text>
+</svg>

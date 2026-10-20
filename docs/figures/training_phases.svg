@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="546" viewBox="0 0 1060 546" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/></marker>
+<pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="6" stroke="#d1d5db" stroke-width="2"/></pattern></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="20.0" y="22.0" font-size="15" font-weight="bold" fill="#1f2937" text-anchor="start">What was trained in each single-model experiment (all on folds 1–4, selected on fold 0)</text>
+<rect x="20.0" y="34.0" width="14.0" height="14.0" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="1.4"/>
+<text x="40.0" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">frozen (no gradient)</text>
+<rect x="184.0" y="34.0" width="14.0" height="14.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="204.0" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">trainable backbone</text>
+<rect x="335.8" y="34.0" width="14.0" height="14.0" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+<text x="355.8" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">new block (Exp2)</text>
+<rect x="475.4" y="34.0" width="14.0" height="14.0" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="495.4" y="45.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">trainable head</text>
+<text x="210.0" y="80.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="start">Phase 1: head warm-up</text>
+<text x="520.0" y="80.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="start">Phase 2: fine-tune the whole network</text>
+<text x="880.0" y="80.0" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="start">Role · public LB</text>
+<text x="20.0" y="114.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">Exp0</text>
+<text x="20.0" y="130.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">ConvNeXt-base</text>
+<rect x="210.0" y="98.0" width="170.0" height="40.0" rx="6" fill="url(#hatch)" stroke="#9ca3af" stroke-width="1.4"/>
+<text x="295.0" y="115.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Backbone</text>
+<text x="295.0" y="129.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">frozen</text>
+<rect x="384.0" y="98.0" width="84.0" height="40.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="426.0" y="115.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="426.0" y="129.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-3</text>
+<text x="210.0" y="152.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">10 epochs, constant LR</text>
+<text x="520.0" y="122.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">—</text>
+<text x="880.0" y="114.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="start">head-only baseline</text>
+<text x="880.0" y="130.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">LB 0.93365</text>
+<text x="20.0" y="192.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">Exp1</text>
+<text x="20.0" y="208.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">ConvNeXt-base</text>
+<rect x="210.0" y="176.0" width="258.0" height="40.0" rx="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 3"/>
+<text x="339.0" y="193.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">starts from Exp0 head</text>
+<text x="339.0" y="207.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">no own phase 1 (head trained in Exp0)</text>
+<rect x="520.0" y="176.0" width="170.0" height="40.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="605.0" y="193.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Backbone</text>
+<text x="605.0" y="207.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-5</text>
+<rect x="694.0" y="176.0" width="84.0" height="40.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="736.0" y="193.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="736.0" y="207.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-4</text>
+<text x="520.0" y="230.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">early stop after 5 of 8 epochs</text>
+<text x="880.0" y="192.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="start">standard fine-tune</text>
+<text x="880.0" y="208.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">LB 0.97003</text>
+<text x="20.0" y="270.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">Exp2</text>
+<text x="20.0" y="286.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">ConvNeXt-base + block</text>
+<rect x="210.0" y="254.0" width="258.0" height="40.0" rx="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 3"/>
+<text x="339.0" y="271.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">starts from Exp0 head</text>
+<text x="339.0" y="285.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">no own phase 1 (head trained in Exp0)</text>
+<rect x="520.0" y="254.0" width="104.0" height="40.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="572.0" y="271.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Backbone</text>
+<text x="572.0" y="285.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-5</text>
+<rect x="628.0" y="254.0" width="74.0" height="40.0" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+<text x="665.0" y="271.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">New block</text>
+<text x="665.0" y="285.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-5</text>
+<rect x="706.0" y="254.0" width="84.0" height="40.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="748.0" y="271.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="748.0" y="285.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-4</text>
+<text x="520.0" y="308.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">8 epochs; block starts at zero</text>
+<text x="880.0" y="270.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="start">own building block</text>
+<text x="880.0" y="286.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">LB 0.96043</text>
+<text x="20.0" y="348.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">Exp3</text>
+<text x="20.0" y="364.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">EfficientNetV2-S</text>
+<rect x="210.0" y="332.0" width="170.0" height="40.0" rx="6" fill="url(#hatch)" stroke="#9ca3af" stroke-width="1.4"/>
+<text x="295.0" y="349.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Backbone</text>
+<text x="295.0" y="363.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">frozen</text>
+<rect x="384.0" y="332.0" width="84.0" height="40.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="426.0" y="349.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">New head</text>
+<text x="426.0" y="363.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-3</text>
+<text x="210.0" y="386.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">8 epochs</text>
+<rect x="520.0" y="332.0" width="170.0" height="40.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="605.0" y="349.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Backbone</text>
+<text x="605.0" y="363.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-4, BN stats frozen</text>
+<rect x="694.0" y="332.0" width="84.0" height="40.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="736.0" y="349.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="736.0" y="363.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-3</text>
+<text x="520.0" y="386.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">8 epochs</text>
+<text x="880.0" y="348.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="start">own head warm-up</text>
+<text x="880.0" y="364.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">LB 0.97015</text>
+<text x="20.0" y="426.0" font-size="14" font-weight="bold" fill="#1f2937" text-anchor="start">Exp5</text>
+<text x="20.0" y="442.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">BiT ResNetV2-50x1</text>
+<rect x="210.0" y="410.0" width="170.0" height="40.0" rx="6" fill="url(#hatch)" stroke="#9ca3af" stroke-width="1.4"/>
+<text x="295.0" y="427.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Backbone</text>
+<text x="295.0" y="441.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">frozen</text>
+<rect x="384.0" y="410.0" width="84.0" height="40.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="426.0" y="427.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">New head</text>
+<text x="426.0" y="441.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 1e-3</text>
+<text x="210.0" y="464.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">8 epochs</text>
+<rect x="520.0" y="410.0" width="170.0" height="40.0" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+<text x="605.0" y="427.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Backbone</text>
+<text x="605.0" y="441.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 3e-5</text>
+<rect x="694.0" y="410.0" width="84.0" height="40.0" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="736.0" y="427.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="middle">Head</text>
+<text x="736.0" y="441.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="middle">LR 3e-4</text>
+<text x="520.0" y="464.0" font-size="10" font-weight="normal" fill="#4b5563" text-anchor="start" font-style="italic">8 epochs</text>
+<text x="880.0" y="426.0" font-size="11" font-weight="normal" fill="#1f2937" text-anchor="start">own head warm-up</text>
+<text x="880.0" y="442.0" font-size="11" font-weight="bold" fill="#1f2937" text-anchor="start">LB 0.94035</text>
+<text x="20.0" y="490.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">&quot;Head&quot; is only the final Linear layer (1×1 conv for BiT). ConvNeXt&#x27;s pooling LayerNorm and EfficientNet&#x27;s 1×1 conv → 1280 belong to the backbone.</text>
+<text x="20.0" y="506.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">Phase 2 for all: AdamW, weight decay 0.01 (not on biases and norms), 1 warm-up epoch then cosine to 10% of the peak, gradient clip 1.0,</text>
+<text x="20.0" y="522.0" font-size="11" font-weight="normal" fill="#4b5563" text-anchor="start">effective batch 16, BCE loss, checkpoint with the best fold-0 macro F1 at 0.25. Frozen BN statistics: running mean/var fixed, scale and shift still trained.</text>
+</svg>

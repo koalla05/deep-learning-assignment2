@@ -91,6 +91,6 @@
     "stage2/ensemble.py": "31ef61e9800f17bc0280b45f52c0896e332306325e2c8d09cd5320b2761bce6f",
     "stage2/experiment.py": "0395c288f58f6f4f61d5a078770015512e1e718f3a992c61e03e8ddd33b09501"
   },
-  "public_leaderboard_score": null,
+  "public_leaderboard_score": 0.96685,
   "error": null
 }
