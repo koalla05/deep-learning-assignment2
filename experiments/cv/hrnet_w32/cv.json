@@ -1,0 +1,220 @@
+{
+  "status": "completed",
+  "model": "hrnet_w32",
+  "title": "HRNet-W32 (Exp7 recipe)",
+  "recipe": {
+    "key": "hrnet_w32",
+    "title": "HRNet-W32 (Exp7 recipe)",
+    "model_name": "hrnet_w32.ms_in1k",
+    "backbone_lr": 3e-05,
+    "head_lr": 0.0003,
+    "weight_decay": 0.0001,
+    "max_epochs": 9,
+    "patience": 4,
+    "freeze_batchnorm": true,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 40,
+    "head_patience": 10,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "folds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "fold_sources": {
+    "0": "imported",
+    "1": "trained",
+    "2": "trained",
+    "3": "trained",
+    "4": "trained"
+  },
+  "fold_records_sha256": {
+    "0": "9d00cc2caf3c90c69c38399055a3f152d0f399fb7886873a529c05217ef7a1cc",
+    "1": "6cb6b980dc81d27e3c9fe0b24a002a46b08d0a58b70dea78af394ed7f7af3252",
+    "2": "959d77497c4ba6620d8a1db4f17097081e1d4df75b3790047127c02c8fa4943d",
+    "3": "dcb8fe63a88c2a344a1871850628231c5e4dc0b71ee298ca1832d26dfa101380",
+    "4": "532f4f93eb623403a17abd4110b45b0cf9efb18b9f8b1a5a34ef8a05d494b33f"
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "cv": {
+    "threshold": 0.25,
+    "per_fold_macro_f1": {
+      "0": 0.9973272700601438,
+      "1": 0.9857615586715127,
+      "2": 0.9746911043318937,
+      "3": 0.9964392276677293,
+      "4": 0.9772901367545739
+    },
+    "per_fold_per_label_f1": {
+      "0": {
+        "Cat": 0.9941176470588236,
+        "Dog": 0.9925187032418953,
+        "Moris": 1.0,
+        "Motya": 1.0,
+        "Biatrix": 1.0
+      },
+      "1": {
+        "Cat": 0.9960513326752222,
+        "Dog": 0.991579990094106,
+        "Moris": 1.0,
+        "Motya": 1.0,
+        "Biatrix": 0.9411764705882353
+      },
+      "2": {
+        "Cat": 0.9916625796959294,
+        "Dog": 0.9884596086302058,
+        "Moris": 0.96,
+        "Motya": 0.9333333333333333,
+        "Biatrix": 1.0
+      },
+      "3": {
+        "Cat": 0.9935992122107337,
+        "Dog": 0.9885969261279127,
+        "Moris": 1.0,
+        "Motya": 1.0,
+        "Biatrix": 1.0
+      },
+      "4": {
+        "Cat": 0.9911678115799804,
+        "Dog": 0.9955334987593052,
+        "Moris": 0.9523809523809523,
+        "Motya": 0.9473684210526315,
+        "Biatrix": 1.0
+      }
+    },
+    "mean_fold_macro_f1": 0.9863018594971706,
+    "std_fold_macro_f1": 0.010495696960983864,
+    "pooled_oof": {
+      "threshold": 0.25,
+      "macro_f1": 0.9861292745788909,
+      "per_label_f1": {
+        "Cat": 0.9933162964419108,
+        "Dog": 0.9913424221315554,
+        "Moris": 0.9821428571428571,
+        "Motya": 0.9761904761904762,
+        "Biatrix": 0.9876543209876543
+      },
+      "macro_ap": 0.9928325030639948,
+      "per_label_ap": {
+        "Cat": 0.9991276302077103,
+        "Dog": 0.9993670918263715,
+        "Moris": 0.9896960255786368,
+        "Motya": 0.9950428626735246,
+        "Biatrix": 0.9809289050337312
+      }
+    },
+    "pooled_oof_macro_f1_at_0_5": 0.9798374998388489
+  },
+  "per_label_thresholds": {
+    "thresholds": {
+      "Cat": 0.7,
+      "Dog": 0.325,
+      "Moris": 0.21,
+      "Motya": 0.245,
+      "Biatrix": 0.455
+    },
+    "thresholds_by_held_out_fold": {
+      "0": {
+        "Cat": 0.685,
+        "Dog": 0.42,
+        "Moris": 0.21,
+        "Motya": 0.245,
+        "Biatrix": 0.505
+      },
+      "1": {
+        "Cat": 0.73,
+        "Dog": 0.31,
+        "Moris": 0.21,
+        "Motya": 0.245,
+        "Biatrix": 0.455
+      },
+      "2": {
+        "Cat": 0.7,
+        "Dog": 0.325,
+        "Moris": 0.21,
+        "Motya": 0.245,
+        "Biatrix": 0.455
+      },
+      "3": {
+        "Cat": 0.74,
+        "Dog": 0.365,
+        "Moris": 0.21,
+        "Motya": 0.275,
+        "Biatrix": 0.455
+      },
+      "4": {
+        "Cat": 0.7,
+        "Dog": 0.325,
+        "Moris": 0.64,
+        "Motya": 0.245,
+        "Biatrix": 0.455
+      }
+    },
+    "fair_macro_f1": 0.9826205455647974,
+    "fair_per_label_f1": {
+      "Cat": 0.9940851735015773,
+      "Dog": 0.991536393507916,
+      "Moris": 0.9636363636363636,
+      "Motya": 0.9761904761904762,
+      "Biatrix": 0.9876543209876543
+    },
+    "optimistic_macro_f1": 0.9864212611405463,
+    "optimistic_per_label_f1": {
+      "Cat": 0.994381468703795,
+      "Dog": 0.9917371826779492,
+      "Moris": 0.9821428571428571,
+      "Motya": 0.9761904761904762,
+      "Biatrix": 0.9876543209876543
+    }
+  },
+  "test": {
+    "method": "equal-weight mean of the five fold models",
+    "positives_at_0_25": {
+      "Cat": 7832,
+      "Dog": 7702,
+      "Moris": 174,
+      "Motya": 136,
+      "Biatrix": 179
+    },
+    "positives_per_label_thresholds": {
+      "Cat": 7739,
+      "Dog": 7680,
+      "Moris": 177,
+      "Motya": 137,
+      "Biatrix": 170
+    }
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "3cb91cfcd5710af61de62af984dd85a8b14089776988427649edcab059e5f0c9"
+    },
+    "test_mean": {
+      "path": "test_mean.csv",
+      "sha256": "e20967bcd157f0385111eaf9c91f6c7dafb2b628623eedcfeaa3935b95b09938"
+    }
+  },
+  "git_commit": "a599e0203758e5f141973ce0b99b96c6461a0417",
+  "created_utc": "2026-11-10T20:09:22+00:00",
+  "public_leaderboard_score": {}
+}

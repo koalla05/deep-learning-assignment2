@@ -1,0 +1,109 @@
+{
+  "status": "completed",
+  "model": "hrnet_w32",
+  "title": "HRNet-W32 (Exp7 recipe)",
+  "fold": 0,
+  "seed": 42,
+  "source": "imported",
+  "smoke_test": false,
+  "imported_from": {
+    "experiment": "07_hrnet_w32",
+    "run_id": "hrnet_w32_finetune_fold0_seed42",
+    "record": "experiments/exp07/results/hrnet_w32_finetune_fold0_seed42/hrnet_w32_finetune_fold0_seed42.json",
+    "model": {
+      "name": "hrnet_w32.ms_in1k",
+      "variant": "standard",
+      "family": "hrnet",
+      "initial_head_checkpoint": "experiments/exp07/checkpoints/head_best.pt",
+      "initial_head_sha256": "7407ad41f1eb5b3184d7391550e138b349529014d33213fb1575fa47f8e578c6",
+      "head_warmup": {
+        "notebook": "notebooks/16_hrnet_w32_head.ipynb",
+        "epochs_completed": 40,
+        "best_heldout_macro_f1": 0.9174683305301006
+      }
+    },
+    "training": {
+      "optimizer": "AdamW(backbone_lr=3e-05, head_lr=0.0003, weight_decay=0.0001 except bias/norm, betas=(0.9, 0.999))",
+      "scheduler": "one epoch step warmup then cosine to 0.1 peak",
+      "loss": "BCEWithLogitsLoss",
+      "max_epochs": 9,
+      "patience": 4,
+      "physical_batch_size": 2,
+      "effective_batch_size": 16,
+      "precision": "32-true",
+      "stage_policy": "full network and classifier trainable; BatchNorm running statistics frozen",
+      "checkpoint_selection": "best validation macro F1 at 0.25; ties by lower validation BCE",
+      "epochs_completed": 9,
+      "selected_epoch": 8,
+      "budget_hours": 7.402407540150283
+    }
+  },
+  "recipe": {
+    "key": "hrnet_w32",
+    "title": "HRNet-W32 (Exp7 recipe)",
+    "model_name": "hrnet_w32.ms_in1k",
+    "backbone_lr": 3e-05,
+    "head_lr": 0.0003,
+    "weight_decay": 0.0001,
+    "max_epochs": 9,
+    "patience": 4,
+    "freeze_batchnorm": true,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 40,
+    "head_patience": 10,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "validation_images": 2452,
+    "test_images": 18673
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9973272700601438,
+    "per_label_f1": {
+      "Cat": 0.9941176470588236,
+      "Dog": 0.9925187032418953,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_ap": 0.9999477572258334,
+    "per_label_ap": {
+      "Cat": 0.9999330982987393,
+      "Dog": 0.9998056878304271,
+      "Moris": 1.0,
+      "Motya": 1.0000000000000002,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9972167158308751
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "256055f2abf8442f13c3bbe21795affa46ccff4a360d4f5d84e68382bded51aa"
+    },
+    "test": {
+      "path": "test.csv",
+      "sha256": "4ff2639514be06897319b47cab7430933b8afaf30406cdd99b25f81468e7b305"
+    }
+  },
+  "best_checkpoint_sha256": "c8a8a36762400162cbfa3c439b7fee748091f7f7c133c0ead126b7fc297ec071",
+  "git_commit": "a599e0203758e5f141973ce0b99b96c6461a0417",
+  "created_utc": "2026-11-10T16:55:27+00:00"
+}
