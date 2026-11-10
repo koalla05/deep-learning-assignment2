@@ -1,0 +1,135 @@
+{
+  "status": "completed",
+  "model": "convnext",
+  "title": "ConvNeXt-base (Exp1 recipe)",
+  "fold": 3,
+  "seed": 42,
+  "source": "trained",
+  "smoke_test": false,
+  "recipe": {
+    "key": "convnext",
+    "title": "ConvNeXt-base (Exp1 recipe)",
+    "model_name": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "backbone_lr": 1e-05,
+    "head_lr": 0.0001,
+    "weight_decay": 0.01,
+    "max_epochs": 8,
+    "patience": 3,
+    "freeze_batchnorm": false,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 10,
+    "head_patience": 3,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "runtime": {
+    "batch_size": 8,
+    "precision": "16-mixed",
+    "num_workers": 2,
+    "device": "cuda",
+    "smoke_test": false,
+    "use_wandb": true,
+    "wandb_project": "ai301-stage2"
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5",
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "train_images": 9808,
+    "validation_images": 2452,
+    "test_images": 18673
+  },
+  "head": {
+    "fold": 3,
+    "method": "linear head on cached frozen features (original + mirrored view)",
+    "optimizer": "AdamW(lr=0.001, weight_decay=0.01)",
+    "epochs_completed": 9,
+    "best_epoch": 6,
+    "best_heldout_macro_f1": 0.951194581280788,
+    "feature_extraction_seconds": 122.54650838399994,
+    "seconds": 130.3873425390002,
+    "head_sha256": "7eabad696687648a46c61b4ba2e89ec8dafce81ff27b81f0bd6b9ed19836b161"
+  },
+  "training": {
+    "fold": 3,
+    "epochs_completed": 8,
+    "stopped_early": false,
+    "best_macro_f1": 0.998811662197113,
+    "best_checkpoint": "checkpoints/best.ckpt",
+    "best_checkpoint_sha256": "9178ddc55d412a81227ac972a508acf8ad44d9742dd2aad6b1db7d58acbf2ab2",
+    "resumed_from_epoch": null,
+    "last_session_seconds": 1636.7825961130002,
+    "device": "cuda"
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.998811666993522,
+    "per_label_f1": {
+      "Cat": 0.9975357318876293,
+      "Dog": 0.9965226030799801,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_ap": 0.9995628445185474,
+    "per_label_ap": {
+      "Cat": 0.9981826675970599,
+      "Dog": 0.9996315549956772,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9854785292191623
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "9b33f4f1b9455dcb156dd64161cf8c208633bb7824322a3a67fccc9b60e405d4"
+    },
+    "oof_logits": {
+      "path": "oof_logits.csv",
+      "sha256": "1986118af3ed6ce761b0b2e74ed316f82b18f9c49a99873ea175fbd8810b55a5"
+    },
+    "test": {
+      "path": "test.csv",
+      "sha256": "08cd5db4673b262bd632fb4e81a0e5c4800603f5f9ba5fa2d5a06ddb24f011ce"
+    },
+    "test_logits": {
+      "path": "test_logits.csv",
+      "sha256": "201c28af72ea126ccc604d5dc023793df3e56409e8383d945e896ea3799adac9"
+    }
+  },
+  "best_checkpoint_sha256": "9178ddc55d412a81227ac972a508acf8ad44d9742dd2aad6b1db7d58acbf2ab2",
+  "prediction_seconds": 116.09995448999962,
+  "git_commit": null,
+  "versions": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "timm": "1.0.31",
+    "lightning": "2.6.6"
+  },
+  "created_utc": "2026-11-10T16:57:27+00:00"
+}

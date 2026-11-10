@@ -1,0 +1,158 @@
+{
+  "model": "convnext",
+  "fold": 2,
+  "recipe": {
+    "key": "convnext",
+    "title": "ConvNeXt-base (Exp1 recipe)",
+    "model_name": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "backbone_lr": 1e-05,
+    "head_lr": 0.0001,
+    "weight_decay": 0.01,
+    "max_epochs": 8,
+    "patience": 3,
+    "freeze_batchnorm": false,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 10,
+    "head_patience": 3,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "runtime": {
+    "batch_size": 2,
+    "precision": "32-true",
+    "num_workers": 0,
+    "device": "mps",
+    "smoke_test": false,
+    "use_wandb": true,
+    "wandb_project": "ai301-stage2"
+  },
+  "status": "failed",
+  "phase": "fine_tuning",
+  "utc": "20261110T152137",
+  "error": {
+    "type": "ConnectionResetError",
+    "frames": [
+      {
+        "file": "cv.py",
+        "line": 155,
+        "function": "record_failure"
+      },
+      {
+        "file": "cv.py",
+        "line": 499,
+        "function": "run_fold"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 4124,
+        "function": "finish"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 322,
+        "function": "wrapper"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 367,
+        "function": "wrapper"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 2282,
+        "function": "finish"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 322,
+        "function": "wrapper"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 2301,
+        "function": "_finish"
+      },
+      {
+        "file": "telemetry.py",
+        "line": 45,
+        "function": "__exit__"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 675,
+        "function": "_telemetry_callback"
+      },
+      {
+        "file": "wandb_run.py",
+        "line": 688,
+        "function": "_telemetry_flush"
+      },
+      {
+        "file": "interface_shared.py",
+        "line": 122,
+        "function": "_publish_telemetry"
+      },
+      {
+        "file": "interface_sock.py",
+        "line": 46,
+        "function": "_publish"
+      },
+      {
+        "file": "asyncio_manager.py",
+        "line": 145,
+        "function": "run"
+      },
+      {
+        "file": "_base.py",
+        "line": 456,
+        "function": "result"
+      },
+      {
+        "file": "_base.py",
+        "line": 401,
+        "function": "__get_result"
+      },
+      {
+        "file": "asyncio_manager.py",
+        "line": 238,
+        "function": "_wrap"
+      },
+      {
+        "file": "service_client.py",
+        "line": 42,
+        "function": "publish"
+      },
+      {
+        "file": "service_client.py",
+        "line": 75,
+        "function": "_send_server_request"
+      },
+      {
+        "file": "service_client.py",
+        "line": 84,
+        "function": "_send_server_request"
+      },
+      {
+        "file": "service_client.py",
+        "line": 92,
+        "function": "_drain_writer"
+      },
+      {
+        "file": "streams.py",
+        "line": 392,
+        "function": "drain"
+      },
+      {
+        "file": "streams.py",
+        "line": 166,
+        "function": "_drain_helper"
+      }
+    ]
+  }
+}

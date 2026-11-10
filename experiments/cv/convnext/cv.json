@@ -1,0 +1,220 @@
+{
+  "status": "completed",
+  "model": "convnext",
+  "title": "ConvNeXt-base (Exp1 recipe)",
+  "recipe": {
+    "key": "convnext",
+    "title": "ConvNeXt-base (Exp1 recipe)",
+    "model_name": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "backbone_lr": 1e-05,
+    "head_lr": 0.0001,
+    "weight_decay": 0.01,
+    "max_epochs": 8,
+    "patience": 3,
+    "freeze_batchnorm": false,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 10,
+    "head_patience": 3,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "folds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "fold_sources": {
+    "0": "imported",
+    "1": "trained",
+    "2": "trained",
+    "3": "trained",
+    "4": "trained"
+  },
+  "fold_records_sha256": {
+    "0": "cb8d3369d43113c10e37af2dea7e04a08e0ccb091cfaba7fbb54dd1e7cbbe2d0",
+    "1": "8984e770573a8a2fa023e2ce92fd107d9755d691ffd73144c921efe6aa0e299d",
+    "2": "2aa085d8cdb9e7e970e6fda7c363d45fb695f135aea49db935f71597d323129e",
+    "3": "e06d3f79749e83c4a2023928bb96bacbce6f5101e46c64e0172ffc8df69c68c2",
+    "4": "d02f2c8f5b9efd7357c0961d6bfc6fc35d0b0c5369cb2ea65068129a5c20cfa5"
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "cv": {
+    "threshold": 0.25,
+    "per_fold_macro_f1": {
+      "0": 0.9751849358283667,
+      "1": 0.9802828319209947,
+      "2": 0.9518865943656927,
+      "3": 0.998811666993522,
+      "4": 0.9669502351649198
+    },
+    "per_fold_per_label_f1": {
+      "0": {
+        "Cat": 0.9965568125922283,
+        "Dog": 0.9970149253731343,
+        "Moris": 1.0,
+        "Motya": 0.9411764705882353,
+        "Biatrix": 0.9411764705882353
+      },
+      "1": {
+        "Cat": 0.9990128331688055,
+        "Dog": 0.9985111662531018,
+        "Moris": 0.9565217391304348,
+        "Motya": 1.0,
+        "Biatrix": 0.9473684210526315
+      },
+      "2": {
+        "Cat": 0.9980353634577603,
+        "Dog": 0.9975087194818136,
+        "Moris": 0.8888888888888888,
+        "Motya": 0.875,
+        "Biatrix": 1.0
+      },
+      "3": {
+        "Cat": 0.9975357318876293,
+        "Dog": 0.9965226030799801,
+        "Moris": 1.0,
+        "Motya": 1.0,
+        "Biatrix": 1.0
+      },
+      "4": {
+        "Cat": 0.9965568125922283,
+        "Dog": 0.9970178926441352,
+        "Moris": 0.9,
+        "Motya": 1.0,
+        "Biatrix": 0.9411764705882353
+      }
+    },
+    "mean_fold_macro_f1": 0.9746232528546992,
+    "std_fold_macro_f1": 0.017271772789982646,
+    "pooled_oof": {
+      "threshold": 0.25,
+      "macro_f1": 0.9741567342333388,
+      "per_label_f1": {
+        "Cat": 0.997538643300187,
+        "Dog": 0.9973153027741871,
+        "Moris": 0.9473684210526315,
+        "Motya": 0.963855421686747,
+        "Biatrix": 0.9647058823529412
+      },
+      "macro_ap": 0.9948543145102093,
+      "per_label_ap": {
+        "Cat": 0.9995687739695271,
+        "Dog": 0.9998263716434274,
+        "Moris": 0.9934502173932571,
+        "Motya": 0.98200692963775,
+        "Biatrix": 0.9994192799070848
+      }
+    },
+    "pooled_oof_macro_f1_at_0_5": 0.976843397509171
+  },
+  "per_label_thresholds": {
+    "thresholds": {
+      "Cat": 0.295,
+      "Dog": 0.645,
+      "Moris": 0.34,
+      "Motya": 0.11,
+      "Biatrix": 0.505
+    },
+    "thresholds_by_held_out_fold": {
+      "0": {
+        "Cat": 0.295,
+        "Dog": 0.645,
+        "Moris": 0.34,
+        "Motya": 0.11,
+        "Biatrix": 0.505
+      },
+      "1": {
+        "Cat": 0.51,
+        "Dog": 0.645,
+        "Moris": 0.545,
+        "Motya": 0.10500000000000001,
+        "Biatrix": 0.75
+      },
+      "2": {
+        "Cat": 0.26,
+        "Dog": 0.6,
+        "Moris": 0.07500000000000001,
+        "Motya": 0.27,
+        "Biatrix": 0.505
+      },
+      "3": {
+        "Cat": 0.435,
+        "Dog": 0.305,
+        "Moris": 0.34,
+        "Motya": 0.11,
+        "Biatrix": 0.505
+      },
+      "4": {
+        "Cat": 0.44,
+        "Dog": 0.33,
+        "Moris": 0.34,
+        "Motya": 0.11,
+        "Biatrix": 0.505
+      }
+    },
+    "fair_macro_f1": 0.971865481634915,
+    "fair_per_label_f1": {
+      "Cat": 0.9973412112259971,
+      "Dog": 0.9971147149537359,
+      "Moris": 0.9380530973451328,
+      "Motya": 0.963855421686747,
+      "Biatrix": 0.9629629629629629
+    },
+    "optimistic_macro_f1": 0.9823788935099849,
+    "optimistic_per_label_f1": {
+      "Cat": 0.997538643300187,
+      "Dog": 0.9974124203821656,
+      "Moris": 0.9642857142857143,
+      "Motya": 0.9647058823529412,
+      "Biatrix": 0.9879518072289156
+    }
+  },
+  "test": {
+    "method": "equal-weight mean of the five fold models",
+    "positives_at_0_25": {
+      "Cat": 7776,
+      "Dog": 7674,
+      "Moris": 178,
+      "Motya": 133,
+      "Biatrix": 184
+    },
+    "positives_per_label_thresholds": {
+      "Cat": 7773,
+      "Dog": 7655,
+      "Moris": 168,
+      "Motya": 144,
+      "Biatrix": 178
+    }
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "664cd7907409a5bd66e7cb944a29010c4258f018fcf9be2d4e29ea6e1ab03c5f"
+    },
+    "test_mean": {
+      "path": "test_mean.csv",
+      "sha256": "8cacff77cef238f92f9c13606e16d7b5e675ef10de7dbc0306e4ed3395b3f8fe"
+    }
+  },
+  "git_commit": null,
+  "created_utc": "2026-11-10T17:18:34+00:00",
+  "public_leaderboard_score": {}
+}
