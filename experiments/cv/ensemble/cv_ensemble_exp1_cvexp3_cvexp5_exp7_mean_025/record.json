@@ -53,5 +53,5 @@
   "submission_csv": "submissions/cv_ensemble_exp1_cvexp3_cvexp5_exp7_mean_025.csv",
   "submission_sha256": "d6213fa30d86037f3b9315351a9a4d003653811d7b7435827d140023b7ecef1d",
   "git_commit": "8eb07f4f9ca2de22653606da79d0fbd1bb7b0054",
-  "public_leaderboard_score": null
+  "public_leaderboard_score": 0.98367
 }
