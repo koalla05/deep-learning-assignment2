@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 from sklearn.metrics import f1_score
 
-from stage2.cv import fold_status, load_fold_record, record_failure, sha256, write_json_once, write_matrix
+from stage2.cv import fold_status, load_fold_record, record_failure, sha256, sha256_matches, write_json_once, write_matrix
 from stage2.experiment import LABEL_COLUMNS
 from stage2.thresholds import FINE_GRID, f1_over_grid, nested_thresholds, per_label_f1, tune_label_thresholds
 
@@ -73,6 +73,16 @@ class FoldBookkeepingTests(unittest.TestCase):
             self.assertEqual(load_fold_record(model_dir, 2)["fold"], 2)
             (directory / "oof.csv").write_text("changed\n")
             self.assertEqual(fold_status(model_dir, 2), "broken")
+
+    def test_hash_survives_git_line_ending_changes_but_not_content_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "oof.csv"
+            path.write_bytes(b"a,b\r\n1,2\r\n")
+            recorded = sha256(path)
+            path.write_bytes(b"a,b\n1,2\n")
+            self.assertTrue(sha256_matches(path, recorded))
+            path.write_bytes(b"a,b\n1,3\n")
+            self.assertFalse(sha256_matches(path, recorded))
 
     def test_failures_leave_a_note_and_propagate(self) -> None:
         with tempfile.TemporaryDirectory() as folder:

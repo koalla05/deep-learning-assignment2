@@ -95,6 +95,16 @@ def sha256(path: Path) -> str:
         return hashlib.file_digest(file, "sha256").hexdigest()
 
 
+def sha256_matches(path: Path, expected: str) -> bool:
+    """True if the file has the recorded hash, also when git changed its line endings (CRLF <-> LF)."""
+    if sha256(path) == expected:
+        return True
+    if path.suffix not in (".csv", ".json"):
+        return False
+    data = path.read_bytes().replace(b"\r\n", b"\n")
+    return expected in (hashlib.sha256(data).hexdigest(), hashlib.sha256(data.replace(b"\n", b"\r\n")).hexdigest())
+
+
 def _atomic_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".partial")
@@ -659,7 +669,7 @@ def read_cv_summary(model_dir: Path, train_ids: list[str], test_ids: list[str]) 
     """Load what a model notebook saved: OOF and fold-mean test probabilities plus the summary record."""
     record = json.loads((model_dir / "cv.json").read_text())
     for entry in record["files"].values():
-        if sha256(model_dir / entry["path"]) != entry["sha256"]:
+        if not sha256_matches(model_dir / entry["path"], entry["sha256"]):
             raise ValueError(f"{model_dir / entry['path']} differs from its recorded SHA-256.")
     with (model_dir / record["files"]["oof"]["path"]).open(newline="") as file:
         folds = {row["image_id"]: int(row["fold"]) for row in csv.DictReader(file)}
