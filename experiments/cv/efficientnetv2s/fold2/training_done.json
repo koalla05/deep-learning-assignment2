@@ -1,0 +1,11 @@
+{
+  "fold": 2,
+  "epochs_completed": 8,
+  "stopped_early": false,
+  "best_macro_f1": 0.9480170011520386,
+  "best_checkpoint": "checkpoints/best.ckpt",
+  "best_checkpoint_sha256": "ab5cb86fe0621bf0b3fd1ff40dfe62afc1216ae84b4c8f7541c922a707017538",
+  "resumed_from_epoch": null,
+  "last_session_seconds": 5662.368377750012,
+  "device": "mps"
+}
