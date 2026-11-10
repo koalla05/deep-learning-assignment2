@@ -1,0 +1,11 @@
+{
+  "fold": 4,
+  "method": "linear head on cached frozen features (original + mirrored view)",
+  "optimizer": "AdamW(lr=0.001, weight_decay=0.01)",
+  "epochs_completed": 7,
+  "best_epoch": 4,
+  "best_heldout_macro_f1": 0.9421894916539817,
+  "feature_extraction_seconds": 91.30053882199991,
+  "seconds": 97.86437642500005,
+  "head_sha256": "b82dc299844f63c6e93fc93aa4870b5019eb6c05daea49c64b68a0e728b49f2a"
+}

@@ -1,0 +1,11 @@
+{
+  "fold": 4,
+  "epochs_completed": 8,
+  "stopped_early": false,
+  "best_macro_f1": 0.9510460495948792,
+  "best_checkpoint": "checkpoints/best.ckpt",
+  "best_checkpoint_sha256": "c759a1e7651b47fda7384f0a8b47b3dcc3d39444c328b837e1e01a0e747b4475",
+  "resumed_from_epoch": null,
+  "last_session_seconds": 970.5502656019999,
+  "device": "cuda"
+}

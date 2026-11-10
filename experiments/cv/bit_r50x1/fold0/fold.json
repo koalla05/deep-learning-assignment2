@@ -1,0 +1,114 @@
+{
+  "status": "completed",
+  "model": "bit_r50x1",
+  "title": "BiT ResNetV2-50x1 (Exp5 recipe)",
+  "fold": 0,
+  "seed": 42,
+  "source": "imported",
+  "smoke_test": false,
+  "imported_from": {
+    "experiment": "05_bit_resnetv2_50x1",
+    "run_id": "bit_r50x1_fold0_seed42",
+    "record": "experiments/exp5/results/bit_r50x1_fold0_seed42/bit_r50x1_fold0_seed42.json",
+    "model": {
+      "name": "resnetv2_50x1_bit.goog_in21k_ft_in1k",
+      "variant": "standard",
+      "family": "bit_resnetv2",
+      "pretrained_source": {
+        "hf_hub_id": "timm/resnetv2_50x1_bit.goog_in21k_ft_in1k",
+        "tag": "goog_in21k_ft_in1k",
+        "architecture": "resnetv2_50x1_bit"
+      },
+      "initial_head_checkpoint": "experiments/exp5/results/bit_r50x1_fold0_seed42/head.pt",
+      "initial_head_sha256": "7f79945a09663aac20de7a510300001fadd10e42b9f7f533fc4a373b7b16d6fe",
+      "head_warmup": {
+        "optimizer": "AdamW(lr=0.001, weight_decay=0.01)",
+        "epochs_completed": 8,
+        "best_heldout_macro_f1": 0.9536112546920776,
+        "seconds": 1819.0755348329985
+      }
+    },
+    "training": {
+      "optimizer": "AdamW(backbone_lr=3e-05, head_lr=0.0003, weight_decay=0.01 except bias/norm, betas=(0.9, 0.999))",
+      "scheduler": "one epoch step warmup then cosine to 0.1 peak",
+      "loss": "BCEWithLogitsLoss",
+      "max_epochs": 8,
+      "patience": 3,
+      "physical_batch_size": 8,
+      "effective_batch_size": 16,
+      "precision": "32-true",
+      "stage_policy": "full network and classifier trainable; GroupNorm has no running statistics",
+      "checkpoint_selection": "best validation macro F1 at 0.25",
+      "gradient_clip_norm": 1.0,
+      "epochs_completed": 8
+    }
+  },
+  "recipe": {
+    "key": "bit_r50x1",
+    "title": "BiT ResNetV2-50x1 (Exp5 recipe)",
+    "model_name": "resnetv2_50x1_bit.goog_in21k_ft_in1k",
+    "backbone_lr": 3e-05,
+    "head_lr": 0.0003,
+    "weight_decay": 0.01,
+    "max_epochs": 8,
+    "patience": 3,
+    "freeze_batchnorm": false,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 8,
+    "head_patience": 3,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "validation_images": 2452,
+    "test_images": 18673
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9985134806755427,
+    "per_label_f1": {
+      "Cat": 0.9970472440944882,
+      "Dog": 0.9955201592832255,
+      "Moris": 1.0,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_ap": 0.9997059026730059,
+    "per_label_ap": {
+      "Cat": 0.9987396836864212,
+      "Dog": 0.999789829678608,
+      "Moris": 0.9999999999999999,
+      "Motya": 1.0,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9877883526661965
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "99a4c0b6fac9a5f790b336ef8a6f8e4f91c58c4b5f05a60235144049d34874e7"
+    },
+    "test": {
+      "path": "test.csv",
+      "sha256": "7fbc310edd8a0208e9b633291c860f9d1e546ebd009a0d0cfda4a9baa82b8d9d"
+    }
+  },
+  "best_checkpoint_sha256": "8ede7547533baed45a0b2b84830f6e50c4cb1c524f436aea180db0c88a4b75f3",
+  "git_commit": "b817cc3d879189e38e19f858ec123cd0fa0b1e4c",
+  "created_utc": "2026-11-10T15:02:18+00:00"
+}

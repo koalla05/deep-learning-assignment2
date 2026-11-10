@@ -1,0 +1,135 @@
+{
+  "status": "completed",
+  "model": "bit_r50x1",
+  "title": "BiT ResNetV2-50x1 (Exp5 recipe)",
+  "fold": 1,
+  "seed": 42,
+  "source": "trained",
+  "smoke_test": false,
+  "recipe": {
+    "key": "bit_r50x1",
+    "title": "BiT ResNetV2-50x1 (Exp5 recipe)",
+    "model_name": "resnetv2_50x1_bit.goog_in21k_ft_in1k",
+    "backbone_lr": 3e-05,
+    "head_lr": 0.0003,
+    "weight_decay": 0.01,
+    "max_epochs": 8,
+    "patience": 3,
+    "freeze_batchnorm": false,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 8,
+    "head_patience": 3,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "runtime": {
+    "batch_size": 8,
+    "precision": "16-mixed",
+    "num_workers": 2,
+    "device": "cuda",
+    "smoke_test": false,
+    "use_wandb": true,
+    "wandb_project": "ai301-stage2"
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "transform": "mean-colour letterbox, bicubic, checkpoint normalization; train horizontal flip p=0.5",
+    "mean": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "std": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "train_images": 9808,
+    "validation_images": 2452,
+    "test_images": 18673
+  },
+  "head": {
+    "fold": 1,
+    "method": "linear head on cached frozen features (original + mirrored view)",
+    "optimizer": "AdamW(lr=0.001, weight_decay=0.01)",
+    "epochs_completed": 8,
+    "best_epoch": 5,
+    "best_heldout_macro_f1": 0.9324044193454952,
+    "feature_extraction_seconds": 94.01046934500005,
+    "seconds": 101.62570245300003,
+    "head_sha256": "fc7eb3e2b6ead7c1a9b7790bdca9a0235bd937dcf75a2893668c51a50f5faf65"
+  },
+  "training": {
+    "fold": 1,
+    "epochs_completed": 8,
+    "stopped_early": false,
+    "best_macro_f1": 0.9737829566001892,
+    "best_checkpoint": "checkpoints/best.ckpt",
+    "best_checkpoint_sha256": "decd379b223fb478bacce4afb1dc40953b3acb767f11b030ea2d17d96a08f15d",
+    "resumed_from_epoch": null,
+    "last_session_seconds": 966.786475311,
+    "device": "cuda"
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9737829581665824,
+    "per_label_f1": {
+      "Cat": 0.9930624380574826,
+      "Dog": 0.9901380670611439,
+      "Moris": 0.9523809523809523,
+      "Motya": 0.9333333333333333,
+      "Biatrix": 1.0
+    },
+    "macro_ap": 0.9970196642121326,
+    "per_label_ap": {
+      "Cat": 0.9995978688506131,
+      "Dog": 0.9993893410989387,
+      "Moris": 1.0,
+      "Motya": 0.9861111111111112,
+      "Biatrix": 1.0000000000000002
+    },
+    "macro_f1_at_0_5": 0.9621140956621244
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "45a4e47960a043e857b1a235ae0dd80760f4afccf3c0b055ad4944cc6d908398"
+    },
+    "oof_logits": {
+      "path": "oof_logits.csv",
+      "sha256": "451a05d3fdb5ada3676a62efdf994acfacd2ba3a8375ebf2c9cde5df16ab298c"
+    },
+    "test": {
+      "path": "test.csv",
+      "sha256": "7b31518e198801b08280ba1e6784ddcf118df727169afe3d88a81dcf9a78d21f"
+    },
+    "test_logits": {
+      "path": "test_logits.csv",
+      "sha256": "a77392b16ad6aedbe7e9ef9a7f0e832588b836bb9a1f99c5a7c419ba885a11f2"
+    }
+  },
+  "best_checkpoint_sha256": "decd379b223fb478bacce4afb1dc40953b3acb767f11b030ea2d17d96a08f15d",
+  "prediction_seconds": 89.31821301299988,
+  "git_commit": "b817cc3d879189e38e19f858ec123cd0fa0b1e4c",
+  "versions": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "timm": "1.0.30",
+    "lightning": "2.6.6"
+  },
+  "created_utc": "2026-11-10T15:21:42+00:00"
+}
