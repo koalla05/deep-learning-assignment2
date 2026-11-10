@@ -10,6 +10,8 @@
 /artifacts/
 /experiments/*/results/**/checkpoints/
 /experiments/*/results/**/wandb/
+/experiments/cv/**/wandb/
+/experiments/cv/**/*.partial
 *.ckpt
 *.pth
 *.pt

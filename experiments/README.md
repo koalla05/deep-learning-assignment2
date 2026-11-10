@@ -14,6 +14,7 @@ experimental rationale; the [root report](../README.md) holds the score table.
 | [exp4](exp4/) | Does averaging completed runs beat the best single model? | [08](../notebooks/08_ensemble.ipynb), [10](../notebooks/10_ensemble_exp1_exp3.ipynb), [13](../notebooks/13_ensemble_exp1_exp3_exp5.ipynb), [15](../notebooks/15_stacking_logreg.ipynb) |
 | [exp5](exp5/) | Does a third CNN family (BiT ResNetV2-50x1) add to the ensemble? | [12](../notebooks/12_bit_resnetv2.ipynb) |
 | [exp6](exp6/) | Do the ensemble members improve when retrained on all labelled data? | [14](../notebooks/14_full_data_final.ipynb) |
+| [cv](cv/) | What do five folds, fold ensembles and per-label thresholds give each model and the ensemble? | [cv/01–06](../notebooks/cv/) |
 
 ## Folder convention
 

@@ -194,6 +194,21 @@ def form_submission(
     return [{"image_id": image_id, **{label: int(value >= threshold) for label, value in zip(LABEL_COLUMNS, by_id[image_id])}} for image_id in sample_ids]
 
 
+def form_submission_per_label(
+    sample_csv: Path, test_ids: Sequence[str], probabilities: np.ndarray, thresholds: Sequence[float]
+) -> list[dict[str, str | int]]:
+    """Like `form_submission`, but every label has its own threshold (in LABEL_COLUMNS order)."""
+    thresholds = np.asarray(thresholds, dtype=float)
+    if thresholds.shape != (len(LABEL_COLUMNS),) or not np.all((thresholds > 0) & (thresholds < 1)):
+        raise ValueError("Expected five thresholds in (0, 1), one per label.")
+    # Reuse the ID and value checks and the sample-submission order, then apply each label's own threshold.
+    rows = form_submission(sample_csv, test_ids, probabilities, 0.5)
+    by_id = dict(zip(test_ids, probabilities))
+    for row in rows:
+        row.update({label: int(value >= threshold) for label, value, threshold in zip(LABEL_COLUMNS, by_id[row["image_id"]], thresholds)})
+    return rows
+
+
 def write_submission(path: Path, rows: Sequence[dict[str, str | int]]) -> None:
     if path.exists():
         raise FileExistsError(f"Refusing to overwrite {path}")

@@ -13,6 +13,7 @@ Each photo gets five 0/1 labels: `Cat`, `Dog` and three named pets, `Moris`, `Mo
 | [04](notebooks/04_convnext_profile.ipynb)–[07](notebooks/07_convnext_custom.ipynb), [09](notebooks/09_efficientnet.ipynb), [12](notebooks/12_bit_resnetv2.ipynb) | Single CNNs (Exp0–3, Exp5) |
 | [08](notebooks/08_ensemble.ipynb), [10](notebooks/10_ensemble_exp1_exp3.ipynb), [11](notebooks/11_tta_ensemble.ipynb), [13](notebooks/13_ensemble_exp1_exp3_exp5.ipynb), [15](notebooks/15_stacking_logreg.ipynb) | Ensembles, TTA, stacking (Exp4) |
 | [14_full_data_final.ipynb](notebooks/14_full_data_final.ipynb) | Retraining on all labelled data (Exp6) |
+| [notebooks/cv/](notebooks/cv/) | Five-fold CV of every model family, fold ensembles, per-label thresholds, and their ensemble ([experiments/cv/](experiments/cv/)) |
 
 The fold assignment is saved in [folds.csv](folds.csv), so every model uses the same splits.
 
