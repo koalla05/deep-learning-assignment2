@@ -1,0 +1,103 @@
+{
+  "status": "completed",
+  "model": "convnext",
+  "title": "ConvNeXt-base (Exp1 recipe)",
+  "fold": 0,
+  "seed": 42,
+  "source": "imported",
+  "smoke_test": false,
+  "imported_from": {
+    "experiment": "01_convnext_standard",
+    "run_id": "convnext_standard_fold0_seed42_20261018_full1",
+    "record": "experiments/exp1/results/convnext_standard_fold0_seed42_20261018_full1/convnext_standard_fold0_seed42_20261018_full1.json",
+    "model": {
+      "name": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+      "variant": "standard",
+      "pretrained_checkpoint": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+      "initial_head_checkpoint": "experiments/00_shared_head/checkpoints/convnext_head_fold0_seed42_colab_head.pt",
+      "initial_head_sha256": "659907f68c9fd74531f8914508a80744d16f4a2e8865e303ad9bdd28f4a0c24c"
+    },
+    "training": {
+      "optimizer": "AdamW(backbone_lr=1e-05, head_lr=0.0001, weight_decay=0.01 except bias/norm, betas=(0.9, 0.999))",
+      "scheduler": "one epoch step warmup then cosine to 0.1 peak",
+      "loss": "BCEWithLogitsLoss",
+      "max_epochs": 8,
+      "patience": 3,
+      "physical_batch_size": 2,
+      "effective_batch_size": 16,
+      "precision": "32-true",
+      "stage_policy": "full backbone and classifier trainable",
+      "checkpoint_selection": "best validation macro F1 at 0.25",
+      "gradient_clip_norm": 1.0,
+      "epochs_completed": 5
+    }
+  },
+  "recipe": {
+    "key": "convnext",
+    "title": "ConvNeXt-base (Exp1 recipe)",
+    "model_name": "hf-hub:timm/convnext_base.fb_in22k_ft_in1k_384@2b2698d86523262ca8065d0957c7f80d963bb43f",
+    "backbone_lr": 1e-05,
+    "head_lr": 0.0001,
+    "weight_decay": 0.01,
+    "max_epochs": 8,
+    "patience": 3,
+    "freeze_batchnorm": false,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 10,
+    "head_patience": 3,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ],
+    "validation_images": 2452,
+    "test_images": 18673
+  },
+  "metrics": {
+    "threshold": 0.25,
+    "macro_f1": 0.9751849358283667,
+    "per_label_f1": {
+      "Cat": 0.9965568125922283,
+      "Dog": 0.9970149253731343,
+      "Moris": 1.0,
+      "Motya": 0.9411764705882353,
+      "Biatrix": 0.9411764705882353
+    },
+    "macro_ap": 0.9944286914422321,
+    "per_label_ap": {
+      "Cat": 0.9999740760019973,
+      "Dog": 0.9999471589869415,
+      "Moris": 0.9999999999999999,
+      "Motya": 0.9722222222222223,
+      "Biatrix": 1.0
+    },
+    "macro_f1_at_0_5": 0.9750861717351178
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "75ac59bbaba74705876d336da3e9802f2a8ae80b2b5c885181ce76cd855151ad"
+    },
+    "test": {
+      "path": "test.csv",
+      "sha256": "836b271e09cdfc988fcfe33fc51994a9f0a26f9fa51754f523d5e8964d0bd673"
+    }
+  },
+  "best_checkpoint_sha256": "4d027ce525e10e7cbe20a59aebfa8c3c5befbbeafbb41f26dee44729428a2d26",
+  "git_commit": "7c9a8c0c8c8eda7f519743e1fc95c23da03fb5ac",
+  "created_utc": "2026-11-10T06:46:29+00:00"
+}

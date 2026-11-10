@@ -645,6 +645,12 @@ def collect_predictions(model_dir: Path, train_rows: list[dict], fold_by_id: dic
         records[fold] = record
     if np.isnan(oof).any():
         raise ValueError("Some training images have no out-of-fold prediction.")
+    # Folds may come from different machines; they must still be one recipe on one split.
+    recipes = {json.dumps(record.get("recipe"), sort_keys=True) for record in records.values()}
+    if len(recipes) > 1:
+        raise ValueError(f"The folds of {model_dir.name} were trained with different recipes; compare the 'recipe' in their fold.json.")
+    if len({record["data"]["fold_sha256"] for record in records.values() if "data" in record}) > 1:
+        raise ValueError(f"The folds of {model_dir.name} used different fold files.")
     targets = np.asarray([[int(row[label]) for label in LABEL_COLUMNS] for row in train_rows])
     return CVPredictions(image_ids, folds, targets, oof, list(test_ids), test_by_fold, records)
 
