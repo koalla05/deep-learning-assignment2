@@ -1,0 +1,74 @@
+{
+  "run_id": "cv_ensemble_hrnet_double_025_convnext_efficientnetv2s_bit_r50x1_hrnet_w32",
+  "status": "completed",
+  "rule": "mean",
+  "method": "weighted mean of five-fold member probabilities, then fixed threshold",
+  "members": {
+    "convnext": {
+      "name": "Exp1 ConvNeXt",
+      "weight": 1,
+      "cv_record_sha256": "c29ee4cf1e3c086897728e86df10ab9e3cc1d65fcf37fce46d006eee366aaac1"
+    },
+    "efficientnetv2s": {
+      "name": "Exp3 EfficientNetV2-S",
+      "weight": 1,
+      "cv_record_sha256": "3910c00610bbc7a3acb49313d77212092f9200fdfb1b8d111b2cd6f426a65cab"
+    },
+    "bit_r50x1": {
+      "name": "Exp5 BiT",
+      "weight": 1,
+      "cv_record_sha256": "6af3e479f265a14394b03119b6a2859f7daceb43fa0875d94a7dff418f0a32f9"
+    },
+    "hrnet_w32": {
+      "name": "Exp7 HRNet",
+      "weight": 2,
+      "cv_record_sha256": "023c85578d1068a5a882940b7a0a35d30983702a567a32c0f9d8d58730934b1e"
+    }
+  },
+  "thresholds": {
+    "Cat": 0.25,
+    "Dog": 0.25,
+    "Moris": 0.25,
+    "Motya": 0.25,
+    "Biatrix": 0.25
+  },
+  "oof_macro_f1": 0.9872827974639176,
+  "oof_vs_eq4_at_025": {
+    "delta": 0.0017582883869252663,
+    "bootstrap_5_95": [
+      -0.0001373952634977027,
+      0.0052464547716907116
+    ],
+    "p_better": 0.834,
+    "by_fold": [
+      9.779781314833702e-05,
+      9.768972958856814e-05,
+      -9.32672919440325e-05,
+      -1.0739049389751898e-06,
+      0.00865748071346173
+    ]
+  },
+  "thresholds_by_held_out_fold": null,
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "submission_csv": "submissions/cv_ensemble_hrnet_double_025.csv",
+  "submission_sha256": "44e2ca7aad0e09ae47cab42184ec31ad35ed79a74362296dabfda4e2e32642a8",
+  "positives": {
+    "Cat": 7813,
+    "Dog": 7707,
+    "Moris": 176,
+    "Motya": 136,
+    "Biatrix": 183
+  },
+  "git_commit": "b33747c7912002c21c8a70458ca54a6d401e6029",
+  "public_leaderboard_score": 0.97854
+}

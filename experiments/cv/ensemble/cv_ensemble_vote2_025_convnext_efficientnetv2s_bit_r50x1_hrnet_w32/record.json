@@ -1,0 +1,74 @@
+{
+  "run_id": "cv_ensemble_vote2_025_convnext_efficientnetv2s_bit_r50x1_hrnet_w32",
+  "status": "completed",
+  "rule": "vote",
+  "method": "share of members with probability >= 0.25, then fixed threshold",
+  "members": {
+    "convnext": {
+      "name": "Exp1 ConvNeXt",
+      "weight": 1,
+      "cv_record_sha256": "c29ee4cf1e3c086897728e86df10ab9e3cc1d65fcf37fce46d006eee366aaac1"
+    },
+    "efficientnetv2s": {
+      "name": "Exp3 EfficientNetV2-S",
+      "weight": 1,
+      "cv_record_sha256": "3910c00610bbc7a3acb49313d77212092f9200fdfb1b8d111b2cd6f426a65cab"
+    },
+    "bit_r50x1": {
+      "name": "Exp5 BiT",
+      "weight": 1,
+      "cv_record_sha256": "6af3e479f265a14394b03119b6a2859f7daceb43fa0875d94a7dff418f0a32f9"
+    },
+    "hrnet_w32": {
+      "name": "Exp7 HRNet",
+      "weight": 1,
+      "cv_record_sha256": "023c85578d1068a5a882940b7a0a35d30983702a567a32c0f9d8d58730934b1e"
+    }
+  },
+  "thresholds": {
+    "Cat": 0.5,
+    "Dog": 0.5,
+    "Moris": 0.5,
+    "Motya": 0.5,
+    "Biatrix": 0.5
+  },
+  "oof_macro_f1": 0.9902156981569672,
+  "oof_vs_eq4_at_025": {
+    "delta": 0.0046911890799749,
+    "bootstrap_5_95": [
+      0.000653761713071832,
+      0.010059311016704906
+    ],
+    "p_better": 1.0,
+    "by_fold": [
+      0.0005908558138091324,
+      0.0006878375196237574,
+      0.011442117598520096,
+      0.000389893668643837,
+      0.009536797685708365
+    ]
+  },
+  "thresholds_by_held_out_fold": null,
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "submission_csv": "submissions/cv_ensemble_vote2_025.csv",
+  "submission_sha256": "e3636634cc68e886878419368d3bfd5952198553adcc49ef78a1e8452e9de5d1",
+  "positives": {
+    "Cat": 7817,
+    "Dog": 7723,
+    "Moris": 178,
+    "Motya": 139,
+    "Biatrix": 185
+  },
+  "git_commit": "b33747c7912002c21c8a70458ca54a6d401e6029",
+  "public_leaderboard_score": 0.97743
+}
