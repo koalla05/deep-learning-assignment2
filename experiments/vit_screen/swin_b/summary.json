@@ -1,0 +1,43 @@
+{
+  "candidate": {
+    "key": "swin_b",
+    "model_name": "swin_base_patch4_window12_384.ms_in22k_ft_in1k",
+    "input_hw": [
+      384,
+      384
+    ],
+    "family": "hierarchical windowed transformer (Swin)"
+  },
+  "protocol": "frozen pooled features, StandardScaler + LogisticRegression per label, 5-fold OOF (folds.csv)",
+  "precision": "fp16 autocast",
+  "device": "mps",
+  "oof_macro_f1_at_025": 0.9535465188710726,
+  "oof_per_label_f1_at_025": {
+    "Cat": 0.9974384236453202,
+    "Dog": 0.9960238568588469,
+    "Moris": 0.9174311926605505,
+    "Motya": 0.9156626506024096,
+    "Biatrix": 0.9411764705882353
+  },
+  "oof_macro_ap": 0.974113870235849,
+  "oof_per_label_ap": {
+    "Cat": 0.9998244931522748,
+    "Dog": 0.9996709968505234,
+    "Moris": 0.9581576753371797,
+    "Motya": 0.917067980405993,
+    "Biatrix": 0.995848205433274
+  },
+  "fair_macro_f1_per_label_thresholds": 0.9495797483007516,
+  "fair_per_label_f1": {
+    "Cat": 0.9969461136833809,
+    "Dog": 0.9961174713787955,
+    "Moris": 0.9009009009009009,
+    "Motya": 0.9156626506024096,
+    "Biatrix": 0.9382716049382716
+  },
+  "retrieval_ap": {
+    "Moris": 0.4885333256181826,
+    "Motya": 0.49215536373599716,
+    "Biatrix": 0.9251729509754072
+  }
+}

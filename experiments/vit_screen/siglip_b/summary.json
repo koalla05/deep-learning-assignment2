@@ -1,0 +1,43 @@
+{
+  "candidate": {
+    "key": "siglip_b",
+    "model_name": "vit_base_patch16_siglip_384.webli",
+    "input_hw": [
+      368,
+      448
+    ],
+    "family": "ViT-B/16, image-text contrastive (SigLIP)"
+  },
+  "protocol": "frozen pooled features, StandardScaler + LogisticRegression per label, 5-fold OOF (folds.csv)",
+  "precision": "fp16 autocast",
+  "device": "mps",
+  "oof_macro_f1_at_025": 0.9784334223931255,
+  "oof_per_label_f1_at_025": {
+    "Cat": 0.9979324603721571,
+    "Dog": 0.996816553919618,
+    "Moris": 0.9565217391304348,
+    "Motya": 0.9647058823529412,
+    "Biatrix": 0.9761904761904762
+  },
+  "oof_macro_ap": 0.9970216216184241,
+  "oof_per_label_ap": {
+    "Cat": 0.9998778098326374,
+    "Dog": 0.9998963110032218,
+    "Moris": 0.9953881931560505,
+    "Motya": 0.9910802240491615,
+    "Biatrix": 0.9988655700510494
+  },
+  "fair_macro_f1_per_label_thresholds": 0.9749029519583011,
+  "fair_per_label_f1": {
+    "Cat": 0.9982262514781237,
+    "Dog": 0.996415770609319,
+    "Moris": 0.9636363636363636,
+    "Motya": 0.9523809523809523,
+    "Biatrix": 0.963855421686747
+  },
+  "retrieval_ap": {
+    "Moris": 0.591544810692789,
+    "Motya": 0.5084310421400955,
+    "Biatrix": 0.986111259752352
+  }
+}

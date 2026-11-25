@@ -1,0 +1,43 @@
+{
+  "candidate": {
+    "key": "dinov2_l",
+    "model_name": "vit_large_patch14_reg4_dinov2.lvd142m",
+    "input_hw": [
+      378,
+      448
+    ],
+    "family": "ViT-L/14, self-supervised (DINOv2 + registers)"
+  },
+  "protocol": "frozen pooled features, StandardScaler + LogisticRegression per label, 5-fold OOF (folds.csv)",
+  "precision": "fp16 autocast",
+  "device": "mps",
+  "oof_macro_f1_at_025": 0.9782644710670534,
+  "oof_per_label_f1_at_025": {
+    "Cat": 0.9987193379962566,
+    "Dog": 0.9973153027741871,
+    "Moris": 0.954954954954955,
+    "Motya": 0.9879518072289156,
+    "Biatrix": 0.9523809523809523
+  },
+  "oof_macro_ap": 0.9937142778531485,
+  "oof_per_label_ap": {
+    "Cat": 0.9996731935161888,
+    "Dog": 0.9992500255873507,
+    "Moris": 0.9748822158111806,
+    "Motya": 0.9989177489177489,
+    "Biatrix": 0.9958482054332738
+  },
+  "fair_macro_f1_per_label_thresholds": 0.9783808959389866,
+  "fair_per_label_f1": {
+    "Cat": 0.9985220218740762,
+    "Dog": 0.9970131421744325,
+    "Moris": 0.9454545454545454,
+    "Motya": 0.9879518072289156,
+    "Biatrix": 0.9629629629629629
+  },
+  "retrieval_ap": {
+    "Moris": 0.5203822537907825,
+    "Motya": 0.7715820586974088,
+    "Biatrix": 0.9485954738307028
+  }
+}

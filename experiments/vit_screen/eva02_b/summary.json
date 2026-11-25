@@ -1,0 +1,43 @@
+{
+  "candidate": {
+    "key": "eva02_b",
+    "model_name": "eva02_base_patch14_448.mim_in22k_ft_in22k_in1k",
+    "input_hw": [
+      378,
+      448
+    ],
+    "family": "ViT-B/14, MIM + IN-22k/1k fine-tune (EVA-02)"
+  },
+  "protocol": "frozen pooled features, StandardScaler + LogisticRegression per label, 5-fold OOF (folds.csv)",
+  "precision": "fp16 autocast",
+  "device": "mps",
+  "oof_macro_f1_at_025": 0.9749504350421596,
+  "oof_per_label_f1_at_025": {
+    "Cat": 0.99812789437383,
+    "Dog": 0.9965239845069024,
+    "Moris": 0.9532710280373832,
+    "Motya": 0.926829268292683,
+    "Biatrix": 1.0
+  },
+  "oof_macro_ap": 0.9853393467280332,
+  "oof_per_label_ap": {
+    "Cat": 0.9997263053216332,
+    "Dog": 0.9996443454311971,
+    "Moris": 0.9854464285714287,
+    "Motya": 0.9418796543159075,
+    "Biatrix": 1.0
+  },
+  "fair_macro_f1_per_label_thresholds": 0.978689732698475,
+  "fair_per_label_f1": {
+    "Cat": 0.9979308306237068,
+    "Dog": 0.9966189339697693,
+    "Moris": 0.972972972972973,
+    "Motya": 0.9382716049382716,
+    "Biatrix": 0.9876543209876543
+  },
+  "retrieval_ap": {
+    "Moris": 0.6741429161139282,
+    "Motya": 0.5690576605839143,
+    "Biatrix": 0.9774095611779212
+  }
+}

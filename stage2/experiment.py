@@ -95,14 +95,17 @@ class ImageDataset(Dataset):
         self,
         rows: Sequence[dict[str, str]],
         image_dir: Path,
-        image_size: int,
+        image_size: int | tuple[int, int],
         mean: Sequence[float],
         std: Sequence[float],
         horizontal_flip: bool = False,
     ) -> None:
         self.rows = list(rows)
         self.image_dir = image_dir
+        # An int is a square canvas; a pair is (height, width), e.g. (378, 448) for patch-14 ViTs on 450x375 photos.
         self.image_size = image_size
+        height, width = (image_size, image_size) if isinstance(image_size, int) else tuple(image_size)
+        self.canvas_size = (int(width), int(height))  # PIL order
         self.mean = tuple(mean)
         self.normalize = Normalize(mean, std)
         self.to_tensor = ToTensor()
@@ -120,12 +123,13 @@ class ImageDataset(Dataset):
         image_id = row["image_id"]
         path = self.image_dir / f"{image_id}.jpg"
         with Image.open(path) as source:
-            image = ImageOps.contain(source.convert("RGB"), (self.image_size, self.image_size), Image.Resampling.BICUBIC)
+            image = ImageOps.contain(source.convert("RGB"), self.canvas_size, Image.Resampling.BICUBIC)
         if self.horizontal_flip and torch.rand(()).item() < 0.5:
             image = ImageOps.mirror(image)
         fill = tuple(round(value * 255) for value in self.mean)
-        canvas = Image.new("RGB", (self.image_size, self.image_size), fill)
-        canvas.paste(image, ((self.image_size - image.width) // 2, (self.image_size - image.height) // 2))
+        width, height = self.canvas_size
+        canvas = Image.new("RGB", self.canvas_size, fill)
+        canvas.paste(image, ((width - image.width) // 2, (height - image.height) // 2))
         targets = torch.tensor([float(row[label]) for label in LABEL_COLUMNS], dtype=torch.float32) if "Cat" in row else torch.empty(0)
         return image_id, self.normalize(self.to_tensor(canvas)), targets
 

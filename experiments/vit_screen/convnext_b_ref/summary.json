@@ -1,0 +1,43 @@
+{
+  "candidate": {
+    "key": "convnext_b_ref",
+    "model_name": "convnext_base.fb_in22k_ft_in1k_384",
+    "input_hw": [
+      384,
+      384
+    ],
+    "family": "CNN reference (current pipeline input)"
+  },
+  "protocol": "frozen pooled features, StandardScaler + LogisticRegression per label, 5-fold OOF (folds.csv)",
+  "precision": "fp16 autocast",
+  "device": "mps",
+  "oof_macro_f1_at_025": 0.9575780360165606,
+  "oof_per_label_f1_at_025": {
+    "Cat": 0.9974394327358677,
+    "Dog": 0.9965219119546855,
+    "Moris": 0.8909090909090909,
+    "Motya": 0.926829268292683,
+    "Biatrix": 0.9761904761904762
+  },
+  "oof_macro_ap": 0.9877889838423727,
+  "oof_per_label_ap": {
+    "Cat": 0.9998932230407253,
+    "Dog": 0.9997424817484827,
+    "Moris": 0.9688705143336603,
+    "Motya": 0.970438700088995,
+    "Biatrix": 1.0
+  },
+  "fair_macro_f1_per_label_thresholds": 0.9640941308573275,
+  "fair_per_label_f1": {
+    "Cat": 0.9971437013690535,
+    "Dog": 0.9973110247983269,
+    "Moris": 0.8983050847457628,
+    "Motya": 0.9397590361445783,
+    "Biatrix": 0.9879518072289156
+  },
+  "retrieval_ap": {
+    "Moris": 0.47928439222592345,
+    "Motya": 0.3323846637463766,
+    "Biatrix": 0.9561408435561447
+  }
+}

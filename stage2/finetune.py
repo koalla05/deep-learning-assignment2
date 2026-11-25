@@ -61,6 +61,33 @@ def fine_tuning_groups(
     ]
 
 
+def layer_decay_groups(
+    network: torch.nn.Module, backbone_lr: float, head_lr: float, weight_decay: float, layer_decay: float
+) -> list[dict]:
+    """Transformer fine-tuning groups: the LR shrinks by `layer_decay` per block below the top.
+
+    timm assigns every parameter a block depth (patch embedding = 0, last block = top) and
+    leaves 1-D parameters and the model's `no_weight_decay()` names (position embedding,
+    class and register tokens) without decay. The new classifier keeps its own `head_lr`.
+    """
+    from timm.optim import param_groups_layer_decay
+
+    if backbone_lr <= 0 or head_lr <= 0 or weight_decay < 0 or not 0 < layer_decay <= 1:
+        raise ValueError("Learning rates must be positive, weight decay nonnegative and layer decay in (0, 1].")
+    head_ids = {id(parameter) for parameter in network.get_classifier().parameters()}
+    no_decay = network.no_weight_decay() if hasattr(network, "no_weight_decay") else ()
+    groups = []
+    for group in param_groups_layer_decay(network, weight_decay=weight_decay, no_weight_decay_list=no_decay, layer_decay=layer_decay):
+        for in_head in (False, True):
+            parameters = [p for p in group["params"] if p.requires_grad and (id(p) in head_ids) == in_head]
+            if parameters:
+                learning_rate = head_lr if in_head else backbone_lr * group["lr_scale"]
+                groups.append({"params": parameters, "lr": learning_rate, "weight_decay": group["weight_decay"]})
+    if not any(id(p) in head_ids for group in groups for p in group["params"]):
+        raise ValueError("Fine-tuning requires a trainable classifier and network.")
+    return groups
+
+
 def warmup_cosine_multiplier(step: int, warmup_steps: int, total_steps: int, minimum: float = 0.1) -> float:
     """Linear warm-up for one epoch, then cosine decay to a fraction of peak LR."""
     if not 0 < warmup_steps <= total_steps or not 0 <= minimum <= 1:
@@ -78,13 +105,17 @@ class FineTuneClassifier(MultilabelClassifier):
 
     def __init__(
         self, network: torch.nn.Module, backbone_lr: float, head_lr: float,
-        weight_decay: float, threshold: float,
+        weight_decay: float, threshold: float, layer_decay: float | None = None,
     ) -> None:
         super().__init__(network, head_lr, weight_decay, threshold)
         self.backbone_lr = backbone_lr
+        self.layer_decay = layer_decay
 
     def configure_optimizers(self) -> dict:
-        groups = fine_tuning_groups(self.network, self.backbone_lr, self.learning_rate, self.weight_decay)
+        if self.layer_decay is None:
+            groups = fine_tuning_groups(self.network, self.backbone_lr, self.learning_rate, self.weight_decay)
+        else:
+            groups = layer_decay_groups(self.network, self.backbone_lr, self.learning_rate, self.weight_decay, self.layer_decay)
         optimizer = torch.optim.AdamW(groups, betas=(0.9, 0.999))
         total_steps = int(self.trainer.estimated_stepping_batches)
         warmup_steps = math.ceil(total_steps / self.trainer.max_epochs)

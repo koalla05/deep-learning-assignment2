@@ -1,0 +1,231 @@
+{
+  "status": "completed",
+  "model": "dinov2_b",
+  "title": "DINOv2 ViT-B/14 + registers",
+  "recipe": {
+    "key": "dinov2_b",
+    "title": "DINOv2 ViT-B/14 + registers",
+    "model_name": "vit_base_patch14_reg4_dinov2.lvd142m",
+    "backbone_lr": 2e-05,
+    "head_lr": 0.0002,
+    "weight_decay": 0.05,
+    "max_epochs": 8,
+    "patience": 3,
+    "freeze_batchnorm": false,
+    "variant": "standard",
+    "block_reduction": 4,
+    "image_size": 384,
+    "head_only_lr": 0.001,
+    "head_epochs": 10,
+    "head_patience": 3,
+    "effective_batch_size": 16,
+    "gradient_clip_norm": 1.0,
+    "threshold": 0.25,
+    "seed": 42,
+    "shared_head_from": null,
+    "image_hw": [
+      378,
+      448
+    ],
+    "model_kwargs": [
+      [
+        "drop_path_rate",
+        0.1
+      ]
+    ],
+    "layer_decay": 0.75
+  },
+  "folds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "fold_sources": {
+    "0": "trained",
+    "1": "trained",
+    "2": "trained",
+    "3": "trained",
+    "4": "trained"
+  },
+  "fold_records_sha256": {
+    "0": "f267fe0b993e0932a746365ebdc112cff20d18587a7cc2d69d855bf28e620078",
+    "1": "6edafc7afeeab5c1171ba645d0526e444e64679edafbc7f4d7eb2bab1a262e7d",
+    "2": "08aa53c30924dfad971658b9581b40ac0cd3f4c5eca300c49ab731537b042e37",
+    "3": "f7aef82388fbc2b2e5fdfb39e7f37aa77be3b0fb7984db0c11440f5d89965b40",
+    "4": "aeba87f5be0882728398592e79bfa680f5b42f6267eb76877169a818479227d1"
+  },
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "cv": {
+    "threshold": 0.25,
+    "per_fold_macro_f1": {
+      "0": 0.9876409258963775,
+      "1": 0.9875427542069483,
+      "2": 0.9994032702380663,
+      "3": 0.9832312528682493,
+      "4": 0.9789121837766303
+    },
+    "per_fold_per_label_f1": {
+      "0": {
+        "Cat": 0.9985214391325776,
+        "Dog": 0.9985067197610752,
+        "Moris": 1.0,
+        "Motya": 1.0,
+        "Biatrix": 0.9411764705882353
+      },
+      "1": {
+        "Cat": 0.9980276134122288,
+        "Dog": 0.9985096870342772,
+        "Moris": 1.0,
+        "Motya": 1.0,
+        "Biatrix": 0.9411764705882353
+      },
+      "2": {
+        "Cat": 0.999507631708518,
+        "Dog": 0.9975087194818136,
+        "Moris": 1.0,
+        "Motya": 1.0,
+        "Biatrix": 1.0
+      },
+      "3": {
+        "Cat": 0.9965601965601966,
+        "Dog": 0.9965191447041273,
+        "Moris": 0.9230769230769231,
+        "Motya": 1.0,
+        "Biatrix": 1.0
+      },
+      "4": {
+        "Cat": 0.9970472440944882,
+        "Dog": 0.9975136747886624,
+        "Moris": 0.9,
+        "Motya": 1.0,
+        "Biatrix": 1.0
+      }
+    },
+    "mean_fold_macro_f1": 0.9873460773972544,
+    "std_fold_macro_f1": 0.007641398090564628,
+    "pooled_oof": {
+      "threshold": 0.25,
+      "macro_f1": 0.98710783880792,
+      "per_label_f1": {
+        "Cat": 0.9979320531757755,
+        "Dog": 0.9977116704805492,
+        "Moris": 0.9642857142857143,
+        "Motya": 1.0,
+        "Biatrix": 0.975609756097561
+      },
+      "macro_ap": 0.9892487782146663,
+      "per_label_ap": {
+        "Cat": 0.9997939622236457,
+        "Dog": 0.9995609388540758,
+        "Moris": 0.9813669030544327,
+        "Motya": 1.0,
+        "Biatrix": 0.9655220869411772
+      }
+    },
+    "pooled_oof_macro_f1_at_0_5": 0.9742439967495974
+  },
+  "per_label_thresholds": {
+    "thresholds": {
+      "Cat": 0.59,
+      "Dog": 0.505,
+      "Moris": 0.36,
+      "Motya": 0.2,
+      "Biatrix": 0.29
+    },
+    "thresholds_by_held_out_fold": {
+      "0": {
+        "Cat": 0.67,
+        "Dog": 0.28500000000000003,
+        "Moris": 0.36,
+        "Motya": 0.2,
+        "Biatrix": 0.255
+      },
+      "1": {
+        "Cat": 0.59,
+        "Dog": 0.385,
+        "Moris": 0.36,
+        "Motya": 0.2,
+        "Biatrix": 0.29
+      },
+      "2": {
+        "Cat": 0.635,
+        "Dog": 0.505,
+        "Moris": 0.46,
+        "Motya": 0.2,
+        "Biatrix": 0.315
+      },
+      "3": {
+        "Cat": 0.58,
+        "Dog": 0.53,
+        "Moris": 0.14,
+        "Motya": 0.18,
+        "Biatrix": 0.29
+      },
+      "4": {
+        "Cat": 0.59,
+        "Dog": 0.505,
+        "Moris": 0.36,
+        "Motya": 0.2,
+        "Biatrix": 0.29
+      }
+    },
+    "fair_macro_f1": 0.9835555586403197,
+    "fair_per_label_f1": {
+      "Cat": 0.9981275253769587,
+      "Dog": 0.9976119402985074,
+      "Moris": 0.9464285714285714,
+      "Motya": 1.0,
+      "Biatrix": 0.975609756097561
+    },
+    "optimistic_macro_f1": 0.9889238980205596,
+    "optimistic_per_label_f1": {
+      "Cat": 0.9982262514781237,
+      "Dog": 0.9978105095541401,
+      "Moris": 0.972972972972973,
+      "Motya": 1.0,
+      "Biatrix": 0.975609756097561
+    }
+  },
+  "test": {
+    "method": "equal-weight mean of the five fold models",
+    "positives_at_0_25": {
+      "Cat": 7771,
+      "Dog": 7678,
+      "Moris": 171,
+      "Motya": 140,
+      "Biatrix": 176
+    },
+    "positives_per_label_thresholds": {
+      "Cat": 7758,
+      "Dog": 7666,
+      "Moris": 162,
+      "Motya": 140,
+      "Biatrix": 176
+    }
+  },
+  "files": {
+    "oof": {
+      "path": "oof.csv",
+      "sha256": "69e58832256c6a1f66d894553fe96c9e094210b710f3de7e581434ed8044ec9e"
+    },
+    "test_mean": {
+      "path": "test_mean.csv",
+      "sha256": "52ced0a0f6fdb4a827e59c15fd255ae54d76fef936a64a90fc106a9f364f7bc5"
+    }
+  },
+  "git_commit": null,
+  "created_utc": "2026-11-25T00:54:10+00:00",
+  "public_leaderboard_score": {}
+}

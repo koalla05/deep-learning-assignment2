@@ -71,6 +71,14 @@ class Recipe:
     threshold: float = 0.25
     seed: int = 42
     shared_head_from: str | None = None  # reuse another model's per-fold heads (Exp2 reuses Exp1's)
+    # Transformers (new fields; their defaults keep the CNN recipes and records unchanged):
+    image_hw: tuple[int, int] | None = None  # (height, width) instead of the image_size square, e.g. (378, 448)
+    model_kwargs: tuple[tuple[str, object], ...] = ()  # extra timm.create_model arguments, e.g. (("drop_path_rate", 0.1),)
+    layer_decay: float | None = None  # per-block LR decay for ViTs; None = one backbone LR
+
+    @property
+    def input_size(self) -> int | tuple[int, int]:
+        return self.image_hw if self.image_hw is not None else self.image_size
 
 
 @dataclass(frozen=True)
@@ -221,7 +229,10 @@ def fold_status(model_dir: Path, fold: int) -> str:
 def build_network(recipe: Recipe, pretrained: bool = True) -> nn.Module:
     import timm
 
-    backbone = timm.create_model(recipe.model_name, pretrained=pretrained, num_classes=len(LABEL_COLUMNS))
+    kwargs = dict(recipe.model_kwargs)
+    if recipe.image_hw is not None:
+        kwargs.setdefault("img_size", tuple(recipe.image_hw))  # timm resamples the position embeddings
+    backbone = timm.create_model(recipe.model_name, pretrained=pretrained, num_classes=len(LABEL_COLUMNS), **kwargs)
     if recipe.variant == "residual_spatial_block":
         return CustomConvNeXt(backbone, reduction=recipe.block_reduction)
     if recipe.variant != "standard":
@@ -348,7 +359,7 @@ class EpochReport(L.Callback):
 
 
 def _loader(rows, image_dir: Path, recipe: Recipe, runtime: Runtime, norm: dict, train: bool, seed: int | None = None) -> DataLoader:
-    dataset = ImageDataset(rows, image_dir, recipe.image_size, norm["mean"], norm["std"], horizontal_flip=train)
+    dataset = ImageDataset(rows, image_dir, recipe.input_size, norm["mean"], norm["std"], horizontal_flip=train)
     options = dict(batch_size=runtime.batch_size, num_workers=runtime.num_workers, pin_memory=runtime.device.startswith("cuda"))
     if train:
         return DataLoader(dataset, shuffle=True, generator=torch.Generator().manual_seed(seed), **options)
@@ -464,7 +475,8 @@ def run_fold(
         with record_failure(directory, "fine_tuning", context):
             network.requires_grad_(True)
             network.train()
-            module = FineTuneClassifier(network, recipe.backbone_lr, recipe.head_lr, recipe.weight_decay, recipe.threshold)
+            module = FineTuneClassifier(network, recipe.backbone_lr, recipe.head_lr, recipe.weight_decay, recipe.threshold,
+                                        layer_decay=recipe.layer_decay)
             best_checkpoint = ModelCheckpoint(dirpath=checkpoint_dir, filename="best", monitor="val_macro_f1", mode="max",
                                               save_top_k=1, save_weights_only=True, enable_version_counter=False)
             resume_checkpoint = ModelCheckpoint(dirpath=checkpoint_dir, save_top_k=0, save_last=True, enable_version_counter=False)
