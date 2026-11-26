@@ -12,6 +12,7 @@ per-label thresholds are in [stage2/thresholds.py](../../stage2/thresholds.py).
 | `efficientnetv2s/` | Exp3 EfficientNetV2-S | [03](../../notebooks/cv/03_cv_efficientnetv2s.ipynb) | imported from `exp3` |
 | `bit_r50x1/` | Exp5 BiT ResNetV2-50x1 | [04](../../notebooks/cv/04_cv_bit_resnetv2.ipynb) | imported from `exp5` |
 | `hrnet_w32/` | Exp7 HRNet-W32 | [05](../../notebooks/cv/05_cv_hrnet_w32.ipynb) | imported from `exp07` |
+| `dinov2_b/` | Exp8 DINOv2 ViT-B/14 + registers, 448×378, layer-wise LR decay | [07](../../notebooks/cv/07_cv_vit.ipynb) | trained here (no earlier run) |
 | `ensemble/` | Weighted means of the models above | [06](../../notebooks/cv/06_cv_ensemble.ipynb) | — |
 
 Run 01 before 02. Run 06 after at least two models have a `cv.json`.

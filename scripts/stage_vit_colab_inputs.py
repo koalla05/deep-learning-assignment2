@@ -30,7 +30,7 @@ def main() -> None:
     for source in sorted((root / "stage2").glob("*.py")):
         (code / "stage2").mkdir(exist_ok=True)
         shutil.copy2(source, code / "stage2" / source.name)
-    for name in ("notebooks/cv/07_cv_vit.ipynb", "notebooks/cv/06_cv_ensemble.ipynb"):
+    for name in ("notebooks/cv/07_cv_vit.ipynb", "notebooks/cv/08_cv_siglip.ipynb", "notebooks/cv/06_cv_ensemble.ipynb"):
         (code / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(root / name, code / name)
     print(f"code/ ready: {sum(1 for p in code.rglob('*') if p.is_file())} files")

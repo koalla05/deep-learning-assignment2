@@ -1,0 +1,79 @@
+{
+  "run_id": "cv_ensemble_cnx_hr_dino_025_convnext_efficientnetv2s_bit_r50x1_hrnet_w32_dinov2_b",
+  "status": "completed",
+  "rule": "mean",
+  "method": "weighted mean of five-fold member probabilities, then fixed threshold",
+  "members": {
+    "convnext": {
+      "name": "Exp1 ConvNeXt",
+      "weight": 1,
+      "cv_record_sha256": "c29ee4cf1e3c086897728e86df10ab9e3cc1d65fcf37fce46d006eee366aaac1"
+    },
+    "efficientnetv2s": {
+      "name": "Exp3 EfficientNetV2-S",
+      "weight": 0,
+      "cv_record_sha256": "3910c00610bbc7a3acb49313d77212092f9200fdfb1b8d111b2cd6f426a65cab"
+    },
+    "bit_r50x1": {
+      "name": "Exp5 BiT",
+      "weight": 0,
+      "cv_record_sha256": "6af3e479f265a14394b03119b6a2859f7daceb43fa0875d94a7dff418f0a32f9"
+    },
+    "hrnet_w32": {
+      "name": "Exp7 HRNet",
+      "weight": 1,
+      "cv_record_sha256": "023c85578d1068a5a882940b7a0a35d30983702a567a32c0f9d8d58730934b1e"
+    },
+    "dinov2_b": {
+      "name": "DINOv2-B ViT",
+      "weight": 1,
+      "cv_record_sha256": "6c83fee68984ed2968a4c5548f92ffb01d48271a29fb8f8e068fe57700204a62"
+    }
+  },
+  "thresholds": {
+    "Cat": 0.25,
+    "Dog": 0.25,
+    "Moris": 0.25,
+    "Motya": 0.25,
+    "Biatrix": 0.25
+  },
+  "oof_macro_f1": 0.9899282689697678,
+  "oof_vs_eq4_at_025": {
+    "delta": 0.004403759892775527,
+    "bootstrap_5_95": [
+      -0.002588935062596681,
+      0.011676814735246031
+    ],
+    "p_better": 0.843,
+    "by_fold": [
+      -0.0115679485257012,
+      0.0004920687255008938,
+      0.01104847721961999,
+      0.00039173429892969125,
+      0.020164878579167933
+    ]
+  },
+  "thresholds_by_held_out_fold": null,
+  "data": {
+    "fold_file": "folds.csv",
+    "fold_sha256": "54583f772f33ba78cd07b2d46505ba87d8a569c5452cc21784ca5f1e96ad359b",
+    "label_columns": [
+      "Cat",
+      "Dog",
+      "Moris",
+      "Motya",
+      "Biatrix"
+    ]
+  },
+  "submission_csv": "submissions/cv_ensemble_cnx_hr_dino_025.csv",
+  "submission_sha256": "296b513667a2398b08f1eea0ae28890cc10b0e42892b5b72cc94ceae90b197c2",
+  "positives": {
+    "Cat": 7788,
+    "Dog": 7692,
+    "Moris": 174,
+    "Motya": 140,
+    "Biatrix": 181
+  },
+  "git_commit": "0e301f8140c6fe6f744256bbbba1f7a0abad42c3",
+  "public_leaderboard_score": null
+}
